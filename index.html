@@ -27,15 +27,15 @@
             text-shadow: 2px 2px 4px black;
         }
 
-        /* Responsive Grid Scaling */
+        /* Fixed 7x7 Grid with Scaling */
         .grid-container {
             display: grid;
-            /* 'auto-fit' fills the row with as many tiles as possible (min 150px, max 1fr) */
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
-            gap: 15px;
+            /* 1. LOCK TO 7 COLUMNS: This prevents the 8th tile from jumping up */
+            grid-template-columns: repeat(7, minmax(100px, 200px)); 
+            gap: 12px;
             padding: 20px;
-            width: 95%;
-            max-width: 1400px; /* Prevents the grid from stretching too far on ultra-wide screens */
+            width: fit-content;
+            max-width: 100%; /* Ensures it doesn't bleed off screen */
             box-sizing: border-box;
         }
 
@@ -73,7 +73,7 @@
             padding: 3px;
             text-align: center;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: clamp(0.6rem, 1.5vw, 0.9rem); /* Font scales with width */
             margin-bottom: 4px;
             white-space: nowrap;
             overflow: hidden;
@@ -83,7 +83,7 @@
         .header-text { color: #ffac00; } 
         .divider { color: #ffac00; margin: 0 4px; } 
 
-        /* Image Styling - Relative Scaling */
+        /* Image Styling */
         .tile img {
             height: 48%; 
             max-width: 90%;
@@ -111,7 +111,7 @@
             transition: width 0.5s ease;
         }
 
-        /* Checklist Box - Maintains 20% of square height */
+        /* Checklist Box */
         .checklist-box {
             background: #342e25; 
             border: 1px solid #000;
@@ -122,7 +122,7 @@
         }
 
         .check-item {
-            font-size: 0.75rem;
+            font-size: clamp(0.5rem, 1.2vw, 0.75rem); /* Font scales with width */
             color: #ffac00;
             display: flex;
             align-items: center;
@@ -143,14 +143,12 @@
         .checklist-box::-webkit-scrollbar { width: 3px; }
         .checklist-box::-webkit-scrollbar-thumb { background: #858476; }
 
-        /* Mobile Adjustments */
-        @media (max-width: 600px) {
+        /* Responsive Breakpoint for Mobile */
+        @media (max-width: 800px) {
             .grid-container {
-                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-                padding: 10px;
+                /* On smaller screens, drop to 4 columns to keep tiles readable */
+                grid-template-columns: repeat(4, 1fr); 
             }
-            .header-box { font-size: 0.75rem; }
-            .check-item { font-size: 0.65rem; }
         }
     </style>
 </head>
@@ -174,7 +172,7 @@
                 grid.innerHTML = '';
 
                 rows.forEach((row, index) => {
-                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^\"$]*$)/);
                     if (cols.length < 4) return;
 
                     const title = cols[0].replace(/"/g, "").trim();
