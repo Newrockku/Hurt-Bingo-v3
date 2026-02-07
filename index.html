@@ -27,15 +27,14 @@
             text-shadow: 2px 2px 4px black;
         }
 
-        /* Fixed 7x7 Grid with Scaling */
+        /* 7-Column Grid */
         .grid-container {
             display: grid;
-            /* 1. LOCK TO 7 COLUMNS: This prevents the 8th tile from jumping up */
-            grid-template-columns: repeat(7, minmax(100px, 200px)); 
+            grid-template-columns: repeat(7, minmax(80px, 1fr)); 
             gap: 12px;
             padding: 20px;
-            width: fit-content;
-            max-width: 100%; /* Ensures it doesn't bleed off screen */
+            width: 100%;
+            max-width: 1600px;
             box-sizing: border-box;
         }
 
@@ -47,41 +46,44 @@
             aspect-ratio: 1 / 1; 
             display: flex;
             flex-direction: column;
-            padding: 10px;
+            padding: 5%; /* Relative padding */
             box-sizing: border-box;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
             overflow: hidden; 
+            
+            /* Enable Container Queries */
+            container-type: inline-size;
         }
 
         /* 4 Corner Brackets */
         .corner {
             position: absolute;
-            width: 8px;
-            height: 8px;
-            border: 6px solid #858476;
+            width: 6cqw;
+            height: 6cqw;
+            border: 0.8cqw solid #858476;
             pointer-events: none;
         }
-        .top-left     { top: -2px; left: -2px; border-right: none; border-bottom: none; }
-        .top-right    { top: -2px; right: -2px; border-left: none; border-bottom: none; }
-        .bottom-left  { bottom: -2px; left: -2px; border-right: none; border-top: none; }
-        .bottom-right { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+        .top-left     { top: -0.5cqw; left: -0.5cqw; border-right: none; border-bottom: none; }
+        .top-right    { top: -0.5cqw; right: -0.5cqw; border-left: none; border-bottom: none; }
+        .bottom-left  { bottom: -0.5cqw; left: -0.5cqw; border-right: none; border-top: none; }
+        .bottom-right { bottom: -0.5cqw; right: -0.5cqw; border-left: none; border-top: none; }
 
-        /* Header Area */
+        /* Header Area - Text Scales with box width */
         .header-box {
             background: #342e25;
             border: 1px solid #000;
-            padding: 3px;
+            padding: 2%;
             text-align: center;
             font-weight: bold;
-            font-size: clamp(0.6rem, 1.5vw, 0.9rem); /* Font scales with width */
-            margin-bottom: 4px;
+            font-size: 9cqw; /* Dynamic scaling */
+            margin-bottom: 3%;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .header-text { color: #ffac00; } 
-        .divider { color: #ffac00; margin: 0 4px; } 
+        .divider { color: #ffac00; margin: 0 2%; } 
 
         /* Image Styling */
         .tile img {
@@ -96,12 +98,12 @@
         /* Progress Bar Area */
         .progress-container {
             width: 100%;
-            margin-bottom: 5px;
+            margin-bottom: 3%;
         }
 
         .progress-bg {
             background: #342e25;
-            height: 6px;
+            height: 3cqw;
             border: 1px solid #000;
             width: 100%;
         }
@@ -115,40 +117,40 @@
         .checklist-box {
             background: #342e25; 
             border: 1px solid #000;
-            padding: 4px;
+            padding: 3%;
             height: 20%; 
             overflow-y: auto;
             text-align: left;
         }
 
         .check-item {
-            font-size: clamp(0.5rem, 1.2vw, 0.75rem); /* Font scales with width */
+            font-size: 7cqw; /* Dynamic scaling */
             color: #ffac00;
             display: flex;
             align-items: center;
-            margin-bottom: 1px;
+            margin-bottom: 1%;
             line-height: 1.1;
         }
 
         .check-mark {
-            width: 7px;
-            height: 7px;
+            width: 5cqw;
+            height: 5cqw;
             background-color: #4caf50; 
             border: 1px solid #1b5e20;
-            margin-right: 4px;
+            margin-right: 3%;
             flex-shrink: 0;
         }
 
-        /* Scrollbar for Checklist */
-        .checklist-box::-webkit-scrollbar { width: 3px; }
+        /* Scrollbar */
+        .checklist-box::-webkit-scrollbar { width: 1cqw; }
         .checklist-box::-webkit-scrollbar-thumb { background: #858476; }
 
-        /* Responsive Breakpoint for Mobile */
-        @media (max-width: 800px) {
-            .grid-container {
-                /* On smaller screens, drop to 4 columns to keep tiles readable */
-                grid-template-columns: repeat(4, 1fr); 
-            }
+        /* Tablet/Mobile breakpoints to keep 7-wide from getting too tiny */
+        @media (max-width: 1000px) {
+            .grid-container { grid-template-columns: repeat(5, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .grid-container { grid-template-columns: repeat(3, 1fr); }
         }
     </style>
 </head>
@@ -172,7 +174,7 @@
                 grid.innerHTML = '';
 
                 rows.forEach((row, index) => {
-                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^\"$]*$)/);
+                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     if (cols.length < 4) return;
 
                     const title = cols[0].replace(/"/g, "").trim();
