@@ -62,7 +62,7 @@
             z-index: 50;
         }
 
-        /* Blocky corners used for both tiles and modal */
+        /* Blocky corners with 1px black outline */
         .corner {
             position: absolute;
             width: 6cqw;
@@ -70,6 +70,12 @@
             border: 3cqw solid #858476; 
             pointer-events: none;
             z-index: 10;
+            /* Using filter to create a 1px black outline around the blocky shape */
+            filter: 
+                drop-shadow(1px 0 0 #000) 
+                drop-shadow(-1px 0 0 #000) 
+                drop-shadow(0 1px 0 #000) 
+                drop-shadow(0 -1px 0 #000);
         }
         .top-left     { top: -0.5cqw; left: -0.5cqw; border-right: none; border-bottom: none; }
         .top-right    { top: -0.5cqw; right: -0.5cqw; border-left: none; border-bottom: none; }
@@ -217,7 +223,6 @@
 
         .modal-progress { height: 10px; margin-bottom: 15px; flex-shrink: 0; }
         
-        /* FIX: Equal padding top and bottom */
         .modal-checklist { 
             background: #342e25; 
             border: 1px solid #000; 
@@ -230,10 +235,7 @@
         }
 
         .modal-checklist .check-item { font-size: 0.9rem; margin-bottom: 10px; }
-        
-        /* Remove margin from the very last item so bottom padding looks even */
         .modal-checklist .check-item:last-child { margin-bottom: 0; }
-
         .modal-checklist .check-mark { width: 16px; height: 16px; }
         .modal-checklist .check-mark::after { width: 4px; height: 8px; border-width: 0 2px 2px 0; }
 
@@ -246,7 +248,7 @@
             border: 1px solid #000;
             overflow-y: auto;
             flex-grow: 1;
-            margin-top: 5px; /* Added slight gap from label */
+            margin-top: 5px;
         }
 
         .close-btn {
