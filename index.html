@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo v3.6</title>
+    <title>Bingo v3.7</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -62,7 +62,7 @@
             z-index: 50;
         }
 
-        /* Blocky corners */
+        /* Blocky corners used for both tiles and modal */
         .corner {
             position: absolute;
             width: 6cqw;
@@ -193,7 +193,7 @@
             width: 100%;
             max-width: 450px;
             max-height: 95vh;
-            padding: 25px;
+            padding: 35px; /* Increased padding to breathe with corners */
             position: relative;
             box-shadow: 0 0 40px rgba(0,0,0,0.8);
             display: flex;
@@ -205,7 +205,6 @@
         .modal-img { height: 150px; margin-bottom: 15px; display: flex; justify-content: center; flex-shrink: 0;}
         .modal-img img { max-height: 100%; filter: drop-shadow(4px 4px 6px black); }
         
-        /* NEW: Modal Labels */
         .modal-label { 
             font-size: 0.85rem; 
             text-transform: uppercase; 
@@ -254,12 +253,17 @@
 </head>
 <body>
 
-    <h1>Bingo v3.6</h1>
+    <h1>Bingo v3.7</h1>
     
     <div class="grid-container" id="grid"></div>
 
     <div id="modal-overlay" onclick="closeModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="corner top-left"></div>
+            <div class="corner top-right"></div>
+            <div class="corner bottom-left"></div>
+            <div class="corner bottom-right"></div>
+
             <span class="close-btn" onclick="closeModal()">&times;</span>
             
             <div id="modal-header" class="modal-header"></div>
