@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo v3.041</title>
+    <title>Bingo v3.043</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -12,7 +12,6 @@
         /* Global Reset */
         * { box-sizing: border-box; }
         
-        /* FIX: Reserves scrollbar space to prevent layout shifting when modals open */
         html { 
             scrollbar-gutter: stable; 
             overflow-y: scroll; 
@@ -27,6 +26,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
+            position: relative;
         }
 
         /* --- Global Header Dashboard --- */
@@ -87,6 +88,7 @@
             padding: 20px;
             width: 100%;
             max-width: 1600px;
+            padding-bottom: 60px; /* Space for version footer */
         }
 
         .tile {
@@ -203,7 +205,9 @@
         ::-webkit-scrollbar-thumb { background: #6d604e; }
         ::-webkit-scrollbar-track { background: #221e18; }
 
-        .tile.completed .checklist-box::-webkit-scrollbar-thumb { background: #4caf50; }
+        .tile.completed .checklist-box::-webkit-scrollbar-thumb,
+        .modal-content.completed .modal-checklist::-webkit-scrollbar-thumb,
+        .modal-content.completed .modal-description::-webkit-scrollbar-thumb { background: #4caf50; }
 
         .tile .check-item {
             font-size: 6.5cqw; 
@@ -284,6 +288,7 @@
             color: #ffac00;
             text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 2px 2px 4px rgba(0,0,0,0.8);
         }
+        .modal-content.completed .modal-header { color: #4caf50; }
 
         .modal-img { height: 130px; margin-bottom: 15px; display: flex; justify-content: center; }
         .modal-img img { max-height: 100%; filter: drop-shadow(4px 4px 6px black); }
@@ -302,9 +307,6 @@
             margin-bottom: 15px;
         }
 
-        .modal-content.completed .modal-checklist,
-        .modal-content.completed .modal-description { background: #162a16; }
-
         .modal-description {
             font-size: 1rem;
             color: #ffee00;
@@ -313,6 +315,16 @@
             border: 1px solid #000;
             overflow-y: auto;
             max-height: 90px;
+        }
+
+        .modal-content.completed .modal-checklist,
+        .modal-content.completed .modal-description { 
+            background: #162a16; 
+            color: #4caf50; 
+        }
+        
+        .modal-content.completed .modal-checklist .check-item {
+            color: #4caf50;
         }
 
         .close-btn {
@@ -324,6 +336,19 @@
             z-index: 100;
         }
         .close-btn:hover { color: #ffac00; }
+
+        /* --- VERSION FOOTER --- */
+        .version-footer {
+            position: fixed;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.75rem;
+            color: #6d604e;
+            text-align: right;
+            pointer-events: none;
+            z-index: 999;
+        }
+        .version-footer span { display: block; }
 
         @media (max-width: 1000px) { 
             .grid-container { grid-template-columns: repeat(5, 1fr); } 
@@ -355,6 +380,11 @@
     </header>
 
     <div class="grid-container" id="grid"></div>
+
+    <footer class="version-footer">
+        <span>Build: v3.043</span>
+        <span id="last-sync">Last Sync: Never</span>
+    </footer>
 
     <div id="modal-overlay" onclick="closeModal()">
         <div class="modal-content" id="modal-box" onclick="event.stopPropagation()">
@@ -408,7 +438,6 @@
         }
 
         async function fetchGlobalData() {
-            // Simulated global data fetch
             const data = {
                 event: "Winter Bingo 2026",
                 team: "The Spreadsheet Warriors",
@@ -434,6 +463,10 @@
 
                 previousVersionHash = lastSeenHash;
                 lastSeenHash = currentHash;
+
+                // Update Sync Timestamp
+                const now = new Date();
+                document.getElementById('last-sync').innerText = `Last Sync: ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
                 const rows = rawData.split('\n').slice(1); 
                 const grid = document.getElementById('grid');
