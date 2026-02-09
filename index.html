@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo v3.032</title>
+    <title>Bingo v3.034</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -104,7 +104,6 @@
             flex-shrink: 0;
         }
 
-        /* Shift image down slightly when progress bar is hidden for better balance */
         .tile.completed .img-container {
             height: 44%;
             margin-bottom: 4%;
@@ -125,7 +124,6 @@
             flex-shrink: 0; 
         }
 
-        /* Hide progress bar on completed tiles */
         .tile.completed .progress-container { display: none; }
 
         .progress-bg {
@@ -149,9 +147,8 @@
             transition: background 0.3s ease;
         }
 
-        .tile.completed .checklist-box {
-            background: #2d4c2d;
-        }
+        /* Darker Green for inner boxes on completed tiles */
+        .tile.completed .checklist-box { background: #162a16; }
 
         .tile .check-item {
             font-size: 6.5cqw; 
@@ -160,6 +157,7 @@
             align-items: center;
             margin-bottom: 4px;
         }
+        .tile.completed .check-item { color: #4caf50; }
 
         .tile .check-mark {
             width: 4.5cqw; height: 4.5cqw;
@@ -256,11 +254,8 @@
         }
         .modal-content.completed .modal-label { color: #4caf50; }
 
-        /* Hide specific modal elements on completion */
         .modal-content.completed .progress-label,
-        .modal-content.completed .modal-progress {
-            display: none;
-        }
+        .modal-content.completed .modal-progress { display: none; }
 
         .modal-progress { height: 14px; margin-bottom: 15px; flex-shrink: 0; }
         
@@ -274,10 +269,10 @@
             flex-shrink: 1; 
             transition: background 0.3s ease;
         }
+
+        /* Darker Green for modal boxes on completion */
         .modal-content.completed .modal-checklist,
-        .modal-content.completed .modal-description {
-            background: #0c240c;
-        }
+        .modal-content.completed .modal-description { background: #162a16; }
 
         .modal-checklist .check-item {
             font-size: 1rem;
@@ -287,6 +282,7 @@
             margin-bottom: 5px;
             line-height: 1.2;
         }
+        .modal-content.completed .modal-checklist .check-item { color: #4caf50; }
 
         .modal-checklist .check-mark {
             width: 14px; height: 14px;
@@ -320,6 +316,7 @@
             line-height: 1.3;
             transition: background 0.3s ease;
         }
+        .modal-content.completed .modal-description { color: #4caf50; }
 
         .close-btn {
             position: absolute;
@@ -341,7 +338,7 @@
 </head>
 <body>
 
-    <h1>Bingo v3.032</h1>
+    <h1>Bingo v3.034</h1>
     <div class="grid-container" id="grid"></div>
 
     <div id="modal-overlay" onclick="closeModal()">
