@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo v3.006</title>
+    <title>Bingo v3.007</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -57,7 +57,6 @@
             overflow: hidden; 
             container-type: inline-size;
             cursor: pointer;
-            /* Added opacity transition for the fade effect */
             transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.4s ease;
             opacity: 1;
         }
@@ -68,7 +67,6 @@
             box-shadow: 0 0 20px 5px rgba(255, 172, 0, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.5);
         }
 
-        /* UPDATED: Ghost class now fades instead of blinking */
         .tile.ghost {
             opacity: 0;
             pointer-events: none;
@@ -184,7 +182,7 @@
             margin-bottom: 0.5cqw;
         }
 
-        /* MODAL SYSTEM v3.006 - Restored Fly-out with Tile Fade */
+        /* MODAL SYSTEM v3.007 */
         #modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -240,6 +238,7 @@
             border-bottom: 2px solid #342e25;
             padding-bottom: 10px;
             text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            flex-shrink: 0; /* Prevents header squishing */
         }
 
         .modal-img { height: 150px; margin-bottom: 15px; display: flex; justify-content: center; flex-shrink: 0;}
@@ -253,18 +252,24 @@
             display: block; 
             font-weight: bold;
             text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            flex-shrink: 0; /* Prevents label squishing */
         }
 
-        .modal-progress { height: 10px; margin-bottom: 15px; }
+        .modal-progress { 
+            height: 20px; 
+            margin-bottom: 15px; 
+            flex-shrink: 0; /* Prevents bar squishing */
+        }
         
         .modal-checklist { 
             background: #342e25; 
             border: 1px solid #000; 
             padding: 10px;
             height: auto; 
-            max-height: 200px; 
+            max-height: 150px; 
             overflow-y: auto; 
-            margin-bottom: 15px; 
+            margin-bottom: 15px;
+            flex-shrink: 1; /* Allows this to shrink if space is tight */
         }
 
         .modal-description {
@@ -274,6 +279,7 @@
             padding: 10px;
             border: 1px solid #000;
             overflow-y: auto;
+            max-height: 100px;
             flex-grow: 1;
         }
 
@@ -297,7 +303,7 @@
 </head>
 <body>
 
-    <h1>Bingo v3.006</h1>
+    <h1>Bingo v3.007</h1>
     <div class="grid-container" id="grid"></div>
 
     <div id="modal-overlay" onclick="closeModal()">
@@ -383,7 +389,6 @@
             const tile = event.currentTarget;
             const rect = tile.getBoundingClientRect();
 
-            // Store and fade out the background tile
             currentActiveTile = tile;
             tile.classList.add('ghost');
 
@@ -394,7 +399,6 @@
             document.getElementById('modal-list').innerHTML = data.checklistHtml;
             document.getElementById('modal-desc').innerText = data.description;
             
-            // Set fly-out start point
             const spawnX = rect.left + (rect.width / 2);
             const spawnY = rect.top + (rect.height / 2);
             box.style.top = spawnY + 'px';
@@ -417,7 +421,6 @@
             overlay.classList.remove('active');
             box.classList.remove('active');
             
-            // Start fading the tile back in slightly before the overlay disappears
             if (currentActiveTile) {
                 currentActiveTile.classList.remove('ghost');
             }
