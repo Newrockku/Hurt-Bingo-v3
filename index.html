@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo v3.045</title>
+    <title>Bingo v3.046</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -62,7 +62,7 @@
 
         #team-name {
             font-size: 1.1rem;
-            color: #ffffff; /* POP: Changed to white for better contrast */
+            color: #ffffff; 
             margin: 4px 0 0 0;
             text-shadow: 1px 1px 2px black;
             font-weight: bold;
@@ -90,14 +90,27 @@
         }
         .codeword-hidden { color: #221e18; text-shadow: none; }
 
-        /* --- Grid & Tiles --- */
+        /* --- Responsive Grid --- */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(7, minmax(80px, 1fr)); 
+            grid-template-columns: repeat(7, 1fr); 
             gap: 10px;
             padding: 0 10px 60px 10px;
             width: 100%;
             max-width: 1600px;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1200px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
+        @media (max-width: 800px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 600px) { 
+            .grid-container { grid-template-columns: repeat(3, 1fr); padding: 0 5px 60px 5px; } 
+            .dashboard { padding: 10px 15px; gap: 5px; }
+            #event-title { font-size: 1.2rem; }
+            #team-name { font-size: 0.85rem; }
+            .stat-value { font-size: 1.1rem; }
+            .stat-label { font-size: 0.6rem; }
+            #codeword-display { min-width: 60px; }
         }
 
         .tile {
@@ -344,23 +357,6 @@
             pointer-events: none;
             z-index: 999;
         }
-
-        /* --- Mobile Tweaks --- */
-        @media (max-width: 600px) { 
-            .dashboard { 
-                padding: 10px 15px; 
-                flex-direction: row; 
-                flex-wrap: nowrap;
-                justify-content: space-between;
-                gap: 5px;
-            }
-            #event-title { font-size: 1.2rem; }
-            #team-name { font-size: 0.85rem; }
-            .stat-value { font-size: 1.1rem; }
-            .stat-label { font-size: 0.6rem; }
-            #codeword-display { min-width: 60px; padding: 1px 5px; }
-            .grid-container { grid-template-columns: repeat(3, 1fr); padding: 0 5px 60px 5px; }
-        }
     </style>
 </head>
 <body>
@@ -373,196 +369,3 @@
         <div class="stats-container">
             <div class="stat-item">
                 <span class="stat-label">Codeword</span>
-                <span id="codeword-display" class="stat-value codeword-hidden" onclick="toggleCodeword()">?????</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Points</span>
-                <span id="total-points" class="stat-value">0</span>
-            </div>
-        </div>
-    </header>
-
-    <div class="grid-container" id="grid"></div>
-
-    <footer class="version-footer">
-        <span>Build: v3.045</span>
-        <span id="last-sync">Last Sync: Never</span>
-    </footer>
-
-    <div id="modal-overlay" onclick="closeModal()">
-        <div class="modal-content" id="modal-box" onclick="event.stopPropagation()">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <div id="modal-header" class="modal-header"></div>
-            <div class="modal-img"><img id="modal-image" src="" alt=""></div>
-            <div class="modal-label progress-label">Progress</div>
-            <div class="modal-progress">
-                <div class="progress-bg"><div id="modal-bar" class="progress-fill"></div></div>
-            </div>
-            <div class="modal-label">Collected Items</div>
-            <div id="modal-list" class="modal-checklist"></div>
-            <div class="modal-label">Description</div>
-            <div id="modal-desc" class="modal-description"></div>
-        </div>
-    </div>
-
-    <script>
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv';
-        
-        let currentActiveTile = null;
-        let lastSeenHash = null;
-        let previousVersionHash = null;
-        let codewordSecret = "";
-
-        function hashString(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = ((hash << 5) - hash) + str.charCodeAt(i);
-                hash |= 0; 
-            }
-            return hash;
-        }
-
-        function getProgressColor(percent) {
-            if (percent >= 100) return '#4caf50';
-            if (percent <= 0) return '#d32f2f';
-            const hue = (percent * 120) / 100;
-            return `hsl(${hue}, 70%, 45%)`;
-        }
-
-        function toggleCodeword() {
-            const el = document.getElementById('codeword-display');
-            if (el.classList.contains('codeword-hidden')) {
-                el.classList.remove('codeword-hidden');
-                el.innerText = codewordSecret;
-            } else {
-                el.classList.add('codeword-hidden');
-                el.innerText = "?????";
-            }
-        }
-
-        async function fetchGlobalData() {
-            const data = {
-                event: "Winter Bingo 2026",
-                team: "The Spreadsheet Warriors",
-                codeword: "BINGO_BLITZ",
-                points: 1250
-            };
-            document.getElementById('event-title').innerText = data.event;
-            document.getElementById('team-name').innerText = data.team;
-            document.getElementById('total-points').innerText = data.points.toLocaleString();
-            codewordSecret = data.codeword;
-        }
-
-        async function fetchData() {
-            try {
-                const response = await fetch(`${sheetUrl}&cachebust=${new Date().getTime()}`, {
-                    cache: "no-store",
-                    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
-                });
-                const rawData = await response.text();
-                const currentHash = hashString(rawData);
-
-                if (currentHash === lastSeenHash || currentHash === previousVersionHash) return;
-
-                previousVersionHash = lastSeenHash;
-                lastSeenHash = currentHash;
-
-                const now = new Date();
-                document.getElementById('last-sync').innerText = `Last Sync: ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-
-                const rows = rawData.split('\n').slice(1); 
-                const grid = document.getElementById('grid');
-                grid.innerHTML = '';
-
-                rows.forEach((row, index) => {
-                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    if (cols.length < 4) return;
-
-                    const title = cols[0].replace(/"/g, "").trim();
-                    const imgName = cols[1].replace(/"/g, "").trim();
-                    const current = parseInt(cols[2]) || 0;
-                    const goal = parseInt(cols[3]) || 1;
-                    const itemList = cols[4] ? cols[4].replace(/"/g, "").trim().split(',') : [];
-                    const description = cols[5] ? cols[5].replace(/"/g, "").trim() : "No description provided.";
-
-                    const percent = Math.min((current / goal) * 100, 100);
-                    const isCompleted = percent === 100;
-                    const barColor = getProgressColor(percent);
-                    const finalImgSrc = (imgName.includes('http')) ? imgName : `./images/${imgName}`;
-
-                    let checklistHtml = '';
-                    itemList.forEach(item => {
-                        if(item.trim() !== "") {
-                            checklistHtml += `<div class="check-item"><span class="check-mark"></span> ${item.trim()}</div>`;
-                        }
-                    });
-
-                    const tile = document.createElement('div');
-                    tile.className = `tile ${isCompleted ? 'completed' : ''}`;
-                    tile.onclick = (e) => openModal(e, {
-                        id: index + 1, title, img: finalImgSrc, percent, barColor, checklistHtml, description, isCompleted
-                    });
-
-                    tile.innerHTML = `
-                        <div class="header-box"><div class="header-content">${index + 1} | ${title}</div></div>
-                        <div class="img-container"><img src="${finalImgSrc}" onerror="this.style.visibility='hidden'"></div>
-                        <div class="progress-container"><div class="progress-bg"><div class="progress-fill" style="width: ${percent}%; background-color: ${barColor}"></div></div></div>
-                        <div class="checklist-box">${checklistHtml}</div>
-                    `;
-                    grid.appendChild(tile);
-                });
-            } catch (error) { console.error("Error fetching sheet:", error); }
-        }
-
-        function openModal(event, data) {
-            const overlay = document.getElementById('modal-overlay');
-            const box = document.getElementById('modal-box');
-            const tile = event.currentTarget;
-            const rect = tile.getBoundingClientRect();
-            currentActiveTile = tile;
-            tile.classList.add('ghost');
-
-            if (data.isCompleted) box.classList.add('completed');
-            else box.classList.remove('completed');
-
-            document.getElementById('modal-header').innerHTML = `${data.id} | ${data.title}`;
-            document.getElementById('modal-image').src = data.img;
-            document.getElementById('modal-bar').style.width = data.percent + '%';
-            document.getElementById('modal-bar').style.backgroundColor = data.barColor;
-            document.getElementById('modal-list').innerHTML = data.checklistHtml;
-            document.getElementById('modal-desc').innerText = data.description;
-            
-            const spawnX = rect.left + (rect.width / 2);
-            const spawnY = rect.top + (rect.height / 2);
-            box.style.top = spawnY + 'px';
-            box.style.left = spawnX + 'px';
-            overlay.style.display = 'flex';
-            setTimeout(() => {
-                overlay.classList.add('active');
-                box.classList.add('active');
-            }, 10);
-            document.body.style.overflow = 'hidden'; 
-        }
-
-        function closeModal() {
-            const overlay = document.getElementById('modal-overlay');
-            const box = document.getElementById('modal-box');
-            overlay.classList.remove('active');
-            box.classList.remove('active');
-            if (currentActiveTile) currentActiveTile.classList.remove('ghost');
-            setTimeout(() => {
-                overlay.style.display = 'none';
-                document.body.style.overflow = 'auto'; 
-                currentActiveTile = null;
-            }, 500);
-        }
-
-        fetchGlobalData();
-        fetchData();
-        setInterval(() => {
-            fetchData();
-            fetchGlobalData();
-        }, 30000);
-    </script>
-</body>
-</html>
