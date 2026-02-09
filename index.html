@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo v3.038</title>
+    <title>Bingo v3.039</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -134,7 +134,7 @@
             overflow: hidden;
         }
 
-        .progress-fill { height: 100%; transition: width 0.5s ease; }
+        .progress-fill { height: 100%; transition: width 0.5s ease, background-color 0.5s ease; }
 
         .checklist-box {
             background: #342e25; 
@@ -352,7 +352,7 @@
 </head>
 <body>
 
-    <h1>Bingo v3.038</h1>
+    <h1>Bingo v3.039</h1>
     <div class="grid-container" id="grid"></div>
 
     <div id="modal-overlay" onclick="closeModal()">
@@ -377,12 +377,9 @@
     <script>
         const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv';
         let currentActiveTile = null;
-        
-        // Anti-Flicker Memory: Stores the hashes of the last two unique versions of the data
         let lastSeenHash = null;
         let previousVersionHash = null;
 
-        // Simple string hashing function
         function hashString(str) {
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
@@ -390,6 +387,16 @@
                 hash |= 0; 
             }
             return hash;
+        }
+
+        // Returns a color between Red (0%) and Green (100%)
+        function getProgressColor(percent) {
+            if (percent >= 100) return '#4caf50'; // Solid Green
+            if (percent <= 0) return '#d32f2f';   // Solid Red
+            
+            // Map 0-100 to Hue: 0 (Red) to 120 (Green)
+            const hue = (percent * 120) / 100;
+            return `hsl(${hue}, 70%, 45%)`;
         }
 
         async function fetchData() {
@@ -402,17 +409,9 @@
                 const rawData = await response.text();
                 const currentHash = hashString(rawData);
 
-                // 1. DUPLICATE CHECK: If the data is exactly what we currently have, do nothing.
                 if (currentHash === lastSeenHash) return;
+                if (currentHash === previousVersionHash) return;
 
-                // 2. FLICKER CHECK: If this version is the same as the PREVIOUS version (ignoring the current one),
-                // it means the CDN is flickering back to old data. Reject it.
-                if (currentHash === previousVersionHash) {
-                    console.log("CDN Flicker detected (serving old version). Skipping update.");
-                    return;
-                }
-
-                // 3. SUCCESS: Update memory and render
                 previousVersionHash = lastSeenHash;
                 lastSeenHash = currentHash;
 
@@ -433,7 +432,7 @@
 
                     const percent = Math.min((current / goal) * 100, 100);
                     const isCompleted = percent === 100;
-                    let barColor = isCompleted ? '#4caf50' : (percent > 0 ? '#ffa500' : '#d32f2f');
+                    const barColor = getProgressColor(percent);
                     const finalImgSrc = (imgName.includes('http')) ? imgName : `./images/${imgName}`;
 
                     let checklistHtml = '';
@@ -452,7 +451,7 @@
                     tile.innerHTML = `
                         <div class="header-box"><div class="header-content">${index + 1} | ${title}</div></div>
                         <div class="img-container"><img src="${finalImgSrc}" onerror="this.style.visibility='hidden'"></div>
-                        <div class="progress-container"><div class="progress-bg"><div class="progress-fill" style="width: ${percent}%; background: ${barColor}"></div></div></div>
+                        <div class="progress-container"><div class="progress-bg"><div class="progress-fill" style="width: ${percent}%; background-color: ${barColor}"></div></div></div>
                         <div class="checklist-box">${checklistHtml}</div>
                     `;
                     grid.appendChild(tile);
@@ -474,7 +473,7 @@
             document.getElementById('modal-header').innerHTML = `${data.id} | ${data.title}`;
             document.getElementById('modal-image').src = data.img;
             document.getElementById('modal-bar').style.width = data.percent + '%';
-            document.getElementById('modal-bar').style.background = data.barColor;
+            document.getElementById('modal-bar').style.backgroundColor = data.barColor;
             document.getElementById('modal-list').innerHTML = data.checklistHtml;
             document.getElementById('modal-desc').innerText = data.description;
             
@@ -504,7 +503,7 @@
         }
 
         fetchData();
-        setInterval(fetchData, 10000);
+        setInterval(fetchData, 30000);
     </script>
 </body>
 </html>
