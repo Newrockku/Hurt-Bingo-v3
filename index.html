@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo v3.046</title>
+    <title>Bingo v3.047</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -36,7 +36,7 @@
             max-width: 1600px;
             background: #494034;
             border: 2px solid #6d604e;
-            padding: 12px 60px;
+            padding: 12px 20px;
             margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
@@ -60,12 +60,31 @@
             line-height: 1;
         }
 
+        .team-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
         #team-name {
             font-size: 1.1rem;
             color: #ffffff; 
-            margin: 4px 0 0 0;
+            margin: 0;
             text-shadow: 1px 1px 2px black;
             font-weight: bold;
+        }
+
+        /* Team Selector Styling */
+        #team-selector {
+            background: #221e18;
+            color: #ffac00;
+            border: 1px solid #6d604e;
+            font-family: 'Cabin Condensed', sans-serif;
+            font-size: 0.8rem;
+            padding: 2px 5px;
+            cursor: pointer;
+            outline: none;
         }
 
         .stats-container {
@@ -363,8 +382,12 @@
 
     <header class="dashboard">
         <div class="dashboard-main">
-            <h1 id="event-title">Loading Event...</h1>
-            <p id="team-name">Loading Team...</p>
+            <h1 id="event-title">Bingo 2026</h1>
+            <div class="team-row">
+                <p id="team-name">Select Team</p>
+                <select id="team-selector" onchange="changeTeam(this.value)">
+                    </select>
+            </div>
         </div>
         <div class="stats-container">
             <div class="stat-item">
@@ -381,7 +404,7 @@
     <div class="grid-container" id="grid"></div>
 
     <footer class="version-footer">
-        <span>Build: v3.046</span>
+        <span>Build: v3.047</span>
         <span id="last-sync">Last Sync: Never</span>
     </footer>
 
@@ -402,12 +425,64 @@
     </div>
 
     <script>
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv';
-        
+        // --- TEAM CONFIGURATION ---
+        // Add your teams and their spreadsheet CSV URLs here.
+        const TEAM_MAP = {
+            "Warriors": {
+                name: "The Spreadsheet Warriors",
+                url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
+                codeword: "BINGO_BLITZ",
+                points: 1250
+            },
+            "Paladins": {
+                name: "The Iron Paladins",
+                url: "PASTE_SECOND_TEAM_CSV_URL_HERE",
+                codeword: "PALADIN_PRIDE",
+                points: 800
+            },
+            "Rogues": {
+                name: "Shadow Rogues",
+                url: "PASTE_THIRD_TEAM_CSV_URL_HERE",
+                codeword: "STEALTH_WIN",
+                points: 2100
+            }
+        };
+
+        let currentTeamKey = "Warriors"; // Default
         let currentActiveTile = null;
         let lastSeenHash = null;
         let previousVersionHash = null;
         let codewordSecret = "";
+
+        // Initialization Logic
+        function init() {
+            // 1. Check URL for team parameter
+            const params = new URLSearchParams(window.location.search);
+            const teamParam = params.get('team');
+            if (teamParam && TEAM_MAP[teamParam]) {
+                currentTeamKey = teamParam;
+            }
+
+            // 2. Populate Dropdown
+            const selector = document.getElementById('team-selector');
+            Object.keys(TEAM_MAP).forEach(key => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.innerText = key;
+                opt.selected = (key === currentTeamKey);
+                selector.appendChild(opt);
+            });
+
+            fetchGlobalData();
+            fetchData();
+        }
+
+        function changeTeam(newKey) {
+            // Update URL and reload to ensure a fresh state for the new team
+            const url = new URL(window.location);
+            url.searchParams.set('team', newKey);
+            window.location.href = url.href;
+        }
 
         function hashString(str) {
             let hash = 0;
@@ -437,21 +512,27 @@
         }
 
         async function fetchGlobalData() {
-            const data = {
-                event: "Winter Bingo 2026",
-                team: "The Spreadsheet Warriors",
-                codeword: "BINGO_BLITZ",
-                points: 1250
-            };
-            document.getElementById('event-title').innerText = data.event;
-            document.getElementById('team-name').innerText = data.team;
-            document.getElementById('total-points').innerText = data.points.toLocaleString();
-            codewordSecret = data.codeword;
+            const teamData = TEAM_MAP[currentTeamKey];
+            document.getElementById('team-name').innerText = teamData.name;
+            document.getElementById('total-points').innerText = teamData.points.toLocaleString();
+            codewordSecret = teamData.codeword;
+            
+            // Reset hidden state when changing teams
+            const el = document.getElementById('codeword-display');
+            el.classList.add('codeword-hidden');
+            el.innerText = "?????";
         }
 
         async function fetchData() {
             try {
-                const response = await fetch(`${sheetUrl}&cachebust=${new Date().getTime()}`, {
+                const teamData = TEAM_MAP[currentTeamKey];
+                // Handle empty URLs for placeholder teams
+                if (teamData.url.startsWith("PASTE")) {
+                    document.getElementById('grid').innerHTML = '<p style="grid-column: 1/-1; text-align: center; margin-top: 50px;">This team sheet has not been linked yet.</p>';
+                    return;
+                }
+
+                const response = await fetch(`${teamData.url}&cachebust=${new Date().getTime()}`, {
                     cache: "no-store",
                     headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
                 });
@@ -553,12 +634,13 @@
             }, 500);
         }
 
-        fetchGlobalData();
-        fetchData();
+        // Run Init
+        init();
+
         setInterval(() => {
             fetchData();
             fetchGlobalData();
-        }, 15000);
+        }, 30000);
     </script>
 </body>
 </html>
