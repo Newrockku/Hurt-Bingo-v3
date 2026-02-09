@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo v3.007</title>
+    <title>Bingo v3.009</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -128,10 +128,13 @@
             filter: drop-shadow(2px 3px 4px black);
         }
 
+        /* FIXED: Added min-height and flex-shrink to background tile progress bars */
         .progress-container {
             margin-bottom: 2%;
-            height: 4cqw;
+            height: 5cqw;
+            min-height: 8px; 
             width: 100%;
+            flex-shrink: 0; 
         }
 
         .progress-bg {
@@ -182,7 +185,7 @@
             margin-bottom: 0.5cqw;
         }
 
-        /* MODAL SYSTEM v3.007 */
+        /* MODAL SYSTEM v3.009 */
         #modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -205,14 +208,12 @@
             border: 3px solid #6d604e;
             width: 90vw;
             max-width: 450px;
-            height: auto;
             max-height: 90vh;
-            padding: 30px;
+            padding: 25px;
             position: fixed;
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
             display: flex;
             flex-direction: column;
-            container-type: inline-size;
             
             opacity: 0;
             transform: translate(-50%, -50%) scale(0);
@@ -232,70 +233,68 @@
 
         .modal-header {
             font-size: 1.8rem;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             text-align: center;
             font-weight: bold;
             border-bottom: 2px solid #342e25;
             padding-bottom: 10px;
-            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-            flex-shrink: 0; /* Prevents header squishing */
+            text-shadow: 2px 2px 2px #000;
+            flex-shrink: 0;
         }
 
-        .modal-img { height: 150px; margin-bottom: 15px; display: flex; justify-content: center; flex-shrink: 0;}
+        .modal-img { height: 140px; margin-bottom: 15px; display: flex; justify-content: center; flex-shrink: 0;}
         .modal-img img { max-height: 100%; filter: drop-shadow(4px 4px 6px black); }
         
         .modal-label { 
             font-size: 0.85rem; 
             text-transform: uppercase; 
             color: #ffee00; 
-            margin-bottom: 5px; 
-            display: block; 
+            margin-bottom: 4px; 
             font-weight: bold;
-            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-            flex-shrink: 0; /* Prevents label squishing */
+            text-shadow: 1px 1px 1px #000;
+            flex-shrink: 0;
         }
 
         .modal-progress { 
-            height: 20px; 
+            height: 14px; 
+            min-height: 14px;
             margin-bottom: 15px; 
-            flex-shrink: 0; /* Prevents bar squishing */
+            flex-shrink: 0; 
         }
         
         .modal-checklist { 
             background: #342e25; 
             border: 1px solid #000; 
             padding: 10px;
-            height: auto; 
-            max-height: 150px; 
+            max-height: 160px; 
             overflow-y: auto; 
             margin-bottom: 15px;
-            flex-shrink: 1; /* Allows this to shrink if space is tight */
+            flex-shrink: 1; 
         }
 
         .modal-description {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: #ffac00;
             background: #342e25;
             padding: 10px;
             border: 1px solid #000;
             overflow-y: auto;
             max-height: 100px;
-            flex-grow: 1;
+            flex-shrink: 1;
         }
 
         .close-btn {
             position: absolute;
-            top: 10px; right: 15px;
-            font-size: 2.5rem;
+            top: 5px; right: 12px;
+            font-size: 2rem;
             cursor: pointer;
             color: #858476;
-            line-height: 1;
         }
         .close-btn:hover { color: #ffac00; }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #6d604e; }
-        ::-webkit-scrollbar-track { background: #342e25; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #6d604e; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: #221e18; }
 
         @media (max-width: 1200px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
         @media (max-width: 800px) { .grid-container { grid-template-columns: repeat(3, 1fr); } }
@@ -303,29 +302,27 @@
 </head>
 <body>
 
-    <h1>Bingo v3.007</h1>
+    <h1>Bingo v3.009</h1>
     <div class="grid-container" id="grid"></div>
 
     <div id="modal-overlay" onclick="closeModal()">
         <div class="modal-content" id="modal-box" onclick="event.stopPropagation()">
-            <div class="corner top-left"></div>
-            <div class="corner top-right"></div>
-            <div class="corner bottom-left"></div>
-            <div class="corner bottom-right"></div>
+            <div class="corner top-left"></div><div class="corner top-right"></div>
+            <div class="corner bottom-left"></div><div class="corner bottom-right"></div>
 
             <span class="close-btn" onclick="closeModal()">&times;</span>
             <div id="modal-header" class="modal-header"></div>
             <div class="modal-img"><img id="modal-image" src="" alt=""></div>
             
-            <span class="modal-label">Progress</span>
+            <div class="modal-label">Progress</div>
             <div class="modal-progress">
                 <div class="progress-bg"><div id="modal-bar" class="progress-fill"></div></div>
             </div>
             
-            <span class="modal-label">Collected Items</span>
+            <div class="modal-label">Collected Items</div>
             <div id="modal-list" class="modal-checklist"></div>
             
-            <span class="modal-label">Description</span>
+            <div class="modal-label">Description</div>
             <div id="modal-desc" class="modal-description"></div>
         </div>
     </div>
@@ -417,7 +414,6 @@
         function closeModal() {
             const overlay = document.getElementById('modal-overlay');
             const box = document.getElementById('modal-box');
-            
             overlay.classList.remove('active');
             box.classList.remove('active');
             
