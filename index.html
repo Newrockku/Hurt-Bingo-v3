@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo v3.055</title>
+    <title>Bingo v3.057</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -17,59 +17,34 @@
             overflow-y: scroll; 
         }
 
-        /* --- Global Custom Scrollbar --- */
-        ::-webkit-scrollbar {
-            width: 12px;
-        }
+        /* --- Custom Square Scrollbar --- */
+        ::-webkit-scrollbar { width: 12px; }
+        ::-webkit-scrollbar-track { background: #221e18; }
+        ::-webkit-scrollbar-thumb { background: #494034; border: 2px solid #221e18; }
+        ::-webkit-scrollbar-thumb:hover { background: #6d604e; }
 
-        ::-webkit-scrollbar-track {
-            background: #221e18; 
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #494034;
-            border: 2px solid #221e18;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6d604e;
-        }
-
-        /* --- Specific Scrollbar for Completed Tiles --- */
-        .tile.completed .checklist-box::-webkit-scrollbar-track {
-            background: #1e3a1e; 
-        }
-
-        .tile.completed .checklist-box::-webkit-scrollbar-thumb {
-            background: #162a16;
-            border: 2px solid #1e3a1e;
-        }
-
-        /* --- Specific Scrollbar for Modals --- */
+        /* Green Scrollbar for Completed Content */
+        .tile.completed .checklist-box::-webkit-scrollbar-track,
         .modal-content.completed .modal-checklist::-webkit-scrollbar-track,
-        .modal-content.completed .modal-description::-webkit-scrollbar-track {
-            background: #1e3a1e;
-        }
-
+        .modal-content.completed .modal-description::-webkit-scrollbar-track { background: #1e3a1e; }
+        
+        .tile.completed .checklist-box::-webkit-scrollbar-thumb,
         .modal-content.completed .modal-checklist::-webkit-scrollbar-thumb,
-        .modal-content.completed .modal-description::-webkit-scrollbar-thumb {
-            background: #162a16;
-            border: 2px solid #1e3a1e;
-        }
+        .modal-content.completed .modal-description::-webkit-scrollbar-thumb { background: #162a16; border: 2px solid #1e3a1e; }
 
         body { 
             background-color: #342e25; 
             color: #ffac00; 
             font-family: 'Cabin Condensed', sans-serif; 
             margin: 0;
-            padding: 10px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
         }
 
-        /* --- Aligned Header Dashboard --- */
+        /* --- Dashboard Header --- */
         .dashboard {
             width: 100%;
             max-width: 1580px; 
@@ -81,397 +56,126 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            z-index: 10;
+            z-index: 100;
         }
 
-        .dashboard-main { 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center;
-        }
-        
-        #event-title {
-            font-size: 1.6rem;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-shadow: 2px 2px 4px black;
-            line-height: 1;
-        }
+        .dashboard-main { display: flex; flex-direction: column; flex: 1; }
+        #event-title { font-size: 1.6rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; text-shadow: 2px 2px 4px black; }
+        #team-name { font-size: 1.1rem; color: #ffffff; margin: 2px 0 0 0; text-shadow: 1px 1px 2px black; font-weight: bold; }
 
-        #team-name {
-            font-size: 1.1rem;
-            color: #ffffff; 
-            margin: 5px 0 0 0;
-            text-shadow: 1px 1px 2px black;
-            font-weight: bold;
-        }
+        .stats-container { display: flex; gap: 20px; align-items: center; margin: 0 20px; }
+        .stat-item { text-align: center; }
+        .stat-label { font-size: 0.65rem; text-transform: uppercase; color: #858476; display: block; }
+        .stat-value { font-size: 1.3rem; font-weight: bold; color: #ffac00; }
 
-        .stats-container {
-            display: flex;
-            gap: 25px;
-            align-items: center;
-        }
-
-        .stat-item { 
-            text-align: center; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .stat-label { 
-            font-size: 0.65rem; 
-            text-transform: uppercase; 
-            color: #858476; 
-            margin-bottom: 1px; 
-        }
-
-        .stat-value { 
-            font-size: 1.3rem; 
-            font-weight: bold; 
-            color: #ffac00; 
-            line-height: 1.1;
-        }
-
-        #codeword-display {
-            cursor: pointer;
-            background: #221e18;
-            padding: 2px 10px;
-            border-radius: 4px;
-            min-width: 90px;
-            text-align: center;
-        }
+        #codeword-display { cursor: pointer; background: #221e18; padding: 2px 10px; border-radius: 4px; min-width: 90px; text-align: center; display: inline-block; }
         .codeword-hidden { color: #221e18; text-shadow: none; }
 
-        /* --- Main Content Layout --- */
-        .main-layout {
-            display: flex;
-            width: 100%;
-            max-width: 1580px;
-            gap: 20px;
-            position: relative;
-        }
-
-        /* --- Responsive Grid --- */
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr); 
-            gap: 10px;
-            padding-bottom: 60px;
-            flex-grow: 1;
-            z-index: 5;
-        }
-
-        /* --- External Minimap HUD --- */
+        /* --- Mini-Map Container --- */
         .minimap-wrapper {
-            position: sticky;
-            top: 20px;
-            height: fit-content;
-            background: #494034;
-            border: 2px solid #6d604e;
-            padding: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            background: #221e18;
+            padding: 4px;
+            border: 1px solid #6d604e;
+            flex-shrink: 0;
         }
 
         .minimap-container {
             display: grid;
-            grid-template-columns: repeat(7, 12px);
-            grid-template-rows: repeat(7, 12px);
+            grid-template-columns: repeat(7, 10px);
+            grid-template-rows: repeat(7, 10px);
             gap: 2px;
-            background: #221e18;
-            padding: 4px;
-            border: 1px solid #000;
         }
 
         .mini-tile {
-            width: 12px;
-            height: 12px;
+            width: 10px; height: 10px;
             background: #342e25;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 7px;
-            color: rgba(255,255,255,0.3);
-            font-weight: bold;
-            border-radius: 1px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 6px; color: rgba(255,255,255,0.2);
+            font-weight: bold; border-radius: 1px;
+        }
+        .mini-tile.complete { background: #4caf50; color: white; box-shadow: 0 0 4px rgba(76, 175, 80, 0.6); }
+
+        /* --- Grid --- */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr); 
+            gap: 10px;
+            width: 100%;
+            max-width: 1580px;
+            padding-bottom: 60px;
         }
 
-        .mini-tile.complete {
-            background: #4caf50;
-            color: white;
-            box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
-        }
-
-        /* --- Responsive Queries --- */
+        /* --- RESPONSIVE LOGIC --- */
+        
+        /* 5 tiles or fewer: Move Minimap to Floating HUD */
         @media (max-width: 1400px) {
             .grid-container { grid-template-columns: repeat(5, 1fr); }
-        }
-        
-        @media (max-width: 1000px) {
-            .grid-container { grid-template-columns: repeat(4, 1fr); }
-        }
-
-        @media (max-width: 800px) {
-            .main-layout { flex-direction: column; align-items: center; }
-            .grid-container { grid-template-columns: repeat(3, 1fr); width: 100%; }
-            .minimap-wrapper { 
-                position: fixed; 
-                bottom: 20px; 
-                top: auto; 
-                right: 20px; 
-                z-index: 100;
-                opacity: 0.9;
+            
+            .minimap-wrapper {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.7);
+                background: #494034;
+                border: 2px solid #6d604e;
+                z-index: 1000;
             }
+            .minimap-container { grid-template-columns: repeat(7, 12px); grid-template-rows: repeat(7, 12px); }
+            .mini-tile { width: 12px; height: 12px; font-size: 7px; }
         }
 
-        @media (max-width: 500px) {
+        @media (max-width: 1000px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 800px) { .grid-container { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 600px) {
             .grid-container { grid-template-columns: repeat(2, 1fr); }
             .dashboard { flex-direction: column; gap: 10px; text-align: center; }
-            .stats-container { width: 100%; justify-content: space-around; }
+            .stats-container { margin: 5px 0; }
         }
 
         /* --- Tile Styles --- */
-        .tile {
-            background-color: #494034; 
-            border: 2px solid #6d604e;
-            position: relative;
-            aspect-ratio: 1 / 1; 
-            display: flex;
-            flex-direction: column;
-            padding: 5%; 
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-            overflow: hidden; 
-            container-type: inline-size;
-            cursor: pointer;
-            transition: all 0.3s ease, opacity 0.4s ease;
-        }
-
+        .tile { background-color: #494034; border: 2px solid #6d604e; position: relative; aspect-ratio: 1 / 1; display: flex; flex-direction: column; padding: 5%; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); overflow: hidden; container-type: inline-size; cursor: pointer; transition: all 0.3s ease, opacity 0.4s ease; }
         .tile.completed { background-color: #1e3a1e; border-color: #4caf50; }
-
-        .tile:hover {
-            transform: scale(1.05);
-            z-index: 50;
-            box-shadow: 0 0 20px 5px rgba(255, 172, 0, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-
-        .tile.completed:hover {
-            box-shadow: 0 0 20px 5px rgba(76, 175, 80, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-
+        .tile:hover { transform: scale(1.05); z-index: 50; box-shadow: 0 0 20px 5px rgba(255, 172, 0, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.5); }
+        .tile.completed:hover { box-shadow: 0 0 20px 5px rgba(76, 175, 80, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.5); }
         .tile.ghost { opacity: 0; pointer-events: none; }
-
-        .header-box {
-            padding: 2% 0; 
-            margin-bottom: 2%;
-            min-height: 18%;
-            display: flex;
-            justify-content: center; 
-            align-items: center;
-            flex-shrink: 0;
-            overflow: hidden;
-            text-align: center;
-        }
-
-        .header-content {
-            width: 100%;
-            font-weight: bold;
-            font-size: 8cqw; 
-            line-height: 1;
-            white-space: nowrap;
-            text-shadow: 1px 1px 2px black;
-            color: #ffac00;
-        }
+        .header-box { padding: 2% 0; margin-bottom: 2%; min-height: 18%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; overflow: hidden; text-align: center; }
+        .header-content { width: 100%; font-weight: bold; font-size: 8cqw; line-height: 1; white-space: nowrap; text-shadow: 1px 1px 2px black; color: #ffac00; }
         .tile.completed .header-content { color: #4caf50; }
-
-        .img-container {
-            height: 40%; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 2%;
-            flex-shrink: 0;
-        }
-
+        .img-container { height: 40%; display: flex; justify-content: center; align-items: center; margin-bottom: 2%; flex-shrink: 0; }
         .tile.completed .img-container { height: 44%; margin-bottom: 4%; }
-
-        .img-container img {
-            max-height: 100%; 
-            max-width: 95%;
-            object-fit: contain;
-            filter: drop-shadow(2px 3px 4px black);
-        }
-
-        .progress-container {
-            margin-bottom: 2%;
-            height: 2cqw;
-            min-height: 5px; 
-            width: 100%;
-            flex-shrink: 0; 
-        }
-
+        .img-container img { max-height: 100%; max-width: 95%; object-fit: contain; filter: drop-shadow(2px 3px 4px black); }
+        .progress-container { margin-bottom: 2%; height: 2cqw; min-height: 5px; width: 100%; flex-shrink: 0; }
         .tile.completed .progress-container { display: none; }
-
-        .progress-bg {
-            background: #342e25;
-            height: 100%;
-            border: 1px solid #000;
-            width: 100%;
-            overflow: hidden;
-        }
-
+        .progress-bg { background: #342e25; height: 100%; border: 1px solid #000; width: 100%; overflow: hidden; }
         .progress-fill { height: 100%; transition: width 0.5s ease, background-color 0.5s ease; }
-
-        .checklist-box {
-            background: #342e25; 
-            border: 1px solid #000;
-            padding: 3%;
-            flex-grow: 1; 
-            width: 100%;
-            overflow-y: auto;
-            min-height: 0;
-            transition: background 0.3s ease;
-        }
-
+        .checklist-box { background: #342e25; border: 1px solid #000; padding: 3%; flex-grow: 1; width: 100%; overflow-y: auto; min-height: 0; transition: background 0.3s ease; }
         .tile.completed .checklist-box { background: #162a16; }
-
-        .check-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-
-        .check-mark {
-            width: 1.2em;
-            height: 1.2em;
-            margin-right: 6px;
-            flex-shrink: 0;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .check-mark::after {
-            content: '';
-            width: 0.3em;
-            height: 0.6em;
-            border: solid #4caf50;
-            border-width: 0 0.2em 0.2em 0;
-            transform: rotate(45deg);
-        }
-
+        .check-item { display: flex; align-items: center; margin-bottom: 4px; }
+        .check-mark { width: 1.2em; height: 1.2em; margin-right: 6px; flex-shrink: 0; position: relative; display: flex; justify-content: center; align-items: center; }
+        .check-mark::after { content: ''; width: 0.3em; height: 0.6em; border: solid #4caf50; border-width: 0 0.2em 0.2em 0; transform: rotate(45deg); }
         .tile .check-item { font-size: 6.5cqw; color: #ffee00; }
         .tile.completed .check-item { color: #4caf50; }
 
-        /* MODAL SYSTEM */
-        #modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(0px);
-            transition: background 0.4s ease, backdrop-filter 0.4s ease;
-        }
-
-        #modal-overlay.active {
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background-color: #494034;
-            border: 3px solid #6d604e;
-            width: 90vw;
-            max-width: 450px;
-            padding: 25px;
-            position: fixed;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
-            display: flex;
-            flex-direction: column;
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0);
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            pointer-events: none;
-            z-index: 1001;
-        }
-
+        /* MODAL */
+        #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(0px); transition: background 0.4s ease, backdrop-filter 0.4s ease; }
+        #modal-overlay.active { background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(5px); }
+        .modal-content { background-color: #494034; border: 3px solid #6d604e; width: 90vw; max-width: 450px; padding: 25px; position: fixed; box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); display: flex; flex-direction: column; opacity: 0; transform: translate(-50%, -50%) scale(0); transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; z-index: 2001; }
         .modal-content.completed { background-color: #1e3a1e; border-color: #4caf50; }
-
-        .modal-content.active {
-            opacity: 1;
-            top: 50% !important; left: 50% !important;
-            transform: translate(-50%, -50%) scale(1);
-            pointer-events: auto;
-        }
-
-        .modal-header {
-            font-size: 1.8rem;
-            margin-bottom: 12px;
-            text-align: center;
-            font-weight: bold;
-            color: #ffac00;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-        }
+        .modal-content.active { opacity: 1; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+        .modal-header { font-size: 1.8rem; margin-bottom: 12px; text-align: center; font-weight: bold; color: #ffac00; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
         .modal-content.completed .modal-header { color: #4caf50; }
-
         .modal-img { height: 120px; margin-bottom: 12px; display: flex; justify-content: center; }
         .modal-img img { max-height: 100%; filter: drop-shadow(4px 4px 6px black); }
-        
         .modal-label { font-size: 0.7rem; text-transform: uppercase; color: #ffac00; margin-bottom: 2px; font-weight: bold; }
         .modal-content.completed .modal-label { color: #4caf50; }
-
         .modal-progress { height: 12px; margin-bottom: 12px; }
-        .modal-content.completed .modal-progress,
-        .modal-content.completed .progress-label { display: none; }
-        
-        .modal-checklist { 
-            background: #342e25; 
-            border: 1px solid #000; 
-            padding: 8px;
-            max-height: 130px; 
-            overflow-y: auto; 
-            margin-bottom: 12px;
-        }
-
-        .modal-description {
-            font-size: 0.95rem;
-            color: #ffee00;
-            background: #342e25;
-            padding: 8px;
-            border: 1px solid #000;
-            overflow-y: auto;
-            max-height: 80px;
-        }
-
-        .modal-content.completed .modal-checklist,
-        .modal-content.completed .modal-description { background: #162a16; color: #4caf50; }
-
-        .close-btn {
-            position: absolute;
-            top: 5px; right: 12px;
-            font-size: 2rem;
-            cursor: pointer;
-            color: #858476;
-            z-index: 100;
-        }
+        .modal-content.completed .modal-progress, .modal-content.completed .progress-label { display: none; }
+        .modal-checklist { background: #342e25; border: 1px solid #000; padding: 8px; max-height: 130px; overflow-y: auto; margin-bottom: 12px; }
+        .modal-description { font-size: 0.95rem; color: #ffee00; background: #342e25; padding: 8px; border: 1px solid #000; overflow-y: auto; max-height: 80px; }
+        .modal-content.completed .modal-checklist, .modal-content.completed .modal-description { background: #162a16; color: #4caf50; }
+        .close-btn { position: absolute; top: 5px; right: 12px; font-size: 2rem; cursor: pointer; color: #858476; z-index: 100; }
         .close-btn:hover { color: #ffac00; }
-
-        /* --- BACKGROUND WATERMARK FOOTER --- */
-        .version-footer {
-            position: fixed;
-            bottom: 10px;
-            right: 25px;
-            font-size: 0.65rem;
-            color: #4a4134; 
-            text-align: right;
-            pointer-events: none;
-            z-index: 1; 
-            opacity: 0.6;
-        }
+        .version-footer { position: fixed; bottom: 10px; right: 25px; font-size: 0.65rem; color: #4a4134; text-align: right; pointer-events: none; z-index: 1; opacity: 0.6; }
     </style>
 </head>
 <body>
@@ -492,19 +196,16 @@
                 <span id="total-points" class="stat-value">0</span>
             </div>
         </div>
+
+        <aside class="minimap-wrapper">
+            <div class="minimap-container" id="minimap"></div>
+        </aside>
     </header>
 
-    <main class="main-layout">
-        <div class="grid-container" id="grid"></div>
-        
-        <aside class="minimap-wrapper">
-            <div class="minimap-container" id="minimap">
-                </div>
-        </aside>
-    </main>
+    <main class="grid-container" id="grid"></main>
 
     <footer class="version-footer">
-        <span>Build: v3.055</span><br>
+        <span>Build: v3.057</span><br>
         <span id="last-sync">Last Sync: Never</span>
     </footer>
 
@@ -514,9 +215,7 @@
             <div id="modal-header" class="modal-header"></div>
             <div class="modal-img"><img id="modal-image" src="" alt=""></div>
             <div class="modal-label progress-label">Progress</div>
-            <div class="modal-progress">
-                <div class="progress-bg"><div id="modal-bar" class="progress-fill"></div></div>
-            </div>
+            <div class="modal-progress"><div class="progress-bg"><div id="modal-bar" class="progress-fill"></div></div></div>
             <div class="modal-label">Collected Items</div>
             <div id="modal-list" class="modal-checklist"></div>
             <div class="modal-label">Description</div>
@@ -543,7 +242,6 @@
         let currentTeamKey = "Warriors";
         let currentActiveTile = null;
         let lastSeenHash = null;
-        let previousVersionHash = null;
         let codewordSecret = "";
 
         function init() {
@@ -551,7 +249,6 @@
             const teamParam = params.get('team');
             if (teamParam && TEAM_MAP[teamParam]) currentTeamKey = teamParam;
 
-            // Initialize empty minimap
             const minimap = document.getElementById('minimap');
             for(let i=1; i<=49; i++) {
                 const dot = document.createElement('div');
@@ -597,70 +294,44 @@
             document.getElementById('team-name').innerText = teamData.name;
             document.getElementById('total-points').innerText = teamData.points.toLocaleString();
             codewordSecret = teamData.codeword;
-            const el = document.getElementById('codeword-display');
-            el.classList.add('codeword-hidden');
-            el.innerText = "?????";
         }
 
         async function fetchData() {
             try {
                 const teamData = TEAM_MAP[currentTeamKey];
-                if (teamData.url.startsWith("PASTE")) {
-                    document.getElementById('grid').innerHTML = '<p style="grid-column: 1/-1; text-align: center; margin-top: 50px;">This team sheet has not been linked yet.</p>';
-                    return;
-                }
-
+                if (teamData.url.startsWith("PASTE")) return;
                 const response = await fetch(`${teamData.url}&cachebust=${new Date().getTime()}`);
                 const rawData = await response.text();
                 const currentHash = hashString(rawData);
-
-                if (currentHash === lastSeenHash || currentHash === previousVersionHash) return;
-                previousVersionHash = lastSeenHash;
+                if (currentHash === lastSeenHash) return;
                 lastSeenHash = currentHash;
-
-                const now = new Date();
-                document.getElementById('last-sync').innerText = `Last Sync: ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-
+                document.getElementById('last-sync').innerText = `Last Sync: ${new Date().toLocaleTimeString()}`;
                 const rows = rawData.split('\n').slice(1); 
                 const grid = document.getElementById('grid');
                 grid.innerHTML = '';
-
                 rows.forEach((row, index) => {
                     const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     if (cols.length < 4) return;
-
                     const title = cols[0].replace(/"/g, "").trim();
                     const imgName = cols[1].replace(/"/g, "").trim();
                     const current = parseInt(cols[2]) || 0;
                     const goal = parseInt(cols[3]) || 1;
                     const itemList = cols[4] ? cols[4].replace(/"/g, "").trim().split(',') : [];
                     const description = cols[5] ? cols[5].replace(/"/g, "").trim() : "No description provided.";
-
                     const percent = Math.min((current / goal) * 100, 100);
                     const isCompleted = percent === 100;
                     const barColor = getProgressColor(percent);
                     const finalImgSrc = (imgName.includes('http')) ? imgName : `./images/${imgName}`;
-
-                    // Update Minimap
                     const miniTile = document.getElementById(`mini-${index + 1}`);
                     if (miniTile) {
                         if (isCompleted) miniTile.classList.add('complete');
                         else miniTile.classList.remove('complete');
                     }
-
                     let checklistHtml = '';
-                    itemList.forEach(item => {
-                        if(item.trim() !== "") {
-                            checklistHtml += `<div class="check-item"><span class="check-mark"></span> ${item.trim()}</div>`;
-                        }
-                    });
-
+                    itemList.forEach(item => { if(item.trim() !== "") checklistHtml += `<div class="check-item"><span class="check-mark"></span> ${item.trim()}</div>`; });
                     const tile = document.createElement('div');
                     tile.className = `tile ${isCompleted ? 'completed' : ''}`;
-                    tile.onclick = (e) => openModal(e, {
-                        id: index + 1, title, img: finalImgSrc, percent, barColor, checklistHtml, description, isCompleted
-                    });
-
+                    tile.onclick = (e) => openModal(e, { id: index + 1, title, img: finalImgSrc, percent, barColor, checklistHtml, description, isCompleted });
                     tile.innerHTML = `
                         <div class="header-box"><div class="header-content">${index + 1} | ${title}</div></div>
                         <div class="img-container"><img src="${finalImgSrc}" onerror="this.style.visibility='hidden'"></div>
@@ -669,7 +340,7 @@
                     `;
                     grid.appendChild(tile);
                 });
-            } catch (error) { console.error("Error fetching sheet:", error); }
+            } catch (error) { console.error(error); }
         }
 
         function openModal(event, data) {
@@ -679,26 +350,17 @@
             const rect = tile.getBoundingClientRect();
             currentActiveTile = tile;
             tile.classList.add('ghost');
-
-            if (data.isCompleted) box.classList.add('completed');
-            else box.classList.remove('completed');
-
+            if (data.isCompleted) box.classList.add('completed'); else box.classList.remove('completed');
             document.getElementById('modal-header').innerHTML = `${data.id} | ${data.title}`;
             document.getElementById('modal-image').src = data.img;
             document.getElementById('modal-bar').style.width = data.percent + '%';
             document.getElementById('modal-bar').style.backgroundColor = data.barColor;
             document.getElementById('modal-list').innerHTML = data.checklistHtml;
             document.getElementById('modal-desc').innerText = data.description;
-            
-            const spawnX = rect.left + (rect.width / 2);
-            const spawnY = rect.top + (rect.height / 2);
-            box.style.top = spawnY + 'px';
-            box.style.left = spawnX + 'px';
+            box.style.top = (rect.top + rect.height / 2) + 'px';
+            box.style.left = (rect.left + rect.width / 2) + 'px';
             overlay.style.display = 'flex';
-            setTimeout(() => {
-                overlay.classList.add('active');
-                box.classList.add('active');
-            }, 10);
+            setTimeout(() => { overlay.classList.add('active'); box.classList.add('active'); }, 10);
             document.body.style.overflow = 'hidden'; 
         }
 
@@ -708,18 +370,11 @@
             overlay.classList.remove('active');
             box.classList.remove('active');
             if (currentActiveTile) currentActiveTile.classList.remove('ghost');
-            setTimeout(() => {
-                overlay.style.display = 'none';
-                document.body.style.overflow = 'auto'; 
-                currentActiveTile = null;
-            }, 500);
+            setTimeout(() => { overlay.style.display = 'none'; document.body.style.overflow = 'auto'; }, 500);
         }
 
         init();
-        setInterval(() => {
-            fetchData();
-            fetchGlobalData();
-        }, 30000);
+        setInterval(fetchData, 30000);
     </script>
 </body>
 </html>
