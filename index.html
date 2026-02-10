@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo v3.053</title>
+    <title>Bingo v3.054</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
             overflow-y: scroll; 
         }
 
-        /* --- Color Matched Square Scrollbar --- */
+        /* --- Global Custom Scrollbar --- */
         ::-webkit-scrollbar {
             width: 12px;
         }
@@ -33,6 +33,32 @@
 
         ::-webkit-scrollbar-thumb:hover {
             background: #6d604e;
+        }
+
+        /* --- Specific Scrollbar for Completed Tiles --- */
+        .tile.completed .checklist-box::-webkit-scrollbar-track {
+            background: #1e3a1e; 
+        }
+
+        .tile.completed .checklist-box::-webkit-scrollbar-thumb {
+            background: #162a16;
+            border: 2px solid #1e3a1e;
+        }
+
+        .tile.completed .checklist-box::-webkit-scrollbar-thumb:hover {
+            background: #2d5a2d;
+        }
+
+        /* --- Specific Scrollbar for Modals --- */
+        .modal-content.completed .modal-checklist::-webkit-scrollbar-track,
+        .modal-content.completed .modal-description::-webkit-scrollbar-track {
+            background: #1e3a1e;
+        }
+
+        .modal-content.completed .modal-checklist::-webkit-scrollbar-thumb,
+        .modal-content.completed .modal-description::-webkit-scrollbar-thumb {
+            background: #162a16;
+            border: 2px solid #1e3a1e;
         }
 
         body { 
@@ -450,7 +476,7 @@
     <div class="grid-container" id="grid"></div>
 
     <footer class="version-footer">
-        <span>Build: v3.053</span><br>
+        <span>Build: v3.054</span><br>
         <span id="last-sync">Last Sync: Never</span>
     </footer>
 
