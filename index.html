@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo v3.064</title>
+    <title>Bingo v3.065</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -11,7 +11,6 @@
     <style>
         /* --- Theme Variables --- */
         :root {
-            /* Default: OSRS */
             --bg-body: #342e25;
             --bg-tile: #494034;
             --bg-well: #342e25;
@@ -96,20 +95,12 @@
         ::-webkit-scrollbar-thumb { background: var(--bg-tile); border: 2px solid var(--bg-well); }
         ::-webkit-scrollbar-thumb:hover { background: var(--border-main); }
 
-        .tile.completed .checklist-box::-webkit-scrollbar-track,
-        .modal-content.completed .modal-checklist::-webkit-scrollbar-track,
-        .modal-content.completed .modal-description::-webkit-scrollbar-track { background: var(--bg-completed); }
-        .tile.completed .checklist-box::-webkit-scrollbar-thumb,
-        .modal-content.completed .modal-checklist::-webkit-scrollbar-thumb,
-        .modal-content.completed .modal-description::-webkit-scrollbar-thumb { background: var(--bg-completed-well); border: 2px solid var(--bg-completed); }
-
         body { 
             background-color: var(--bg-body); 
             color: var(--text-main); 
             font-family: 'Cabin Condensed', sans-serif; 
             margin: 0; padding: 15px;
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            transition: background-color 0.5s ease;
         }
 
         /* --- Dashboard --- */
@@ -133,11 +124,9 @@
         #codeword-display { cursor: pointer; background: var(--bg-well); padding: 2px 10px; border-radius: 4px; min-width: 90px; text-align: center; display: inline-block; }
         .codeword-hidden { color: var(--bg-well); text-shadow: none; }
 
-        /* --- Theme Switcher (Temporary) --- */
-        .theme-selector { margin-left: 20px; }
         .theme-selector select { 
             background: var(--bg-well); color: var(--text-main); border: 1px solid var(--border-main); 
-            padding: 5px; font-family: 'Cabin Condensed'; cursor: pointer;
+            padding: 2px 5px; font-family: 'Cabin Condensed'; cursor: pointer; font-size: 1.1rem; border-radius: 4px;
         }
 
         /* --- Mini-Map --- */
@@ -156,13 +145,6 @@
             width: 100%; max-width: 1580px; padding-bottom: 60px;
         }
 
-        .point-badge {
-            position: absolute; bottom: 5px; right: 5px; background: var(--bg-well);
-            border: 1px solid var(--accent); padding: 1px 5px; border-radius: 3px;
-            font-size: 10px; font-weight: bold; color: var(--text-main); z-index: 10;
-        }
-        .tile.completed .point-badge { border-color: var(--border-completed); color: var(--text-completed); }
-
         /* --- Tile Styles --- */
         .tile { 
             background-color: var(--bg-tile); border: 2px solid var(--border-main); 
@@ -175,18 +157,35 @@
         .tile.completed:hover { box-shadow: 0 0 20px 5px rgba(76, 175, 80, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.5); }
         .tile.ghost { opacity: 0; pointer-events: none; }
         
-        .header-content { width: 100%; font-weight: bold; font-size: 8cqw; line-height: 1; white-space: nowrap; text-shadow: 1px 1px 2px black; color: var(--text-main); text-align: center;}
+        .header-box { padding: 2% 0; margin-bottom: 2%; min-height: 18%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; overflow: hidden; text-align: center; }
+        .header-content { width: 100%; font-weight: bold; font-size: 8cqw; line-height: 1; white-space: nowrap; text-shadow: 1px 1px 2px black; color: var(--text-main); }
         .tile.completed .header-content { color: var(--text-completed); }
         
         .img-container { height: 40%; display: flex; justify-content: center; align-items: center; margin-bottom: 2%; flex-shrink: 0; }
         .img-container img { max-height: 100%; max-width: 95%; object-fit: contain; filter: drop-shadow(2px 3px 4px black); }
         
+        .progress-container { margin-bottom: 2%; height: 2cqw; min-height: 5px; width: 100%; flex-shrink: 0; }
+        .tile.completed .progress-container { display: none; }
         .progress-bg { background: var(--bg-well); height: 100%; border: 1px solid #000; width: 100%; overflow: hidden; }
-        .checklist-box { background: var(--bg-well); border: 1px solid #000; padding: 3%; flex-grow: 1; width: 100%; overflow-y: auto; transition: background 0.3s ease; }
+        .progress-fill { height: 100%; transition: width 0.5s ease, background-color 0.5s ease; }
+
+        .checklist-box { background: var(--bg-well); border: 1px solid #000; padding: 3%; flex-grow: 1; width: 100%; overflow-y: auto; min-height: 0; transition: background 0.3s ease; position: relative; }
         .tile.completed .checklist-box { background: var(--bg-completed-well); }
+        .tile.completed .checklist-box::-webkit-scrollbar-track { background: var(--bg-completed); }
+        .tile.completed .checklist-box::-webkit-scrollbar-thumb { background: var(--bg-completed-well); border: 2px solid var(--bg-completed); }
+        
+        .check-item { display: flex; align-items: center; margin-bottom: 4px; }
+        .check-mark { width: 1.2em; height: 1.2em; margin-right: 6px; flex-shrink: 0; position: relative; display: flex; justify-content: center; align-items: center; }
         .check-mark::after { content: ''; width: 0.3em; height: 0.6em; border: solid var(--text-completed); border-width: 0 0.2em 0.2em 0; transform: rotate(45deg); }
-        .tile .check-item { font-size: 6cqw; color: var(--text-bright); display: flex; align-items: center; margin-bottom: 4px;}
+        .tile .check-item { font-size: 6cqw; color: var(--text-bright); }
         .tile.completed .check-item { color: var(--text-completed); }
+
+        .point-badge {
+            position: absolute; bottom: 5px; right: 5px; background: var(--bg-well);
+            border: 1px solid var(--accent); padding: 1px 5px; border-radius: 3px;
+            font-size: 10px; font-weight: bold; color: var(--text-main); z-index: 10;
+        }
+        .tile.completed .point-badge { border-color: var(--border-completed); color: var(--text-completed); }
 
         /* --- Modal --- */
         #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(0px); transition: background 0.4s ease, backdrop-filter 0.4s ease; }
@@ -197,16 +196,32 @@
         
         .modal-header { font-size: 1.8rem; margin-bottom: 12px; text-align: center; font-weight: bold; color: var(--text-main); text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
         .modal-content.completed .modal-header { color: var(--text-completed); }
+        .modal-img { height: 120px; margin-bottom: 12px; display: flex; justify-content: center; }
+        .modal-img img { max-height: 100%; filter: drop-shadow(4px 4px 6px black); }
         .modal-points-inline { font-size: 0.85rem; background: var(--bg-well); border: 1px solid var(--accent); padding: 1px 6px; border-radius: 4px; font-weight: bold; color: var(--text-main); }
         .modal-checklist, .modal-description { background: var(--bg-well); border: 1px solid #000; padding: 8px; overflow-y: auto; }
         .modal-content.completed .modal-checklist, .modal-content.completed .modal-description { background: var(--bg-completed-well); color: var(--text-completed); }
+        .modal-content.completed .modal-checklist::-webkit-scrollbar-track, .modal-content.completed .modal-description::-webkit-scrollbar-track { background: var(--bg-completed); }
+        .modal-content.completed .modal-checklist::-webkit-scrollbar-thumb, .modal-content.completed .modal-description::-webkit-scrollbar-thumb { background: var(--bg-completed-well); border: 2px solid var(--bg-completed); }
+
+        .large-map-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: #221e18; padding: 10px; border: 2px solid #000; width: 100%; aspect-ratio: 1/1; }
         .large-map-tile { background: var(--bg-well); display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; color: rgba(255,255,255,0.2); border: 1px solid var(--bg-tile); cursor: pointer; transition: 0.2s; }
+        .large-map-tile:hover { background: var(--bg-tile); color: #fff; transform: scale(1.05); z-index: 2; border-color: var(--accent); }
         .large-map-tile.complete { background: var(--bg-completed); color: var(--text-completed); border-color: var(--border-completed); }
 
-        .close-btn { position: absolute; top: 5px; right: 12px; font-size: 2rem; cursor: pointer; color: var(--text-dim); }
+        .close-btn { position: absolute; top: 5px; right: 12px; font-size: 2rem; cursor: pointer; color: var(--text-dim); z-index: 100; }
+        .close-btn:hover { color: var(--accent); }
         .version-footer { position: fixed; bottom: 10px; left: 25px; font-size: 0.65rem; color: var(--border-main); pointer-events: none; }
         
-        @media (max-width: 1400px) { .grid-container { grid-template-columns: repeat(5, 1fr); } .minimap-wrapper { position: fixed; bottom: 20px; right: 20px; z-index: 1000; } }
+        /* --- ORIGINAL RESPONSIVE BREAKPOINTS --- */
+        @media (max-width: 1400px) {
+            .grid-container { grid-template-columns: repeat(5, 1fr); }
+            .minimap-wrapper { position: fixed; bottom: 20px; right: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.7); background: var(--bg-well); border: 2px solid var(--border-main); z-index: 1000; }
+            .minimap-container { grid-template-columns: repeat(7, 12px); grid-template-rows: repeat(7, 12px); }
+            .mini-tile { width: 12px; height: 12px; font-size: 7px; }
+        }
+        @media (max-width: 1000px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 600px) { .grid-container { grid-template-columns: repeat(3, 1fr); } }
     </style>
 </head>
 
@@ -247,27 +262,34 @@
     <main class="grid-container" id="grid"></main>
 
     <footer class="version-footer">
-        <span>Build: v3.064</span><br>
+        <span>Build: v3.065</span><br>
         <span id="last-sync">Last Sync: Never</span>
     </footer>
 
     <div id="modal-overlay" onclick="closeModal()">
         <div class="modal-content" id="modal-box" onclick="event.stopPropagation()">
             <span class="close-btn" onclick="closeModal()">&times;</span>
+            
             <div id="standard-modal-view">
                 <div id="modal-header" class="modal-header"></div>
-                <div class="modal-img" style="height: 120px; margin-bottom: 12px; display: flex; justify-content: center;"><img id="modal-image" src="" style="max-height: 100%;"></div>
-                <div class="modal-section-row" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2px;">
+                <div class="modal-img"><img id="modal-image" src="" alt=""></div>
+                
+                <div class="modal-label" style="font-size: 0.7rem; text-transform: uppercase; font-weight: bold; margin-bottom: 2px;">Progress</div>
+                <div style="height: 12px; margin-bottom: 12px;"><div class="progress-bg"><div id="modal-bar" class="progress-fill"></div></div></div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2px;">
                     <div class="modal-label" style="font-size: 0.7rem; text-transform: uppercase; font-weight: bold;">Collected Items</div>
                     <div id="modal-points" class="modal-points-inline">0 PTS</div>
                 </div>
                 <div id="modal-list" class="modal-checklist" style="max-height: 130px; margin-bottom: 12px;"></div>
-                <div class="modal-label" style="font-size: 0.7rem; text-transform: uppercase; font-weight: bold;">Description</div>
+                
+                <div class="modal-label" style="font-size: 0.7rem; text-transform: uppercase; font-weight: bold; margin-bottom: 2px;">Description</div>
                 <div id="modal-desc" class="modal-description" style="max-height: 80px;"></div>
             </div>
+
             <div id="map-modal-view" style="display: none; flex-direction: column; align-items: center;">
                 <div class="modal-header">TACTICAL OVERVIEW</div>
-                <div class="large-map-grid" id="large-map-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: #000; padding: 10px; width: 100%; aspect-ratio: 1/1;"></div>
+                <div class="large-map-grid" id="large-map-grid"></div>
             </div>
         </div>
     </div>
@@ -350,7 +372,7 @@
                     if (miniTile) isCompleted ? miniTile.classList.add('complete') : miniTile.classList.remove('complete');
 
                     let checklistHtml = '';
-                    itemList.forEach(item => { if(item.trim()) checklistHtml += `<div class="check-item"><span class="check-mark" style="width: 1.2em; height: 1.2em; margin-right: 6px; position: relative; display: flex; justify-content: center; align-items: center;"></span> ${item.trim()}</div>`; });
+                    itemList.forEach(item => { if(item.trim()) checklistHtml += `<div class="check-item"><span class="check-mark"></span> ${item.trim()}</div>`; });
 
                     const pkg = { id: index + 1, title, img: finalImgSrc, percent, barColor, checklistHtml, description, isCompleted, points: pts };
                     tileDataCache.push(pkg);
@@ -359,9 +381,9 @@
                     tile.className = `tile ${isCompleted ? 'completed' : ''}`;
                     tile.onclick = (e) => openModal(e, pkg);
                     tile.innerHTML = `
-                        <div class="header-content">${index + 1} | ${title}</div>
+                        <div class="header-box"><div class="header-content">${index + 1} | ${title}</div></div>
                         <div class="img-container"><img src="${finalImgSrc}" onerror="this.style.visibility='hidden'"></div>
-                        <div class="progress-bg" style="height: 6px; margin-bottom: 4px;"><div style="width:${percent}%; height:100%; background:${barColor}"></div></div>
+                        <div class="progress-container"><div class="progress-bg"><div class="progress-fill" style="width: ${percent}%; background-color: ${barColor}"></div></div></div>
                         <div class="checklist-box">${checklistHtml}</div>
                         <div class="point-badge">${pts} PTS</div>
                     `;
@@ -385,6 +407,8 @@
             document.getElementById('modal-header').innerText = `${data.id} | ${data.title}`;
             document.getElementById('modal-image').src = data.img;
             document.getElementById('modal-points').innerText = `${data.points} PTS`;
+            document.getElementById('modal-bar').style.width = data.percent + '%';
+            document.getElementById('modal-bar').style.backgroundColor = data.barColor;
             document.getElementById('modal-list').innerHTML = data.checklistHtml;
             document.getElementById('modal-desc').innerText = data.description;
             
@@ -393,6 +417,7 @@
             box.style.left = (rect.left + rect.width/2) + 'px';
             overlay.style.display = 'flex';
             setTimeout(() => { overlay.classList.add('active'); box.classList.add('active'); }, 10);
+            document.body.style.overflow = 'hidden';
         }
 
         function openMapModal(e) {
@@ -402,6 +427,7 @@
             currentActiveElement.classList.add('ghost');
             
             box.classList.add('map-mode');
+            box.classList.remove('completed');
             document.getElementById('standard-modal-view').style.display = 'none';
             document.getElementById('map-modal-view').style.display = 'flex';
             
@@ -414,15 +440,20 @@
                 cell.onclick = (ev) => { ev.stopPropagation(); const pkg = tileDataCache[i-1]; if(pkg) openModal({currentTarget: cell}, pkg); };
                 largeGrid.appendChild(cell);
             }
+
+            const rect = currentActiveElement.getBoundingClientRect();
+            box.style.top = (rect.top + rect.height/2) + 'px';
+            box.style.left = (rect.left + rect.width/2) + 'px';
             overlay.style.display = 'flex';
             setTimeout(() => { overlay.classList.add('active'); box.classList.add('active'); }, 10);
+            document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
             document.getElementById('modal-overlay').classList.remove('active');
             document.getElementById('modal-box').classList.remove('active');
             if (currentActiveElement) currentActiveElement.classList.remove('ghost');
-            setTimeout(() => { document.getElementById('modal-overlay').style.display = 'none'; }, 500);
+            setTimeout(() => { document.getElementById('modal-overlay').style.display = 'none'; document.body.style.overflow = 'auto'; }, 500);
         }
 
         function toggleCodeword() {
