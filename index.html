@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo v3.065</title>
+    <title>Bingo v3.066</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -199,10 +199,16 @@
         .modal-img { height: 120px; margin-bottom: 12px; display: flex; justify-content: center; }
         .modal-img img { max-height: 100%; filter: drop-shadow(4px 4px 6px black); }
         .modal-points-inline { font-size: 0.85rem; background: var(--bg-well); border: 1px solid var(--accent); padding: 1px 6px; border-radius: 4px; font-weight: bold; color: var(--text-main); }
-        .modal-checklist, .modal-description { background: var(--bg-well); border: 1px solid #000; padding: 8px; overflow-y: auto; }
+        .modal-content.completed .modal-points-inline { border-color: var(--border-completed); color: var(--text-completed); }
+
+        .modal-checklist, .modal-description { background: var(--bg-well); border: 1px solid #000; padding: 8px; overflow-y: auto; color: var(--text-bright); }
         .modal-content.completed .modal-checklist, .modal-content.completed .modal-description { background: var(--bg-completed-well); color: var(--text-completed); }
-        .modal-content.completed .modal-checklist::-webkit-scrollbar-track, .modal-content.completed .modal-description::-webkit-scrollbar-track { background: var(--bg-completed); }
-        .modal-content.completed .modal-checklist::-webkit-scrollbar-thumb, .modal-content.completed .modal-description::-webkit-scrollbar-thumb { background: var(--bg-completed-well); border: 2px solid var(--bg-completed); }
+        
+        /* Modal Scrollbar Completed Fix */
+        .modal-content.completed .modal-checklist::-webkit-scrollbar-track, 
+        .modal-content.completed .modal-description::-webkit-scrollbar-track { background: var(--bg-completed); }
+        .modal-content.completed .modal-checklist::-webkit-scrollbar-thumb, 
+        .modal-content.completed .modal-description::-webkit-scrollbar-thumb { background: var(--bg-completed-well); border: 2px solid var(--bg-completed); }
 
         .large-map-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: #221e18; padding: 10px; border: 2px solid #000; width: 100%; aspect-ratio: 1/1; }
         .large-map-tile { background: var(--bg-well); display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; color: rgba(255,255,255,0.2); border: 1px solid var(--bg-tile); cursor: pointer; transition: 0.2s; }
@@ -262,7 +268,7 @@
     <main class="grid-container" id="grid"></main>
 
     <footer class="version-footer">
-        <span>Build: v3.065</span><br>
+        <span>Build: v3.066</span><br>
         <span id="last-sync">Last Sync: Never</span>
     </footer>
 
@@ -274,8 +280,10 @@
                 <div id="modal-header" class="modal-header"></div>
                 <div class="modal-img"><img id="modal-image" src="" alt=""></div>
                 
-                <div class="modal-label" style="font-size: 0.7rem; text-transform: uppercase; font-weight: bold; margin-bottom: 2px;">Progress</div>
-                <div style="height: 12px; margin-bottom: 12px;"><div class="progress-bg"><div id="modal-bar" class="progress-fill"></div></div></div>
+                <div id="modal-progress-section">
+                    <div class="modal-label" style="font-size: 0.7rem; text-transform: uppercase; font-weight: bold; margin-bottom: 2px;">Progress</div>
+                    <div style="height: 12px; margin-bottom: 12px;"><div class="progress-bg"><div id="modal-bar" class="progress-fill"></div></div></div>
+                </div>
                 
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2px;">
                     <div class="modal-label" style="font-size: 0.7rem; text-transform: uppercase; font-weight: bold;">Collected Items</div>
@@ -400,7 +408,15 @@
             currentActiveElement.classList.add('ghost');
             
             box.classList.remove('map-mode');
-            data.isCompleted ? box.classList.add('completed') : box.classList.remove('completed');
+            
+            if (data.isCompleted) {
+                box.classList.add('completed');
+                document.getElementById('modal-progress-section').style.display = 'none';
+            } else {
+                box.classList.remove('completed');
+                document.getElementById('modal-progress-section').style.display = 'block';
+            }
+
             document.getElementById('standard-modal-view').style.display = 'block';
             document.getElementById('map-modal-view').style.display = 'none';
 
