@@ -216,7 +216,7 @@
     <main class="grid-container" id="grid"></main>
 
     <footer class="version-footer">
-        <span>Build: v3.073</span><br>
+        <span>Build: v3.074</span><br>
         <span id="last-sync-text">Updated just now</span>
         <span class="sync-btn" onclick="fetchData(true)">[Sync Now]</span>
     </footer>
@@ -294,6 +294,13 @@
         let tileDataCache = [];
 
         function init() {
+            // Load saved theme preference
+            const savedTheme = localStorage.getItem('bingo-theme');
+            if (savedTheme) {
+                changeTheme(savedTheme);
+                document.getElementById('theme-dropdown').value = savedTheme;
+            }
+
             const minimap = document.getElementById('minimap');
             for(let i=1; i<=49; i++) {
                 const dot = document.createElement('div');
@@ -306,7 +313,6 @@
             fetchGlobalData();
             fetchData();
             
-            // Start the relative time counter
             setInterval(updateRelativeTime, 30000);
         }
 
@@ -321,6 +327,7 @@
 
         function changeTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('bingo-theme', theme);
         }
 
         async function fetchGlobalData() {
