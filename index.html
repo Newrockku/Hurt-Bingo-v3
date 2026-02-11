@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo v3.067</title>
+    <title>Bingo v3.068</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -31,7 +31,7 @@
         [data-theme="autumn"] { --bg-body: #3a1f1a; --bg-tile: #5d322c; --bg-well: #3a1f1a; --bg-completed: #2c4a5d; --bg-completed-well: #1a2d3a; --border-main: #a35d4d; --border-completed: #5ea3cc; --accent: #ff7e33; --text-main: #ff7e33; --text-bright: #ffd1b3; --text-dim: #ca9a92; --text-completed: #5ea3cc; }
         [data-theme="winter"] { --bg-body: #1e252b; --bg-tile: #343e49; --bg-well: #1e252b; --bg-completed: #493434; --bg-completed-well: #2b1e1e; --border-main: #6d8ba0; --border-completed: #ff6d6d; --accent: #a0e9ff; --text-main: #a0e9ff; --text-bright: #ffffff; --text-dim: #7e8d9b; --text-completed: #ff6d6d; }
 
-        /* --- 10 New Themes --- */
+        /* --- Custom Themes --- */
         [data-theme="abyssal"] { --bg-body: #050a14; --bg-tile: #0a192f; --bg-well: #02050a; --bg-completed: #004d4d; --bg-completed-well: #002626; --border-main: #112240; --border-completed: #64ffda; --accent: #64ffda; --text-main: #64ffda; --text-bright: #ccd6f6; --text-dim: #8892b0; --text-completed: #64ffda; }
         [data-theme="volcanic"] { --bg-body: #0f0c0c; --bg-tile: #1a1515; --bg-well: #050404; --bg-completed: #4d1a00; --bg-completed-well: #260d00; --border-main: #3d2b2b; --border-completed: #ff4d00; --accent: #ff4d00; --text-main: #ff4d00; --text-bright: #ffa600; --text-dim: #6d5e5e; --text-completed: #ff4d00; }
         [data-theme="cyberpunk"] { --bg-body: #0d0221; --bg-tile: #261447; --bg-well: #0d0221; --bg-completed: #ff0055; --bg-completed-well: #80002a; --border-main: #fb3640; --border-completed: #00f5d4; --accent: #fee440; --text-main: #ff0055; --text-bright: #ffffff; --text-dim: #9d8189; --text-completed: #00f5d4; }
@@ -171,7 +171,8 @@
         .modal-content.completed .modal-checklist::-webkit-scrollbar-thumb, 
         .modal-content.completed .modal-description::-webkit-scrollbar-thumb { background: var(--bg-completed-well); border: 2px solid var(--bg-completed); }
 
-        .large-map-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: #221e18; padding: 10px; border: 2px solid var(--border-main); width: 100%; aspect-ratio: 1/1; }
+        /* --- Large Map (Themed) --- */
+        .large-map-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: var(--bg-body); padding: 10px; border: 2px solid var(--border-main); width: 100%; aspect-ratio: 1/1; }
         .large-map-tile { background: var(--bg-well); display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; color: rgba(255,255,255,0.2); border: 1px solid var(--bg-tile); cursor: pointer; transition: 0.2s; }
         .large-map-tile:hover { background: var(--bg-tile); color: #fff; transform: scale(1.05); z-index: 2; border-color: var(--accent); }
         .large-map-tile.complete { background: var(--bg-completed); color: var(--text-completed); border-color: var(--border-completed); }
@@ -196,7 +197,7 @@
 
     <header class="dashboard">
         <div class="dashboard-main">
-            <h1 id="event-title">Bingo 2026</h1>
+            <h1 id="event-title">Bingo 2026 | v3.068</h1>
             <p id="team-name">Loading Team...</p>
         </div>
 
@@ -204,22 +205,27 @@
             <div class="stat-item theme-selector">
                 <span class="stat-label">Theme</span>
                 <select id="theme-dropdown" onchange="changeTheme(this.value)">
-                    <option value="osrs">OSRS (Original)</option>
-                    <option value="spring">Spring</option>
-                    <option value="summer">Summer</option>
-                    <option value="autumn">Autumn</option>
-                    <option value="winter">Winter</option>
-                    <hr>
-                    <option value="abyssal">Abyssal</option>
-                    <option value="volcanic">Volcanic</option>
-                    <option value="cyberpunk">Cyberpunk</option>
-                    <option value="bloodlust">Bloodlust</option>
-                    <option value="royal">Royal</option>
-                    <option value="emerald">Emerald</option>
-                    <option value="solar">Solar</option>
-                    <option value="vaporwave">Vaporwave</option>
-                    <option value="midnight">Midnight</option>
-                    <option value="tox">Toxic</option>
+                    <optgroup label="Classic">
+                        <option value="osrs">OSRS (Original)</option>
+                        <option value="midnight">Midnight OLED</option>
+                    </optgroup>
+                    <optgroup label="Seasons">
+                        <option value="spring">Spring</option>
+                        <option value="summer">Summer</option>
+                        <option value="autumn">Autumn</option>
+                        <option value="winter">Winter</option>
+                    </optgroup>
+                    <optgroup label="Aesthetic">
+                        <option value="abyssal">Abyssal</option>
+                        <option value="volcanic">Volcanic</option>
+                        <option value="cyberpunk">Cyberpunk</option>
+                        <option value="bloodlust">Bloodlust</option>
+                        <option value="royal">Royal</option>
+                        <option value="emerald">Emerald</option>
+                        <option value="solar">Solar</option>
+                        <option value="vaporwave">Vaporwave</option>
+                        <option value="tox">Toxic</option>
+                    </optgroup>
                 </select>
             </div>
             <div class="stat-item">
@@ -240,7 +246,7 @@
     <main class="grid-container" id="grid"></main>
 
     <footer class="version-footer">
-        <span>Build: v3.067 (Extended Themes)</span><br>
+        <span>Build: v3.068</span><br>
         <span id="last-sync">Last Sync: Never</span>
     </footer>
 
