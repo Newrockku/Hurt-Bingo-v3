@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo 2026 | v3.080</title>
+    <title>Bingo 2026 | v3.081</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -40,11 +40,9 @@
         [data-theme="vaporwave"] { --bg-body: #120458; --bg-tile: #240b36; --bg-well: #0b0233; --bg-completed: #ff71ce; --bg-completed-well: #b967ff; --border-main: #05ffa1; --border-completed: #01cdfe; --accent: #01cdfe; --text-main: #b967ff; --text-bright: #ffffff; --text-dim: #7a5c91; --text-completed: #01cdfe; }
         [data-theme="midnight"] { --bg-body: #000000; --bg-tile: #121212; --bg-well: #080808; --bg-completed: #222222; --bg-completed-well: #111111; --border-main: #333333; --border-completed: #ffffff; --accent: #ffffff; --text-main: #eeeeee; --text-bright: #ffffff; --text-dim: #555555; --text-completed: #ffffff; }
 
-        /* Global Layout */
+        /* --- Global Reset & Scrollbars --- */
         * { box-sizing: border-box; }
         html { scrollbar-gutter: stable; overflow-y: scroll; }
-        
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: var(--bg-well); }
         ::-webkit-scrollbar-thumb { background: var(--bg-tile); border: 2px solid var(--bg-well); }
@@ -63,21 +61,20 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 1000;
         }
         #event-title { font-size: 1.6rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; text-shadow: 2px 2px 4px black; color: #fff; }
-        #team-name { font-size: 1rem; color: var(--accent); margin: 2px 0 0 0; text-shadow: 1px 1px 2px black; font-weight: bold; }
+        #team-name { font-size: 1rem; color: var(--accent); margin: 2px 0 0 0; font-weight: bold; text-shadow: 1px 1px 2px black; }
         
         .stats-container { display: flex; gap: 20px; align-items: center; }
         .stat-item { text-align: center; }
         .stat-label { font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); display: block; margin-bottom: 2px; }
         .stat-value { font-size: 1.3rem; font-weight: bold; color: var(--text-main); }
         
-        #codeword-display { cursor: pointer; background: var(--bg-well); padding: 2px 10px; border: 1px solid var(--border-main); border-radius: 4px; transition: 0.2s; }
+        #codeword-display { cursor: pointer; background: var(--bg-well); padding: 2px 10px; border: 1px solid var(--border-main); border-radius: 4px; }
         #codeword-display.codeword-hidden { color: var(--bg-well); text-shadow: none; }
-        #codeword-display:hover { border-color: var(--accent); }
 
         /* --- Mini-Map --- */
-        .minimap-wrapper { background: var(--bg-well); padding: 5px; border: 2px solid var(--border-main); cursor: pointer; box-shadow: 0 2px 5px black; }
+        .minimap-wrapper { background: var(--bg-well); padding: 5px; border: 2px solid var(--border-main); cursor: pointer; }
         .minimap-container { display: grid; grid-template-columns: repeat(7, 8px); grid-template-rows: repeat(7, 8px); gap: 2px; }
-        .mini-tile { width: 8px; height: 8px; background: rgba(0,0,0,0.3); font-size: 0; border-radius: 1px; }
+        .mini-tile { width: 8px; height: 8px; background: rgba(0,0,0,0.3); border-radius: 1px; }
         .mini-tile.complete { background: var(--border-completed); box-shadow: 0 0 4px var(--border-completed); }
 
         /* --- Bingo Grid --- */
@@ -89,32 +86,31 @@
             background-color: var(--bg-tile); border: 2px solid var(--border-main); 
             position: relative; aspect-ratio: 1 / 1; display: flex; flex-direction: column; 
             padding: 5%; box-shadow: inset 0 0 12px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3); 
-            overflow: hidden; container-type: inline-size; cursor: pointer; transition: 0.25s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            overflow: hidden; container-type: inline-size; cursor: pointer; transition: 0.25s;
         }
-        .tile.completed { background-color: var(--bg-completed); border-color: var(--border-completed); box-shadow: inset 0 0 20px rgba(0,0,0,0.6); }
-        .tile:hover { transform: translateY(-5px) scale(1.02); z-index: 50; border-color: var(--accent); box-shadow: 0 10px 25px rgba(0,0,0,0.6), 0 0 15px var(--accent); }
+        .tile.completed { background-color: var(--bg-completed); border-color: var(--border-completed); }
+        .tile:hover { transform: translateY(-3px); z-index: 50; border-color: var(--accent); box-shadow: 0 0 15px var(--accent); }
         .tile.ghost { opacity: 0; pointer-events: none; }
         
-        /* Tile Interior */
         .header-box { min-height: 20%; display: flex; justify-content: center; align-items: center; text-align: center; margin-bottom: 4%; }
-        .header-content { font-weight: 700; font-size: 8.5cqw; color: var(--text-main); text-shadow: 2px 2px 3px black; line-height: 1; }
+        .header-content { font-weight: 700; font-size: 8.5cqw; color: var(--text-main); text-shadow: 2px 2px 3px black; }
         .tile.completed .header-content { color: var(--text-completed); }
         
-        .img-container { height: 38%; display: flex; justify-content: center; align-items: center; margin-bottom: 4%; position: relative; }
-        .img-container img { max-height: 100%; max-width: 95%; filter: drop-shadow(0 4px 6px black); transition: 0.3s; }
-        .tile:hover .img-container img { transform: scale(1.1); }
+        .img-container { height: 38%; display: flex; justify-content: center; align-items: center; margin-bottom: 4%; }
+        .img-container img { max-height: 100%; max-width: 95%; filter: drop-shadow(0 4px 6px black); }
         
         .progress-area { margin-bottom: 4%; }
-        .progress-bg { background: var(--bg-well); height: 7px; border: 1px solid #000; border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--text-bright)); transition: width 0.6s ease; }
+        .progress-bg { background: var(--bg-well); height: 7px; border: 1px solid #000; overflow: hidden; border-radius: 4px; }
+        .progress-fill { height: 100%; background: var(--accent); transition: width 0.6s ease; }
         .tile.completed .progress-area { display: none; }
 
         .checklist-box { 
             background: var(--bg-well); border: 1px solid rgba(0,0,0,0.4); 
             padding: 5%; flex-grow: 1; overflow-y: auto; font-size: 6.5cqw; color: var(--text-bright); 
-            line-height: 1.2; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
         }
         .tile.completed .checklist-box { background: var(--bg-completed-well); color: var(--text-completed); }
+        .checklist-box::-webkit-scrollbar { width: 4px; }
+        .checklist-box::-webkit-scrollbar-thumb { background: var(--border-main); }
 
         .point-badge { 
             position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.6); 
@@ -132,39 +128,31 @@
         .modal-content { 
             background-color: var(--bg-tile); border: 3px solid var(--border-main); 
             width: 90vw; max-width: 500px; padding: 30px; position: relative; 
-            box-shadow: 0 0 60px rgba(0,0,0,1); animation: modalIn 0.3s ease-out;
+            box-shadow: 0 0 60px rgba(0,0,0,1);
         }
         .modal-content.completed { background-color: var(--bg-completed); border-color: var(--border-completed); }
         
-        @keyframes modalIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        .close-btn { 
-            position: absolute; top: 12px; right: 18px; font-size: 1.8rem; 
-            cursor: pointer; color: #888; transition: 0.2s; font-family: Arial, sans-serif; 
-        }
-        .close-btn:hover { color: #fff; transform: scale(1.1); }
+        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; cursor: pointer; color: #888; transition: 0.2s; }
+        .close-btn:hover { color: #fff; }
 
         .modal-header { font-size: 2rem; text-align: center; font-weight: bold; margin-bottom: 20px; color: var(--text-main); text-shadow: 2px 2px 4px black; }
         .modal-content.completed .modal-header { color: var(--text-completed); }
         
-        .modal-label { font-size: 0.8rem; text-transform: uppercase; font-weight: bold; color: var(--text-main); margin-bottom: 6px; letter-spacing: 1px; }
+        .modal-label { font-size: 0.8rem; text-transform: uppercase; font-weight: bold; color: var(--text-main); margin-bottom: 6px; }
         .modal-content.completed .modal-label { color: var(--text-completed); }
         
-        .modal-well { background: var(--bg-well); border: 1px solid #000; padding: 15px; margin-bottom: 20px; color: var(--text-bright); box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
+        .modal-well { background: var(--bg-well); border: 1px solid #000; padding: 15px; margin-bottom: 20px; color: var(--text-bright); overflow-y: auto; }
         .modal-content.completed .modal-well { background: var(--bg-completed-well); color: var(--text-completed); }
 
-        /* --- Tools --- */
+        /* --- Sync & Version --- */
         .sync-btn { 
             position: fixed; bottom: 25px; left: 25px; background: var(--bg-tile); 
             border: 2px solid var(--border-main); color: #fff; padding: 10px 20px; 
             cursor: pointer; z-index: 1000; font-family: inherit; font-weight: bold; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.6); transition: 0.2s;
         }
-        .sync-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
-        
+        .sync-btn:hover { border-color: var(--accent); color: var(--accent); }
         .version-tag { position: fixed; bottom: 5px; left: 25px; font-size: 0.6rem; color: var(--text-dim); }
 
-        @media (max-width: 900px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
         @media (max-width: 600px) { .grid-container { grid-template-columns: repeat(3, 1fr); } }
     </style>
 </head>
@@ -174,7 +162,7 @@
     <header class="dashboard">
         <div>
             <h1 id="event-title">Bingo 2026</h1>
-            <p id="team-name">Initializing Systems...</p>
+            <p id="team-name">Syncing...</p>
         </div>
         <div class="stats-container">
             <div class="stat-item">
@@ -182,20 +170,20 @@
                 <span id="codeword-display" class="stat-value codeword-hidden" onclick="toggleCodeword()">?????</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">Total Score</span>
+                <span class="stat-label">Total Points</span>
                 <span id="total-points" class="stat-value">0</span>
             </div>
         </div>
         <div style="display:flex; gap:15px; align-items:center;">
-            <div onclick="openSettingsModal()" style="cursor:pointer; font-size: 1.5rem; filter: drop-shadow(0 0 5px black);">⚙️</div>
+            <div onclick="openSettingsModal()" style="cursor:pointer; font-size: 1.5rem;">⚙️</div>
             <aside class="minimap-wrapper" onclick="openMapModal()"><div class="minimap-container" id="minimap"></div></aside>
         </div>
     </header>
 
     <main class="grid-container" id="grid"></main>
 
-    <button class="sync-btn" onclick="fetchData()">🔄 FORCE REFRESH</button>
-    <footer class="version-tag">Build: v3.080 | Production</footer>
+    <button class="sync-btn" onclick="fetchData()">🔄 MANUAL REFRESH</button>
+    <footer class="version-tag">Build: v3.081</footer>
 
     <div id="modal-overlay" onclick="closeModal()">
         <div class="modal-content" id="modal-box" onclick="event.stopPropagation()">
@@ -207,13 +195,13 @@
                     <img id="m-img" src="" style="max-height: 100%; filter: drop-shadow(0 5px 15px black);">
                 </div>
                 <div id="m-prog-wrap">
-                    <div class="modal-label">Completion Status</div>
+                    <div class="modal-label">Progress</div>
                     <div class="progress-bg" style="margin-bottom:20px;"><div id="m-bar" class="progress-fill"></div></div>
                 </div>
                 <div class="modal-label">Required Items</div>
-                <div id="m-list" class="modal-well" style="max-height: 150px; overflow-y: auto;"></div>
+                <div id="m-list" class="modal-well" style="max-height: 150px;"></div>
                 <div class="modal-label">Objective Description</div>
-                <div id="m-desc" class="modal-well" style="margin-bottom:0;"></div>
+                <div id="m-desc" class="modal-well"></div>
             </div>
 
             <div id="map-view" style="display:none;">
@@ -222,28 +210,21 @@
             </div>
 
             <div id="settings-view" style="display:none;">
-                <div class="modal-header">INTERFACE SETTINGS</div>
-                <div class="modal-label">Visual Theme</div>
-                <select id="theme-sel" onchange="applyTheme(this.value)" style="width:100%; padding: 12px; background: var(--bg-well); color: #fff; border: 1px solid var(--border-main); font-family: inherit;">
-                    <optgroup label="Core Classics">
-                        <option value="osrs">Old School Brown</option>
-                        <option value="midnight">Midnight OLED</option>
-                    </optgroup>
-                    <optgroup label="Seasons">
-                        <option value="spring">Verdant Spring</option>
-                        <option value="summer">Solar Summer</option>
-                        <option value="autumn">Harvest Autumn</option>
-                        <option value="winter">Glacial Winter</option>
-                    </optgroup>
-                    <optgroup label="Specialized">
-                        <option value="abyssal">Abyssal Depth</option>
-                        <option value="volcanic">Volcanic Ash</option>
-                        <option value="cyberpunk">Neon Cyber</option>
-                        <option value="bloodlust">Bloodlust Red</option>
-                        <option value="royal">Royal Gilt</option>
-                        <option value="emerald">Emerald Grove</option>
-                        <option value="vaporwave">Vaporwave Dream</option>
-                    </select>
+                <div class="modal-header">THEME SELECT</div>
+                <select id="theme-sel" onchange="applyTheme(this.value)" style="width:100%; padding: 12px; background: var(--bg-well); color: #fff; border: 1px solid var(--border-main);">
+                    <option value="osrs">Old School Brown</option>
+                    <option value="midnight">Midnight OLED</option>
+                    <option value="spring">Verdant Spring</option>
+                    <option value="summer">Solar Summer</option>
+                    <option value="autumn">Harvest Autumn</option>
+                    <option value="winter">Glacial Winter</option>
+                    <option value="abyssal">Abyssal Depth</option>
+                    <option value="volcanic">Volcanic Ash</option>
+                    <option value="cyberpunk">Neon Cyber</option>
+                    <option value="bloodlust">Bloodlust Red</option>
+                    <option value="royal">Royal Gilt</option>
+                    <option value="emerald">Emerald Grove</option>
+                    <option value="vaporwave">Vaporwave Dream</option>
                 </select>
             </div>
         </div>
@@ -265,7 +246,6 @@
                 applyTheme(saved);
                 document.getElementById('theme-sel').value = saved;
             }
-            // Create mini-map dots
             const mm = document.getElementById('minimap');
             for(let i=1; i<=49; i++) {
                 const d = document.createElement('div');
@@ -283,7 +263,7 @@
 
         async function fetchData() {
             try {
-                const res = await fetch(`${CONFIG.url}&cachebreak=${Date.now()}`);
+                const res = await fetch(`${CONFIG.url}&cb=${Date.now()}`);
                 const text = await res.text();
                 const rows = text.split('\n').slice(1);
                 const grid = document.getElementById('grid');
@@ -308,11 +288,9 @@
                     d.done = d.pct === 100;
                     cache.push(d);
 
-                    // Update Minimap
                     const dot = document.getElementById(`mt-${d.id}`);
                     if (dot) d.done ? dot.classList.add('complete') : dot.classList.remove('complete');
 
-                    // Create Tile
                     const tile = document.createElement('div');
                     tile.className = `tile ${d.done ? 'completed' : ''}`;
                     tile.onclick = (e) => openModal(d, e.currentTarget);
@@ -326,8 +304,8 @@
                     grid.appendChild(tile);
                 });
                 document.getElementById('team-name').innerText = CONFIG.team;
-                document.getElementById('total-points').innerText = "1,250"; // Hardcoded from your sheet logic
-            } catch (err) { console.error("Sync Error:", err); }
+                document.getElementById('total-points').innerText = "1,250";
+            } catch (err) { console.error(err); }
         }
 
         function openModal(d, el) {
@@ -357,7 +335,6 @@
             document.getElementById('settings-view').style.display = 'none';
             document.getElementById('map-view').style.display = 'block';
             document.getElementById('modal-box').className = 'modal-content';
-            
             const lg = document.getElementById('large-map');
             lg.innerHTML = '';
             cache.forEach(d => {
