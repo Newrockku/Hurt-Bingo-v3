@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo v3.071</title>
+    <title>Bingo v3.070</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -57,51 +57,44 @@
             background-color: var(--bg-body); 
             color: var(--text-main); 
             font-family: 'Cabin Condensed', sans-serif; 
-            margin: 0; padding: 10px;
+            margin: 0; padding: 15px;
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
 
-        /* --- Redesigned Dashboard --- */
+        /* --- Dashboard --- */
         .dashboard {
             width: 100%; max-width: 1580px; 
             background: var(--bg-tile); border: 2px solid var(--border-main);
-            padding: 12px 15px; margin-bottom: 20px;
-            display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 15px;
+            padding: 10px 20px; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 100;
         }
 
-        .dashboard-main { display: flex; flex-direction: column; }
-        #event-title { font-size: 1.5rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; text-shadow: 2px 2px 4px black; }
-        #team-name { font-size: 1rem; color: #ffffff; margin: 2px 0 0 0; text-shadow: 1px 1px 2px black; font-weight: bold; }
+        .dashboard-main { display: flex; flex-direction: column; flex: 1; }
+        #event-title { font-size: 1.6rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; text-shadow: 2px 2px 4px black; }
+        #team-name { font-size: 1.1rem; color: #ffffff; margin: 2px 0 0 0; text-shadow: 1px 1px 2px black; font-weight: bold; }
 
-        .stats-container { display: flex; gap: 15px; align-items: center; }
+        .stats-container { display: flex; gap: 20px; align-items: center; margin: 0 20px; }
         .stat-item { text-align: center; }
-        .stat-label { font-size: 0.6rem; text-transform: uppercase; color: var(--text-dim); display: block; }
-        .stat-value { font-size: 1.2rem; font-weight: bold; color: var(--text-main); }
+        .stat-label { font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); display: block; }
+        .stat-value { font-size: 1.3rem; font-weight: bold; color: var(--text-main); }
 
-        #codeword-display { cursor: pointer; background: var(--bg-well); padding: 2px 8px; border-radius: 4px; min-width: 80px; text-align: center; display: inline-block; }
+        #codeword-display { cursor: pointer; background: var(--bg-well); padding: 2px 10px; border-radius: 4px; min-width: 90px; text-align: center; display: inline-block; }
         .codeword-hidden { color: var(--bg-well); text-shadow: none; }
 
-        .settings-trigger {
-            font-size: 1.5rem; cursor: pointer; color: var(--text-dim); transition: 0.2s;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .settings-trigger:hover { color: var(--accent); transform: rotate(45deg); }
-
-        /* --- Settings Panel --- */
-        .settings-content select { 
+        .theme-selector select { 
             background: var(--bg-well); color: var(--text-main); border: 1px solid var(--border-main); 
-            padding: 8px; font-family: 'Cabin Condensed'; cursor: pointer; font-size: 1.1rem; border-radius: 4px; width: 100%;
+            padding: 2px 5px; font-family: 'Cabin Condensed'; cursor: pointer; font-size: 1.1rem; border-radius: 4px;
         }
 
         /* --- Mini-Map --- */
         .minimap-wrapper {
             background: var(--bg-well); padding: 4px; border: 2px solid var(--border-main);
-            cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease;
+            flex-shrink: 0; cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease;
         }
         .minimap-wrapper:hover { transform: scale(1.05); border-color: var(--accent); }
-        .minimap-container { display: grid; grid-template-columns: repeat(7, 8px); grid-template-rows: repeat(7, 8px); gap: 2px; pointer-events: none; }
-        .mini-tile { width: 8px; height: 8px; background: var(--bg-body); display: flex; justify-content: center; align-items: center; font-size: 5px; color: rgba(255,255,255,0.1); border-radius: 1px; }
+        .minimap-container { display: grid; grid-template-columns: repeat(7, 10px); grid-template-rows: repeat(7, 10px); gap: 2px; pointer-events: none; }
+        .mini-tile { width: 10px; height: 10px; background: var(--bg-body); display: flex; justify-content: center; align-items: center; font-size: 7px; color: rgba(255,255,255,0.2); border-radius: 1px; }
         .mini-tile.complete { background: var(--bg-completed); color: var(--text-completed); }
 
         /* --- Grid --- */
@@ -119,11 +112,18 @@
         }
         .tile.completed { background-color: var(--bg-completed); border-color: var(--border-completed); }
         
-        .tile:hover { transform: scale(1.05); z-index: 50; box-shadow: 0 0 25px 2px var(--accent), inset 0 0 10px rgba(0, 0, 0, 0.5); }
-        .tile.completed:hover { box-shadow: 0 0 25px 2px var(--border-completed), inset 0 0 10px rgba(0, 0, 0, 0.5); }
+        .tile:hover { 
+            transform: scale(1.05); 
+            z-index: 50; 
+            box-shadow: 0 0 25px 2px var(--accent), inset 0 0 10px rgba(0, 0, 0, 0.5); 
+        }
+        .tile.completed:hover { 
+            box-shadow: 0 0 25px 2px var(--border-completed), inset 0 0 10px rgba(0, 0, 0, 0.5); 
+        }
+
         .tile.ghost { opacity: 0; pointer-events: none; }
         
-        .header-box { padding: 2% 0; margin-bottom: 2%; min-height: 18%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; text-align: center; }
+        .header-box { padding: 2% 0; margin-bottom: 2%; min-height: 18%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; overflow: hidden; text-align: center; }
         .header-content { width: 100%; font-weight: bold; font-size: 8cqw; line-height: 1; white-space: nowrap; text-shadow: 1px 1px 2px black; color: var(--text-main); }
         .tile.completed .header-content { color: var(--text-completed); }
         
@@ -137,6 +137,8 @@
 
         .checklist-box { background: var(--bg-well); border: 1px solid #000; padding: 3%; flex-grow: 1; width: 100%; overflow-y: auto; min-height: 0; transition: background 0.3s ease; position: relative; }
         .tile.completed .checklist-box { background: var(--bg-completed-well); }
+        .tile.completed .checklist-box::-webkit-scrollbar-track { background: var(--bg-completed); }
+        .tile.completed .checklist-box::-webkit-scrollbar-thumb { background: var(--bg-completed-well); border: 2px solid var(--bg-completed); }
         
         .check-item { display: flex; align-items: center; margin-bottom: 4px; }
         .check-mark { width: 1.2em; height: 1.2em; margin-right: 6px; flex-shrink: 0; position: relative; display: flex; justify-content: center; align-items: center; }
@@ -151,7 +153,7 @@
         }
         .tile.completed .point-badge { border-color: var(--border-completed); color: var(--text-completed); background: var(--bg-completed-well); }
 
-        /* --- Modals --- */
+        /* --- Modal --- */
         #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(0px); transition: background 0.4s ease, backdrop-filter 0.4s ease; }
         #modal-overlay.active { background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(5px); }
         .modal-content { background-color: var(--bg-tile); border: 3px solid var(--border-main); width: 90vw; max-width: 450px; padding: 25px; position: fixed; box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); display: flex; flex-direction: column; opacity: 0; transform: translate(-50%, -50%) scale(0); transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; z-index: 2001; }
@@ -160,13 +162,22 @@
         
         .modal-header { font-size: 1.8rem; margin-bottom: 12px; text-align: center; font-weight: bold; color: var(--text-main); text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
         .modal-content.completed .modal-header { color: var(--text-completed); }
+        .modal-img { height: 120px; margin-bottom: 12px; display: flex; justify-content: center; }
+        .modal-img img { max-height: 100%; filter: drop-shadow(4px 4px 6px black); }
         
         .modal-label { font-size: 0.7rem; text-transform: uppercase; font-weight: bold; margin-bottom: 2px; color: var(--text-main); }
-        .modal-checklist, .modal-description { background: var(--bg-well); border: 1px solid #000; padding: 8px; overflow-y: auto; color: var(--text-bright); }
+        .modal-content.completed .modal-label { color: var(--text-completed); }
 
-        /* --- Large Map --- */
+        .modal-points-inline { font-size: 0.85rem; background: var(--bg-well); border: 1px solid var(--accent); padding: 1px 6px; border-radius: 4px; font-weight: bold; color: var(--text-main); }
+        .modal-content.completed .modal-points-inline { border-color: var(--border-completed); color: var(--text-completed); background: var(--bg-completed-well); }
+
+        .modal-checklist, .modal-description { background: var(--bg-well); border: 1px solid #000; padding: 8px; overflow-y: auto; color: var(--text-bright); }
+        .modal-content.completed .modal-checklist, .modal-content.completed .modal-description { background: var(--bg-completed-well); color: var(--text-completed); }
+
+        /* --- Large Map (Themed) --- */
         .large-map-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: var(--bg-body); padding: 10px; border: 2px solid var(--border-main); width: 100%; aspect-ratio: 1/1; }
         .large-map-tile { background: var(--bg-well); display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; color: rgba(255,255,255,0.2); border: 1px solid var(--bg-tile); cursor: pointer; transition: 0.2s; }
+        .large-map-tile:hover { background: var(--bg-tile); color: #fff; transform: scale(1.05); z-index: 2; border-color: var(--accent); }
         .large-map-tile.complete { background: var(--bg-completed); color: var(--text-completed); border-color: var(--border-completed); }
 
         .close-btn { position: absolute; top: 5px; right: 12px; font-size: 2rem; cursor: pointer; color: var(--text-dim); z-index: 100; }
@@ -178,28 +189,14 @@
         .sync-flash { animation: flash-sync 1s ease-out; }
         @keyframes flash-sync { 0% { color: var(--accent); } 100% { color: var(--border-main); } }
         
-        /* --- Mobile Specific Overrides --- */
-        @media (max-width: 600px) {
-            .dashboard {
-                grid-template-columns: 1fr auto;
-                grid-template-areas: "main main" "stats tools";
-            }
-            .dashboard-main { grid-area: main; border-bottom: 1px solid var(--border-main); padding-bottom: 8px; }
-            .stats-container { grid-area: stats; justify-content: flex-start; }
-            .tools-container { grid-area: tools; display: flex; align-items: center; gap: 15px; }
-
-            .grid-container { grid-template-columns: repeat(3, 1fr); }
-            
-            #event-title { font-size: 1.2rem; }
-            #team-name { font-size: 0.85rem; }
-            .stat-value { font-size: 1rem; }
-            
-            .minimap-wrapper { position: fixed; bottom: 20px; right: 20px; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.7); }
+        @media (max-width: 1400px) {
+            .grid-container { grid-template-columns: repeat(5, 1fr); }
+            .minimap-wrapper { position: fixed; bottom: 20px; right: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.7); background: var(--bg-well); border: 2px solid var(--border-main); z-index: 1000; }
+            .minimap-container { grid-template-columns: repeat(7, 12px); grid-template-rows: repeat(7, 12px); }
+            .mini-tile { width: 12px; height: 12px; font-size: 7px; }
         }
-
-        @media (min-width: 601px) and (max-width: 1400px) {
-            .grid-container { grid-template-columns: repeat(4, 1fr); }
-        }
+        @media (max-width: 1000px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 600px) { .grid-container { grid-template-columns: repeat(3, 1fr); } }
     </style>
 </head>
 
@@ -207,11 +204,37 @@
 
     <header class="dashboard">
         <div class="dashboard-main">
-            <h1 id="event-title">Bingo 2026 | v3.071</h1>
+            <h1 id="event-title">Bingo 2026 | v3.070</h1>
             <p id="team-name">Loading Team...</p>
         </div>
 
         <div class="stats-container">
+            <div class="stat-item theme-selector">
+                <span class="stat-label">Theme</span>
+                <select id="theme-dropdown" onchange="changeTheme(this.value)">
+                    <optgroup label="Classic">
+                        <option value="osrs">OSRS (Original)</option>
+                        <option value="midnight">Midnight OLED</option>
+                    </optgroup>
+                    <optgroup label="Seasons">
+                        <option value="spring">Spring</option>
+                        <option value="summer">Summer</option>
+                        <option value="autumn">Autumn</option>
+                        <option value="winter">Winter</option>
+                    </optgroup>
+                    <optgroup label="Aesthetic">
+                        <option value="abyssal">Abyssal</option>
+                        <option value="volcanic">Volcanic</option>
+                        <option value="cyberpunk">Cyberpunk</option>
+                        <option value="bloodlust">Bloodlust</option>
+                        <option value="royal">Royal</option>
+                        <option value="emerald">Emerald</option>
+                        <option value="solar">Solar</option>
+                        <option value="vaporwave">Vaporwave</option>
+                        <option value="tox">Toxic</option>
+                    </optgroup>
+                </select>
+            </div>
             <div class="stat-item">
                 <span class="stat-label">Codeword</span>
                 <span id="codeword-display" class="stat-value codeword-hidden" onclick="toggleCodeword()">?????</span>
@@ -222,18 +245,15 @@
             </div>
         </div>
 
-        <div class="tools-container">
-            <div class="settings-trigger" onclick="openSettingsModal()">⚙️</div>
-            <aside class="minimap-wrapper" id="mini-map-trigger" onclick="openMapModal(event)">
-                <div class="minimap-container" id="minimap"></div>
-            </aside>
-        </div>
+        <aside class="minimap-wrapper" id="mini-map-trigger" onclick="openMapModal(event)">
+            <div class="minimap-container" id="minimap"></div>
+        </aside>
     </header>
 
     <main class="grid-container" id="grid"></main>
 
     <footer class="version-footer">
-        <span>Build: v3.071</span><br>
+        <span>Build: v3.070</span><br>
         <span id="last-sync-text">Last Sync: Never</span>
         <span class="sync-btn" onclick="fetchData(true)">[Sync Now]</span>
     </footer>
@@ -244,18 +264,19 @@
             
             <div id="standard-modal-view">
                 <div id="modal-header" class="modal-header"></div>
-                <div style="height: 120px; margin-bottom: 12px; display: flex; justify-content: center;">
-                    <img id="modal-image" src="" alt="" style="max-height: 100%; filter: drop-shadow(4px 4px 6px black);">
-                </div>
+                <div class="modal-img"><img id="modal-image" src="" alt=""></div>
+                
                 <div id="modal-progress-section">
                     <div class="modal-label">Progress</div>
                     <div style="height: 12px; margin-bottom: 12px;"><div class="progress-bg"><div id="modal-bar" class="progress-fill"></div></div></div>
                 </div>
+                
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2px;">
                     <div class="modal-label">Collected Items</div>
-                    <div id="modal-points" style="font-size: 0.85rem; background: var(--bg-well); border: 1px solid var(--accent); padding: 1px 6px; border-radius: 4px; font-weight: bold;">0 PTS</div>
+                    <div id="modal-points" class="modal-points-inline">0 PTS</div>
                 </div>
                 <div id="modal-list" class="modal-checklist" style="max-height: 130px; margin-bottom: 12px;"></div>
+                
                 <div class="modal-label">Description</div>
                 <div id="modal-desc" class="modal-description" style="max-height: 80px;"></div>
             </div>
@@ -263,39 +284,6 @@
             <div id="map-modal-view" style="display: none; flex-direction: column; align-items: center;">
                 <div class="modal-header">OVERVIEW</div>
                 <div class="large-map-grid" id="large-map-grid"></div>
-            </div>
-
-            <div id="settings-modal-view" style="display: none;">
-                <div class="modal-header">SETTINGS</div>
-                <div class="modal-label">Choose Theme</div>
-                <div class="settings-content">
-                    <select id="theme-dropdown" onchange="changeTheme(this.value)">
-                        <optgroup label="Classic">
-                            <option value="osrs">OSRS (Original)</option>
-                            <option value="midnight">Midnight OLED</option>
-                        </optgroup>
-                        <optgroup label="Seasons">
-                            <option value="spring">Spring</option>
-                            <option value="summer">Summer</option>
-                            <option value="autumn">Autumn</option>
-                            <option value="winter">Winter</option>
-                        </optgroup>
-                        <optgroup label="Aesthetic">
-                            <option value="abyssal">Abyssal</option>
-                            <option value="volcanic">Volcanic</option>
-                            <option value="cyberpunk">Cyberpunk</option>
-                            <option value="bloodlust">Bloodlust</option>
-                            <option value="royal">Royal</option>
-                            <option value="emerald">Emerald</option>
-                            <option value="solar">Solar</option>
-                            <option value="vaporwave">Vaporwave</option>
-                            <option value="tox">Toxic</option>
-                        </optgroup>
-                    </select>
-                </div>
-                <div style="margin-top: 20px; font-size: 0.8rem; color: var(--text-dim); text-align: center;">
-                    Bingo 2026 Engine v3.071
-                </div>
             </div>
         </div>
     </div>
@@ -330,6 +318,12 @@
             document.documentElement.setAttribute('data-theme', theme);
         }
 
+        function getProgressColor(percent) {
+            if (percent >= 100) return 'var(--text-completed)';
+            const hue = (percent * 120) / 100;
+            return `hsl(${hue}, 70%, 45%)`;
+        }
+
         async function fetchGlobalData() {
             const teamData = TEAM_MAP[currentTeamKey];
             document.getElementById('team-name').innerText = teamData.name;
@@ -339,18 +333,25 @@
 
         async function fetchData(isManual = false) {
             try {
+                // Stronger cache busting: random param AND no-cache headers
                 const response = await fetch(`${TEAM_MAP[currentTeamKey].url}&t=${Date.now()}`, {
                     method: 'GET',
-                    headers: { 'pragma': 'no-cache', 'cache-control': 'no-cache' }
+                    headers: {
+                        'pragma': 'no-cache',
+                        'cache-control': 'no-cache'
+                    }
                 });
-                const rawData = await response.text();
-                if (!isManual && lastSeenHash === rawData.length) return; 
-                lastSeenHash = rawData.length;
                 
+                const rawData = await response.text();
+                
+                // If the data hasn't changed (size is the same), don't redraw unless manual sync
+                if (!isManual && lastSeenHash === rawData.length) return; 
+                
+                lastSeenHash = rawData.length;
                 const syncText = document.getElementById('last-sync-text');
                 syncText.innerText = `Last Sync: ${new Date().toLocaleTimeString()}`;
                 syncText.classList.remove('sync-flash');
-                void syncText.offsetWidth; 
+                void syncText.offsetWidth; // Trigger reflow
                 syncText.classList.add('sync-flash');
                 
                 const rows = rawData.split('\n').slice(1);
@@ -372,6 +373,7 @@
                     
                     const percent = Math.min((current / goal) * 100, 100);
                     const isCompleted = percent === 100;
+                    const barColor = getProgressColor(percent);
                     const finalImgSrc = (imgName.includes('http')) ? imgName : `./images/${imgName}`;
                     
                     completionState[index] = isCompleted;
@@ -381,7 +383,7 @@
                     let checklistHtml = '';
                     itemList.forEach(item => { if(item.trim()) checklistHtml += `<div class="check-item"><span class="check-mark"></span> ${item.trim()}</div>`; });
 
-                    const pkg = { id: index + 1, title, img: finalImgSrc, percent, checklistHtml, description, isCompleted, points: pts };
+                    const pkg = { id: index + 1, title, img: finalImgSrc, percent, barColor, checklistHtml, description, isCompleted, points: pts };
                     tileDataCache.push(pkg);
                     
                     const tile = document.createElement('div');
@@ -390,7 +392,7 @@
                     tile.innerHTML = `
                         <div class="header-box"><div class="header-content">${index + 1} | ${title}</div></div>
                         <div class="img-container"><img src="${finalImgSrc}" onerror="this.style.visibility='hidden'"></div>
-                        <div class="progress-container"><div class="progress-bg"><div class="progress-fill" style="width: ${percent}%; background-color: var(--accent)"></div></div></div>
+                        <div class="progress-container"><div class="progress-bg"><div class="progress-fill" style="width: ${percent}%; background-color: ${barColor}"></div></div></div>
                         <div class="checklist-box">${checklistHtml}</div>
                         <div class="point-badge">${pts} PTS</div>
                     `;
@@ -406,31 +408,44 @@
             currentActiveElement = e.currentTarget;
             currentActiveElement.classList.add('ghost');
             
-            box.classList.remove('completed');
-            if (data.isCompleted) box.classList.add('completed');
+            box.classList.remove('map-mode');
+            
+            if (data.isCompleted) {
+                box.classList.add('completed');
+                document.getElementById('modal-progress-section').style.display = 'none';
+            } else {
+                box.classList.remove('completed');
+                document.getElementById('modal-progress-section').style.display = 'block';
+            }
 
             document.getElementById('standard-modal-view').style.display = 'block';
             document.getElementById('map-modal-view').style.display = 'none';
-            document.getElementById('settings-modal-view').style.display = 'none';
 
             document.getElementById('modal-header').innerText = `${data.id} | ${data.title}`;
             document.getElementById('modal-image').src = data.img;
             document.getElementById('modal-points').innerText = `${data.points} PTS`;
             document.getElementById('modal-bar').style.width = data.percent + '%';
+            document.getElementById('modal-bar').style.backgroundColor = data.barColor;
             document.getElementById('modal-list').innerHTML = data.checklistHtml;
             document.getElementById('modal-desc').innerText = data.description;
             
-            showModal(currentActiveElement);
+            const rect = currentActiveElement.getBoundingClientRect();
+            box.style.top = (rect.top + rect.height/2) + 'px';
+            box.style.left = (rect.left + rect.width/2) + 'px';
+            overlay.style.display = 'flex';
+            setTimeout(() => { overlay.classList.add('active'); box.classList.add('active'); }, 10);
+            document.body.style.overflow = 'hidden';
         }
 
         function openMapModal(e) {
+            const overlay = document.getElementById('modal-overlay');
             const box = document.getElementById('modal-box');
             currentActiveElement = document.getElementById('mini-map-trigger');
             currentActiveElement.classList.add('ghost');
             
+            box.classList.add('map-mode');
             box.classList.remove('completed');
             document.getElementById('standard-modal-view').style.display = 'none';
-            document.getElementById('settings-modal-view').style.display = 'none';
             document.getElementById('map-modal-view').style.display = 'flex';
             
             const largeGrid = document.getElementById('large-map-grid');
@@ -439,29 +454,11 @@
                 const cell = document.createElement('div');
                 cell.className = `large-map-tile ${completionState[i-1] ? 'complete' : ''}`;
                 cell.innerText = i;
-                cell.onclick = (ev) => { ev.stopPropagation(); openModal({currentTarget: cell}, tileDataCache[i-1]); };
+                cell.onclick = (ev) => { ev.stopPropagation(); const pkg = tileDataCache[i-1]; if(pkg) openModal({currentTarget: cell}, pkg); };
                 largeGrid.appendChild(cell);
             }
-            showModal(currentActiveElement);
-        }
 
-        function openSettingsModal() {
-            const box = document.getElementById('modal-box');
-            currentActiveElement = document.querySelector('.settings-trigger');
-            currentActiveElement.classList.add('ghost');
-            
-            box.classList.remove('completed');
-            document.getElementById('standard-modal-view').style.display = 'none';
-            document.getElementById('map-modal-view').style.display = 'none';
-            document.getElementById('settings-modal-view').style.display = 'block';
-            
-            showModal(currentActiveElement);
-        }
-
-        function showModal(trigger) {
-            const overlay = document.getElementById('modal-overlay');
-            const box = document.getElementById('modal-box');
-            const rect = trigger.getBoundingClientRect();
+            const rect = currentActiveElement.getBoundingClientRect();
             box.style.top = (rect.top + rect.height/2) + 'px';
             box.style.left = (rect.left + rect.width/2) + 'px';
             overlay.style.display = 'flex';
