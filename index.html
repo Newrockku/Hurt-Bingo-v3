@@ -1,990 +1,1331 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
-    
-    <style>
-        /* --- Theme Variables --- */
-        :root {
-            --bg-body: #342e25;
-            --bg-tile: #494034;
-            --bg-well: #342e25;
-            --bg-completed: #1e3a1e;
-            --bg-completed-well: #162a16;
-            --border-main: #6d604e;
-            --border-completed: #4caf50;
-            --accent: #ffac00;
-            --text-main: #ffac00;
-            --text-bright: #ffee00;
-            --text-dim: #858476;
-            --text-completed: #4caf50;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bingo</title>
 
-        /* --- Seasonal Themes --- */
-        [data-theme="spring"] { --bg-body: #2d3a2d; --bg-tile: #4a5d4a; --bg-well: #2d3a2d; --bg-completed: #5d4a5d; --bg-completed-well: #3a2d3a; --border-main: #88b088; --border-completed: #d896ff; --accent: #a2ffb3; --text-main: #a2ffb3; --text-bright: #ffffff; --text-dim: #b5c9b5; --text-completed: #d896ff; }
-        [data-theme="summer"] { --bg-body: #1a3a4a; --bg-tile: #2c5d72; --bg-well: #1a3a4a; --bg-completed: #725d2c; --bg-completed-well: #4a3a1a; --border-main: #5ea3cc; --border-completed: #ffcc33; --accent: #33f0ff; --text-main: #33f0ff; --text-bright: #ffffff; --text-dim: #92b7ca; --text-completed: #ffcc33; }
-        [data-theme="autumn"] { --bg-body: #3a1f1a; --bg-tile: #5d322c; --bg-well: #3a1f1a; --bg-completed: #2c4a5d; --bg-completed-well: #1a2d3a; --border-main: #a35d4d; --border-completed: #5ea3cc; --accent: #ff7e33; --text-main: #ff7e33; --text-bright: #ffd1b3; --text-dim: #ca9a92; --text-completed: #5ea3cc; }
-        [data-theme="winter"] { --bg-body: #1e252b; --bg-tile: #343e49; --bg-well: #1e252b; --bg-completed: #493434; --bg-completed-well: #2b1e1e; --border-main: #6d8ba0; --border-completed: #ff6d6d; --accent: #a0e9ff; --text-main: #a0e9ff; --text-bright: #ffffff; --text-dim: #7e8d9b; --text-completed: #ff6d6d; }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
 
-        /* --- Custom Themes --- */
-        [data-theme="abyssal"] { --bg-body: #050a14; --bg-tile: #0a192f; --bg-well: #02050a; --bg-completed: #004d4d; --bg-completed-well: #002626; --border-main: #112240; --border-completed: #64ffda; --accent: #64ffda; --text-main: #64ffda; --text-bright: #ccd6f6; --text-dim: #8892b0; --text-completed: #64ffda; }
-        [data-theme="volcanic"] { --bg-body: #0f0c0c; --bg-tile: #1a1515; --bg-well: #050404; --bg-completed: #4d1a00; --bg-completed-well: #260d00; --border-main: #3d2b2b; --border-completed: #ff4d00; --accent: #ff4d00; --text-main: #ff4d00; --text-bright: #ffa600; --text-dim: #6d5e5e; --text-completed: #ff4d00; }
-        [data-theme="cyberpunk"] { --bg-body: #0d0221; --bg-tile: #261447; --bg-well: #0d0221; --bg-completed: #ff0055; --bg-completed-well: #80002a; --border-main: #fb3640; --border-completed: #00f5d4; --accent: #fee440; --text-main: #ff0055; --text-bright: #ffffff; --text-dim: #9d8189; --text-completed: #00f5d4; }
-        [data-theme="bloodlust"] { --bg-body: #1a0505; --bg-tile: #2b0a0a; --bg-well: #120303; --bg-completed: #4d0a0a; --bg-completed-well: #2b0505; --border-main: #4d1515; --border-completed: #ff3333; --accent: #ff3333; --text-main: #cc0000; --text-bright: #ff6666; --text-dim: #664444; --text-completed: #ff3333; }
-        [data-theme="royal"] { --bg-body: #1e0d2d; --bg-tile: #3c1b5a; --bg-well: #140820; --bg-completed: #d4af37; --bg-completed-well: #8a6d00; --border-main: #5a3285; --border-completed: #ffee00; --accent: #ffd700; --text-main: #d4af37; --text-bright: #ffffff; --text-dim: #a684c7; --text-completed: #ffee00; }
-        [data-theme="emerald"] { --bg-body: #061e12; --bg-tile: #0a3d24; --bg-well: #04120b; --bg-completed: #145a32; --bg-completed-well: #0a3d24; --border-main: #145a32; --border-completed: #2ecc71; --accent: #58d68d; --text-main: #58d68d; --text-bright: #abebc6; --text-dim: #515a5a; --text-completed: #2ecc71; }
-        [data-theme="solar"] { --bg-body: #3d2b1f; --bg-tile: #5e412f; --bg-well: #2b1e15; --bg-completed: #f39c12; --bg-completed-well: #af710b; --border-main: #7d5a44; --border-completed: #f1c40f; --accent: #ffcc33; --text-main: #ffcc33; --text-bright: #fff5cc; --text-dim: #a68e7e; --text-completed: #f1c40f; }
-        [data-theme="vaporwave"] { --bg-body: #120458; --bg-tile: #240b36; --bg-well: #0b0233; --bg-completed: #ff71ce; --bg-completed-well: #b967ff; --border-main: #05ffa1; --border-completed: #01cdfe; --accent: #01cdfe; --text-main: #b967ff; --text-bright: #ffffff; --text-dim: #7a5c91; --text-completed: #01cdfe; }
-        [data-theme="midnight"] { --bg-body: #000000; --bg-tile: #121212; --bg-well: #080808; --bg-completed: #222222; --bg-completed-well: #111111; --border-main: #333333; --border-completed: #ffffff; --accent: #ffffff; --text-main: #eeeeee; --text-bright: #ffffff; --text-dim: #555555; --text-completed: #ffffff; }
-        [data-theme="tox"] { --bg-body: #1a001a; --bg-tile: #2d002d; --bg-well: #0f000f; --bg-completed: #1a001a; --bg-completed-well: #0f000f; --border-main: #5e005e; --border-completed: #39ff14; --accent: #dfff11; --text-main: #dfff11; --text-bright: #ffffff; --text-dim: #7a5c7a; --text-completed: #39ff14; }
+  <!-- Prefer setting CSP in server headers; meta is a fallback. -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 img-src 'self' https: http: data:;
+                 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+                 font-src https://fonts.gstatic.com;
+                 connect-src https:;
+                 script-src 'self' 'unsafe-inline';">
 
-        /* Global Reset */
-        * { box-sizing: border-box; }
-        html { scrollbar-gutter: stable; overflow-y: scroll; }
+  <style>
+    /* --- Theme Variables --- */
+    :root {
+      --bg-body: #342e25;
+      --bg-tile: #494034;
+      --bg-well: #342e25;
+      --bg-completed: #1e3a1e;
+      --bg-completed-well: #162a16;
+      --border-main: #6d604e;
+      --border-completed: #4caf50;
+      --accent: #ffac00;
+      --text-main: #ffac00;
+      --text-bright: #ffee00;
+      --text-dim: #858476;
+      --text-completed: #4caf50;
+      --danger: #ff6d6d;
+    }
 
-        /* --- Custom Scrollbar --- */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-well); }
-        ::-webkit-scrollbar-thumb { background: var(--bg-tile); border: 2px solid var(--bg-well); }
-        ::-webkit-scrollbar-thumb:hover { background: var(--border-main); }
+    /* --- Seasonal Themes --- */
+    [data-theme="spring"] { --bg-body: #2d3a2d; --bg-tile: #4a5d4a; --bg-well: #2d3a2d; --bg-completed: #5d4a5d; --bg-completed-well: #3a2d3a; --border-main: #88b088; --border-completed: #d896ff; --accent: #a2ffb3; --text-main: #a2ffb3; --text-bright: #ffffff; --text-dim: #b5c9b5; --text-completed: #d896ff; }
+    [data-theme="summer"] { --bg-body: #1a3a4a; --bg-tile: #2c5d72; --bg-well: #1a3a4a; --bg-completed: #725d2c; --bg-completed-well: #4a3a1a; --border-main: #5ea3cc; --border-completed: #ffcc33; --accent: #33f0ff; --text-main: #33f0ff; --text-bright: #ffffff; --text-dim: #92b7ca; --text-completed: #ffcc33; }
+    [data-theme="autumn"] { --bg-body: #3a1f1a; --bg-tile: #5d322c; --bg-well: #3a1f1a; --bg-completed: #2c4a5d; --bg-completed-well: #1a2d3a; --border-main: #a35d4d; --border-completed: #5ea3cc; --accent: #ff7e33; --text-main: #ff7e33; --text-bright: #ffd1b3; --text-dim: #ca9a92; --text-completed: #5ea3cc; }
+    [data-theme="winter"] { --bg-body: #1e252b; --bg-tile: #343e49; --bg-well: #1e252b; --bg-completed: #493434; --bg-completed-well: #2b1e1e; --border-main: #6d8ba0; --border-completed: #ff6d6d; --accent: #a0e9ff; --text-main: #a0e9ff; --text-bright: #ffffff; --text-dim: #7e8d9b; --text-completed: #ff6d6d; }
 
-        body { 
-            background-color: var(--bg-body); 
-            color: var(--text-main); 
-            font-family: 'Cabin Condensed', sans-serif; 
-            margin: 0; padding: 15px;
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-        }
+    /* --- Custom Themes --- */
+    [data-theme="abyssal"] { --bg-body: #050a14; --bg-tile: #0a192f; --bg-well: #02050a; --bg-completed: #004d4d; --bg-completed-well: #002626; --border-main: #112240; --border-completed: #64ffda; --accent: #64ffda; --text-main: #64ffda; --text-bright: #ccd6f6; --text-dim: #8892b0; --text-completed: #64ffda; }
+    [data-theme="volcanic"] { --bg-body: #0f0c0c; --bg-tile: #1a1515; --bg-well: #050404; --bg-completed: #4d1a00; --bg-completed-well: #260d00; --border-main: #3d2b2b; --border-completed: #ff4d00; --accent: #ff4d00; --text-main: #ff4d00; --text-bright: #ffa600; --text-dim: #6d5e5e; --text-completed: #ff4d00; }
+    [data-theme="cyberpunk"] { --bg-body: #0d0221; --bg-tile: #261447; --bg-well: #0d0221; --bg-completed: #ff0055; --bg-completed-well: #80002a; --border-main: #fb3640; --border-completed: #00f5d4; --accent: #fee440; --text-main: #ff0055; --text-bright: #ffffff; --text-dim: #9d8189; --text-completed: #00f5d4; }
+    [data-theme="bloodlust"] { --bg-body: #1a0505; --bg-tile: #2b0a0a; --bg-well: #120303; --bg-completed: #4d0a0a; --bg-completed-well: #2b0505; --border-main: #4d1515; --border-completed: #ff3333; --accent: #ff3333; --text-main: #cc0000; --text-bright: #ff6666; --text-dim: #664444; --text-completed: #ff3333; }
+    [data-theme="royal"] { --bg-body: #1e0d2d; --bg-tile: #3c1b5a; --bg-well: #140820; --bg-completed: #d4af37; --bg-completed-well: #8a6d00; --border-main: #5a3285; --border-completed: #ffee00; --accent: #ffd700; --text-main: #d4af37; --text-bright: #ffffff; --text-dim: #a684c7; --text-completed: #ffee00; }
+    [data-theme="emerald"] { --bg-body: #061e12; --bg-tile: #0a3d24; --bg-well: #04120b; --bg-completed: #145a32; --bg-completed-well: #0a3d24; --border-main: #145a32; --border-completed: #2ecc71; --accent: #58d68d; --text-main: #58d68d; --text-bright: #abebc6; --text-dim: #515a5a; --text-completed: #2ecc71; }
+    [data-theme="solar"] { --bg-body: #3d2b1f; --bg-tile: #5e412f; --bg-well: #2b1e15; --bg-completed: #f39c12; --bg-completed-well: #af710b; --border-main: #7d5a44; --border-completed: #f1c40f; --accent: #ffcc33; --text-main: #ffcc33; --text-bright: #fff5cc; --text-dim: #a68e7e; --text-completed: #f1c40f; }
+    [data-theme="vaporwave"] { --bg-body: #120458; --bg-tile: #240b36; --bg-well: #0b0233; --bg-completed: #ff71ce; --bg-completed-well: #b967ff; --border-main: #05ffa1; --border-completed: #01cdfe; --accent: #01cdfe; --text-main: #b967ff; --text-bright: #ffffff; --text-dim: #7a5c91; --text-completed: #01cdfe; }
+    [data-theme="midnight"] { --bg-body: #000000; --bg-tile: #121212; --bg-well: #080808; --bg-completed: #222222; --bg-completed-well: #111111; --border-main: #333333; --border-completed: #ffffff; --accent: #ffffff; --text-main: #eeeeee; --text-bright: #ffffff; --text-dim: #555555; --text-completed: #ffffff; }
+    [data-theme="tox"] { --bg-body: #1a001a; --bg-tile: #2d002d; --bg-well: #0f000f; --bg-completed: #1a001a; --bg-completed-well: #0f000f; --border-main: #5e005e; --border-completed: #39ff14; --accent: #dfff11; --text-main: #dfff11; --text-bright: #ffffff; --text-dim: #7a5c7a; --text-completed: #39ff14; }
 
-        /* --- Dashboard --- */
-        .dashboard {
-            width: 100%; max-width: 1580px; 
-            background: var(--bg-tile); border: 2px solid var(--border-main);
-            padding: 10px 20px; margin-bottom: 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            flex-wrap: wrap; gap: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 100;
-        }
+    * { box-sizing: border-box; }
+    html { scrollbar-gutter: stable; overflow-y: scroll; }
 
-        .dashboard-main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
-        #event-title { font-size: 1.6rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; text-shadow: 2px 2px 4px black; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        #team-name { font-size: 1.1rem; color: #ffffff; margin: 2px 0 0 0; text-shadow: 1px 1px 2px black; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sr-only {
+      position: absolute !important;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0);
+      border: 0;
+      white-space: nowrap;
+    }
 
-        .stats-container { display: flex; gap: 15px; align-items: center; flex-shrink: 0; flex-wrap: wrap; }
-        .stat-item { text-align: center; }
-        .stat-label { font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); display: block; }
-        .stat-value { font-size: 1.3rem; font-weight: bold; color: var(--text-main); }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-well); }
+    ::-webkit-scrollbar-thumb { background: var(--bg-tile); border: 2px solid var(--bg-well); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border-main); }
 
-        #codeword-display { cursor: pointer; background: var(--bg-well); padding: 2px 10px; border-radius: 4px; min-width: 90px; text-align: center; display: inline-block; }
-        .codeword-hidden { color: var(--bg-well); text-shadow: none; }
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      font-family: 'Cabin Condensed', sans-serif;
+      margin: 0; padding: 15px;
+      display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+    }
 
-        /* --- Settings Gear Button --- */
-        .settings-btn {
-            background: none; border: 2px solid var(--border-main); color: var(--text-dim);
-            width: 38px; height: 38px; border-radius: 4px; cursor: pointer;
-            display: flex; justify-content: center; align-items: center;
-            transition: all 0.2s ease; flex-shrink: 0; font-size: 1.3rem; padding: 0;
-            order: 10;
-        }
-        .settings-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--bg-well); }
-        .settings-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-        .settings-btn svg { width: 20px; height: 20px; fill: currentColor; }
+    .dashboard {
+      width: 100%; max-width: 1580px;
+      background: var(--bg-tile); border: 2px solid var(--border-main);
+      padding: 10px 20px; margin-bottom: 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 100;
+    }
 
-        /* --- Mini-Map --- */
-        .minimap-wrapper {
-            background: var(--bg-well); padding: 4px; border: 2px solid var(--border-main);
-            flex-shrink: 0; cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease;
-        }
-        .minimap-wrapper:hover { transform: scale(1.05); border-color: var(--accent); }
-        .minimap-container { display: grid; grid-template-columns: repeat(7, 10px); grid-template-rows: repeat(7, 10px); gap: 2px; pointer-events: none; }
-        .mini-tile { width: 10px; height: 10px; background: var(--bg-body); display: flex; justify-content: center; align-items: center; font-size: 7px; color: rgba(255,255,255,0.2); border-radius: 1px; }
-        .mini-tile.complete { background: var(--bg-completed); color: var(--text-completed); }
+    .dashboard-main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+    #event-title { font-size: 1.6rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; text-shadow: 2px 2px 4px black; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #team-name { font-size: 1.1rem; color: #ffffff; margin: 2px 0 0 0; text-shadow: 1px 1px 2px black; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* --- Grid --- */
-        .grid-container {
-            display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px;
-            width: 100%; max-width: 1580px;
-        }
+    .stats-container { display: flex; gap: 15px; align-items: center; flex-shrink: 0; flex-wrap: wrap; }
+    .stat-item { text-align: center; }
+    .stat-label { font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); display: block; }
+    .stat-value { font-size: 1.3rem; font-weight: bold; color: var(--text-main); }
 
-        /* --- Tile Styles --- */
-        .tile { 
-            background-color: var(--bg-tile); border: 2px solid var(--border-main); 
-            position: relative; aspect-ratio: 1 / 1; display: flex; flex-direction: column; 
-            padding: 5%; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); overflow: hidden; 
-            container-type: inline-size; cursor: pointer; transition: all 0.3s ease, opacity 0.4s ease; 
-        }
-        .tile.completed { background-color: var(--bg-completed); border-color: var(--border-completed); }
-        
-        .tile:hover { 
-            transform: scale(1.05); 
-            z-index: 50; 
-            box-shadow: 0 0 25px 2px var(--accent), inset 0 0 10px rgba(0, 0, 0, 0.5); 
-        }
-        .tile.completed:hover { 
-            box-shadow: 0 0 25px 2px var(--border-completed), inset 0 0 10px rgba(0, 0, 0, 0.5); 
-        }
+    #codeword-display {
+      cursor: pointer;
+      background: var(--bg-well);
+      padding: 2px 10px;
+      border-radius: 4px;
+      min-width: 90px;
+      text-align: center;
+      display: inline-block;
+    }
+    .codeword-hidden { color: var(--bg-well); text-shadow: none; }
 
-        .tile.ghost { opacity: 0; pointer-events: none; }
-        
-        .header-box { padding: 2% 0; margin-bottom: 2%; min-height: 18%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; overflow: hidden; text-align: center; }
-        .header-content { width: 100%; font-weight: bold; font-size: 8cqw; line-height: 1; white-space: nowrap; text-shadow: 1px 1px 2px black; color: var(--text-main); }
-        .tile.completed .header-content { color: var(--text-completed); }
-        
-        .img-container { height: 40%; display: flex; justify-content: center; align-items: center; margin-bottom: 2%; flex-shrink: 0; }
-        .img-container img { max-height: 100%; max-width: 95%; object-fit: contain; filter: drop-shadow(2px 3px 4px black); }
-        
-        .progress-container { margin-bottom: 2%; height: 2cqw; min-height: 5px; width: 100%; flex-shrink: 0; }
-        .tile.completed .progress-container { display: none; }
-        .progress-bg { background: var(--bg-well); height: 100%; border: 1px solid #000; width: 100%; overflow: hidden; }
-        .progress-fill { height: 100%; transition: width 0.5s ease, background-color 0.5s ease; }
+    .settings-btn {
+      background: none; border: 2px solid var(--border-main); color: var(--text-dim);
+      width: 38px; height: 38px; border-radius: 4px; cursor: pointer;
+      display: flex; justify-content: center; align-items: center;
+      transition: all 0.2s ease; flex-shrink: 0; font-size: 1.3rem; padding: 0;
+      order: 10;
+    }
+    .settings-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--bg-well); }
+    .settings-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .settings-btn svg { width: 20px; height: 20px; fill: currentColor; }
 
-        .checklist-box { background: var(--bg-well); border: 1px solid #000; padding: 3%; flex-grow: 1; width: 100%; overflow-y: auto; min-height: 0; transition: background 0.3s ease; position: relative; }
-        .tile.completed .checklist-box { background: var(--bg-completed-well); }
-        .tile.completed .checklist-box::-webkit-scrollbar-track { background: var(--bg-completed); }
-        .tile.completed .checklist-box::-webkit-scrollbar-thumb { background: var(--bg-completed-well); border: 2px solid var(--bg-completed); }
-        
-        .check-item { display: flex; align-items: center; margin-bottom: 4px; }
-        .check-mark { width: 1.2em; height: 1.2em; margin-right: 6px; flex-shrink: 0; position: relative; display: flex; justify-content: center; align-items: center; }
-        .check-mark::after { content: ''; width: 0.3em; height: 0.6em; border: solid var(--text-completed); border-width: 0 0.2em 0.2em 0; transform: rotate(45deg); }
-        .tile .check-item { font-size: 6cqw; color: var(--text-bright); }
-        .tile.completed .check-item { color: var(--text-completed); }
+    .minimap-wrapper {
+      background: var(--bg-well); padding: 4px; border: 2px solid var(--border-main);
+      flex-shrink: 0; cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .minimap-wrapper:hover { transform: scale(1.05); border-color: var(--accent); }
+    .minimap-wrapper:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .minimap-container { display: grid; grid-template-columns: repeat(7, 10px); grid-template-rows: repeat(7, 10px); gap: 2px; pointer-events: none; }
+    .mini-tile { width: 10px; height: 10px; background: var(--bg-body); display: flex; justify-content: center; align-items: center; font-size: 7px; color: rgba(255,255,255,0.2); border-radius: 1px; }
+    .mini-tile.complete { background: var(--bg-completed); color: var(--text-completed); }
 
-        .point-badge {
-            position: absolute; bottom: 5px; right: 5px; background: var(--bg-well);
-            border: 1px solid var(--accent); padding: 1px 5px; border-radius: 3px;
-            font-size: 10px; font-weight: bold; color: var(--text-main); z-index: 10;
-        }
-        .tile.completed .point-badge { border-color: var(--border-completed); color: var(--text-completed); background: var(--bg-completed-well); }
+    .grid-container {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px;
+      width: 100%; max-width: 1580px;
+    }
 
-        /* --- Modal --- */
-        #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(0px); transition: background 0.4s ease, backdrop-filter 0.4s ease; }
-        #modal-overlay.active { background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(5px); }
-        .modal-content { background-color: var(--bg-tile); border: 3px solid var(--border-main); width: 90vw; max-width: 450px; padding: 25px; position: fixed; box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); display: flex; flex-direction: column; opacity: 0; transform: translate(-50%, -50%) scale(0); transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; z-index: 2001; }
-        .modal-content.completed { background-color: var(--bg-completed); border-color: var(--border-completed); }
-        .modal-content.active { opacity: 1; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
-        
-        .modal-header { font-size: 1.8rem; margin-bottom: 12px; text-align: center; font-weight: bold; color: var(--text-main); text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
-        .modal-content.completed .modal-header { color: var(--text-completed); }
-        .modal-img { height: 120px; margin-bottom: 12px; display: flex; justify-content: center; }
-        .modal-img img { max-height: 100%; filter: drop-shadow(4px 4px 6px black); }
-        
-        .modal-label { font-size: 0.7rem; text-transform: uppercase; font-weight: bold; margin-bottom: 2px; color: var(--text-main); }
-        .modal-content.completed .modal-label { color: var(--text-completed); }
+    .tile {
+      background-color: var(--bg-tile);
+      border: 2px solid var(--border-main);
+      position: relative;
+      aspect-ratio: 1 / 1;
+      display: flex; flex-direction: column;
+      padding: 5%;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+      overflow: hidden;
+      container-type: inline-size;
+      cursor: pointer;
+      transition: all 0.3s ease, opacity 0.4s ease;
+    }
+    .tile.completed { background-color: var(--bg-completed); border-color: var(--border-completed); }
 
-        .modal-points-inline { font-size: 0.85rem; background: var(--bg-well); border: 1px solid var(--accent); padding: 1px 6px; border-radius: 4px; font-weight: bold; color: var(--text-main); }
-        .modal-content.completed .modal-points-inline { border-color: var(--border-completed); color: var(--text-completed); background: var(--bg-completed-well); }
+    .tile:hover {
+      transform: scale(1.05);
+      z-index: 50;
+      box-shadow: 0 0 25px 2px var(--accent), inset 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+    .tile.completed:hover {
+      box-shadow: 0 0 25px 2px var(--border-completed), inset 0 0 10px rgba(0, 0, 0, 0.5);
+    }
 
-        .modal-checklist, .modal-description { background: var(--bg-well); border: 1px solid #000; padding: 8px; overflow-y: auto; color: var(--text-bright); }
-        .modal-content.completed .modal-checklist, .modal-content.completed .modal-description { background: var(--bg-completed-well); color: var(--text-completed); }
+    .tile:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+      transform: scale(1.02);
+      z-index: 60;
+    }
+    .tile.completed:focus-visible { outline-color: var(--border-completed); }
 
-        /* --- Modal Top Bar (map + close buttons) --- */
-        .modal-top-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 0; min-height: 30px;
-        }
+    .tile.ghost { opacity: 0; pointer-events: none; }
 
-        .modal-map-btn {
-            background: none; border: none; padding: 4px; cursor: pointer;
-            color: var(--text-dim); display: flex; align-items: center; justify-content: center;
-            border-radius: 4px; transition: all 0.2s ease;
-        }
-        .modal-map-btn:hover { color: var(--accent); background: var(--bg-well); }
-        .modal-map-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-        .modal-map-btn svg { width: 22px; height: 22px; fill: currentColor; }
-        .modal-content.completed .modal-map-btn:hover { color: var(--text-completed); }
+    .header-box { padding: 2% 0; margin-bottom: 2%; min-height: 18%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; overflow: hidden; text-align: center; }
+    .header-content { width: 100%; font-weight: bold; font-size: 8cqw; line-height: 1; white-space: nowrap; text-shadow: 1px 1px 2px black; color: var(--text-main); }
+    .tile.completed .header-content { color: var(--text-completed); }
 
-        .modal-close-btn {
-            background: none; border: none; padding: 4px; cursor: pointer;
-            color: var(--text-dim); display: flex; align-items: center; justify-content: center;
-            font-size: 2rem; line-height: 1; transition: all 0.2s ease; border-radius: 4px;
-        }
-        .modal-close-btn:hover { color: var(--accent); background: var(--bg-well); }
-        .modal-close-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .img-container { height: 40%; display: flex; justify-content: center; align-items: center; margin-bottom: 2%; flex-shrink: 0; }
+    .img-container img { max-height: 100%; max-width: 95%; object-fit: contain; filter: drop-shadow(2px 3px 4px black); }
 
-        /* --- Large Map (Themed) --- */
-        .large-map-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: var(--bg-body); padding: 10px; border: 2px solid var(--border-main); width: 100%; aspect-ratio: 1/1; }
-        .large-map-tile { background: var(--bg-well); display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; color: rgba(255,255,255,0.2); border: 1px solid var(--bg-tile); cursor: pointer; transition: 0.2s; }
-        .large-map-tile:hover { background: var(--bg-tile); color: #fff; transform: scale(1.05); z-index: 2; border-color: var(--accent); }
-        .large-map-tile.complete { background: var(--bg-completed); color: var(--text-completed); border-color: var(--border-completed); }
+    .progress-container { margin-bottom: 2%; height: 2cqw; min-height: 5px; width: 100%; flex-shrink: 0; }
+    .tile.completed .progress-container { display: none; }
+    .progress-bg { background: var(--bg-well); height: 100%; border: 1px solid #000; width: 100%; overflow: hidden; }
+    .progress-fill { height: 100%; transition: width 0.5s ease, background-color 0.5s ease; }
 
-        .close-btn { position: absolute; top: 5px; right: 12px; font-size: 2rem; cursor: pointer; color: var(--text-dim); z-index: 100; }
-        .close-btn:hover { color: var(--accent); }
+    .checklist-box { background: var(--bg-well); border: 1px solid #000; padding: 3%; flex-grow: 1; width: 100%; overflow-y: auto; min-height: 0; transition: background 0.3s ease; position: relative; }
+    .tile.completed .checklist-box { background: var(--bg-completed-well); }
+    .tile.completed .checklist-box::-webkit-scrollbar-track { background: var(--bg-completed); }
+    .tile.completed .checklist-box::-webkit-scrollbar-thumb { background: var(--bg-completed-well); border: 2px solid var(--bg-completed); }
 
-        /* --- Settings Modal --- */
-        .settings-section { margin-bottom: 18px; }
-        .settings-section-title {
-            font-size: 0.75rem; text-transform: uppercase; font-weight: bold;
-            color: var(--text-dim); letter-spacing: 1px; margin-bottom: 8px;
-            padding-bottom: 4px; border-bottom: 1px solid var(--border-main);
-        }
-        .settings-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 0;
-        }
-        .settings-row-label { font-size: 1rem; color: var(--text-bright); }
-        .settings-row-hint { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px; }
-        .settings-select {
-            background: var(--bg-well); color: var(--text-main); border: 1px solid var(--border-main);
-            padding: 5px 10px; font-family: 'Cabin Condensed'; cursor: pointer;
-            font-size: 1rem; border-radius: 4px; min-width: 140px;
-        }
-        .settings-select:focus { border-color: var(--accent); outline: none; }
-        .settings-version {
-            text-align: center; font-size: 0.7rem; color: var(--text-dim);
-            margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-main);
-        }
+    .check-item { display: flex; align-items: center; margin-bottom: 4px; }
+    .check-mark { width: 1.2em; height: 1.2em; margin-right: 6px; flex-shrink: 0; position: relative; display: flex; justify-content: center; align-items: center; }
+    .check-mark::after { content: ''; width: 0.3em; height: 0.6em; border: solid var(--text-completed); border-width: 0 0.2em 0.2em 0; transform: rotate(45deg); }
+    .tile .check-item { font-size: 6cqw; color: var(--text-bright); }
+    .tile.completed .check-item { color: var(--text-completed); }
 
-        /* --- Page Footer (flows after grid) --- */
-        .page-footer {
-            width: 100%; max-width: 1580px;
-            padding: 15px 0 10px 0;
-            font-size: 0.65rem; color: var(--border-main);
-            display: flex; align-items: center; gap: 6px;
-        }
-        .sync-btn { cursor: pointer; color: var(--text-dim); text-decoration: underline; }
-        .sync-btn:hover { color: var(--accent); }
-        .sync-flash { animation: flash-sync 1s ease-out; }
-        @keyframes flash-sync { 0% { color: var(--accent); } 100% { color: var(--border-main); } }
+    .point-badge {
+      position: absolute; bottom: 5px; right: 5px; background: var(--bg-well);
+      border: 1px solid var(--accent); padding: 1px 5px; border-radius: 3px;
+      font-size: 10px; font-weight: bold; color: var(--text-main); z-index: 10;
+    }
+    .tile.completed .point-badge { border-color: var(--border-completed); color: var(--text-completed); background: var(--bg-completed-well); }
 
-        /* --- Mobile Dashboard Responsive --- */
-        @media (max-width: 1400px) {
-            .grid-container { grid-template-columns: repeat(5, 1fr); }
-            .minimap-wrapper.in-dashboard { display: none; }
-            .minimap-wrapper.floating {
-                display: block; position: fixed; bottom: 20px; right: 20px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.7); background: var(--bg-well);
-                border: 2px solid var(--border-main); z-index: 1000;
-            }
-            .minimap-wrapper.floating .minimap-container { grid-template-columns: repeat(7, 12px); grid-template-rows: repeat(7, 12px); }
-            .minimap-wrapper.floating .mini-tile { width: 12px; height: 12px; font-size: 7px; }
-        }
-        @media (min-width: 1401px) {
-            .minimap-wrapper.floating { display: none; }
-        }
-        @media (max-width: 1000px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+    .tile.no-data { opacity: 0.55; cursor: default; }
+    .tile.no-data:hover { transform: none; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); z-index: auto; }
+    .tile.no-data:focus-visible { outline: none; transform: none; }
 
-        @media (max-width: 768px) {
-            body { padding: 8px; }
-            .dashboard { padding: 8px 12px; gap: 6px; }
-            .dashboard-main { flex-basis: calc(100% - 50px); }
-            #event-title { font-size: 1.2rem; }
-            #team-name { font-size: 0.9rem; }
-            .stats-container { 
-                order: 3; flex-basis: 100%; justify-content: center;
-                gap: 12px; padding-top: 6px;
-                border-top: 1px solid var(--border-main);
-            }
-            .stat-value { font-size: 1.1rem; }
-            #codeword-display { min-width: 70px; padding: 2px 8px; }
-            .settings-btn { order: 2; }
-        }
+    #modal-overlay {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0);
+      display: none;
+      justify-content: center; align-items: center;
+      z-index: 2000;
+      backdrop-filter: blur(0px);
+      transition: background 0.4s ease, backdrop-filter 0.4s ease;
+    }
+    #modal-overlay.active { background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(5px); }
 
-        @media (max-width: 600px) {
-            .grid-container { grid-template-columns: repeat(3, 1fr); }
-            .dashboard { padding: 6px 10px; }
-            #event-title { font-size: 1rem; }
-            #team-name { font-size: 0.8rem; }
-            .stats-container { gap: 10px; }
-            .stat-label { font-size: 0.6rem; }
-            .stat-value { font-size: 1rem; }
-        }
-    </style>
+    .modal-content {
+      background-color: var(--bg-tile); border: 3px solid var(--border-main);
+      width: 90vw; max-width: 450px;
+      padding: 25px;
+      position: fixed;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+      display: flex; flex-direction: column;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+      z-index: 2001;
+    }
+    .modal-content.completed { background-color: var(--bg-completed); border-color: var(--border-completed); }
+    .modal-content.active { opacity: 1; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+
+    .modal-header { font-size: 1.8rem; margin-bottom: 12px; text-align: center; font-weight: bold; color: var(--text-main); text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+    .modal-content.completed .modal-header { color: var(--text-completed); }
+
+    .modal-img { height: 120px; margin-bottom: 12px; display: flex; justify-content: center; }
+    .modal-img img { max-height: 100%; filter: drop-shadow(4px 4px 6px black); }
+
+    .modal-label { font-size: 0.7rem; text-transform: uppercase; font-weight: bold; margin-bottom: 2px; color: var(--text-main); }
+    .modal-content.completed .modal-label { color: var(--text-completed); }
+
+    .modal-points-inline { font-size: 0.85rem; background: var(--bg-well); border: 1px solid var(--accent); padding: 1px 6px; border-radius: 4px; font-weight: bold; color: var(--text-main); }
+    .modal-content.completed .modal-points-inline { border-color: var(--border-completed); color: var(--text-completed); background: var(--bg-completed-well); }
+
+    .modal-checklist, .modal-description { background: var(--bg-well); border: 1px solid #000; padding: 8px; overflow-y: auto; color: var(--text-bright); }
+    .modal-content.completed .modal-checklist, .modal-content.completed .modal-description { background: var(--bg-completed-well); color: var(--text-completed); }
+
+    .modal-top-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 0; min-height: 30px;
+    }
+    .modal-map-btn {
+      background: none; border: none; padding: 4px; cursor: pointer;
+      color: var(--text-dim); display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; transition: all 0.2s ease;
+    }
+    .modal-map-btn:hover { color: var(--accent); background: var(--bg-well); }
+    .modal-map-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .modal-map-btn svg { width: 22px; height: 22px; fill: currentColor; }
+
+    .modal-close-btn {
+      background: none; border: none; padding: 4px; cursor: pointer;
+      color: var(--text-dim); display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; line-height: 1; transition: all 0.2s ease; border-radius: 4px;
+    }
+    .modal-close-btn:hover { color: var(--accent); background: var(--bg-well); }
+    .modal-close-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .large-map-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: var(--bg-body); padding: 10px; border: 2px solid var(--border-main); width: 100%; aspect-ratio: 1/1; }
+    .large-map-tile { background: var(--bg-well); display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; color: rgba(255,255,255,0.2); border: 1px solid var(--bg-tile); cursor: pointer; transition: 0.2s; }
+    .large-map-tile:hover { background: var(--bg-tile); color: #fff; transform: scale(1.05); z-index: 2; border-color: var(--accent); }
+    .large-map-tile.complete { background: var(--bg-completed); color: var(--text-completed); border-color: var(--border-completed); }
+    .large-map-tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .settings-section { margin-bottom: 18px; }
+    .settings-section-title {
+      font-size: 0.75rem; text-transform: uppercase; font-weight: bold;
+      color: var(--text-dim); letter-spacing: 1px; margin-bottom: 8px;
+      padding-bottom: 4px; border-bottom: 1px solid var(--border-main);
+    }
+    .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+    .settings-row-label { font-size: 1rem; color: var(--text-bright); }
+    .settings-row-hint { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px; }
+    .settings-select {
+      background: var(--bg-well); color: var(--text-main); border: 1px solid var(--border-main);
+      padding: 5px 10px; font-family: 'Cabin Condensed'; cursor: pointer;
+      font-size: 1rem; border-radius: 4px; min-width: 140px;
+    }
+    .settings-select:focus { border-color: var(--accent); outline: none; }
+    .settings-version { text-align: center; font-size: 0.7rem; color: var(--text-dim); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-main); }
+
+    .page-footer {
+      width: 100%; max-width: 1580px;
+      padding: 15px 0 10px 0;
+      font-size: 0.65rem; color: var(--border-main);
+      display: flex; align-items: center; gap: 6px;
+      flex-wrap: wrap;
+    }
+    .sync-btn { cursor: pointer; color: var(--text-dim); text-decoration: underline; }
+    .sync-btn:hover { color: var(--accent); }
+    .sync-flash { animation: flash-sync 1s ease-out; }
+    @keyframes flash-sync { 0% { color: var(--accent); } 100% { color: var(--border-main); } }
+    .sync-error { color: var(--danger); }
+
+    @media (max-width: 1400px) {
+      .grid-container { grid-template-columns: repeat(5, 1fr); }
+      .minimap-wrapper.in-dashboard { display: none; }
+      .minimap-wrapper.floating {
+        display: block; position: fixed; bottom: 20px; right: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.7); background: var(--bg-well);
+        border: 2px solid var(--border-main); z-index: 1000;
+      }
+      .minimap-wrapper.floating .minimap-container { grid-template-columns: repeat(7, 12px); grid-template-rows: repeat(7, 12px); }
+      .minimap-wrapper.floating .mini-tile { width: 12px; height: 12px; font-size: 7px; }
+    }
+    @media (min-width: 1401px) { .minimap-wrapper.floating { display: none; } }
+    @media (max-width: 1000px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+
+    @media (max-width: 768px) {
+      body { padding: 8px; }
+      .dashboard { padding: 8px 12px; gap: 6px; }
+      .dashboard-main { flex-basis: calc(100% - 50px); }
+      #event-title { font-size: 1.2rem; }
+      #team-name { font-size: 0.9rem; }
+      .stats-container {
+        order: 3; flex-basis: 100%; justify-content: center;
+        gap: 12px; padding-top: 6px;
+        border-top: 1px solid var(--border-main);
+      }
+      .stat-value { font-size: 1.1rem; }
+      #codeword-display { min-width: 70px; padding: 2px 8px; }
+      .settings-btn { order: 2; }
+    }
+
+    @media (max-width: 600px) {
+      .grid-container { grid-template-columns: repeat(3, 1fr); }
+      .dashboard { padding: 6px 10px; }
+      #event-title { font-size: 1rem; }
+      #team-name { font-size: 0.8rem; }
+      .stats-container { gap: 10px; }
+      .stat-label { font-size: 0.6rem; }
+      .stat-value { font-size: 1rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+      .tile:hover { transform: none !important; }
+      .minimap-wrapper:hover { transform: none !important; }
+    }
+  </style>
 </head>
 
 <body>
-
-    <header class="dashboard" role="banner">
-        <div class="dashboard-main">
-            <h1 id="event-title">Bingo 2026</h1>
-            <p id="team-name">Loading Team...</p>
-        </div>
-
-        <div class="stats-container">
-            <div class="stat-item">
-                <span class="stat-label">Codeword</span>
-                <span id="codeword-display" class="stat-value codeword-hidden" role="button" tabindex="0" aria-label="Toggle codeword visibility" onclick="toggleCodeword()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCodeword();}">?????</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Points</span>
-                <span id="total-points" class="stat-value" aria-live="polite">0</span>
-            </div>
-        </div>
-
-        <aside class="minimap-wrapper in-dashboard" id="mini-map-trigger" role="button" tabindex="0" aria-label="Open overview map" onclick="openMapModal(event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMapModal(event);}">
-            <div class="minimap-container" id="minimap" aria-hidden="true"></div>
-        </aside>
-
-        <button class="settings-btn" id="settings-trigger" aria-label="Open settings" onclick="openSettingsModal(event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSettingsModal(event);}">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.611 3.611 0 0112 15.6z"/></svg>
-        </button>
-    </header>
-
-    <!-- Floating minimap for smaller screens -->
-    <aside class="minimap-wrapper floating" id="mini-map-floating" role="button" tabindex="0" aria-label="Open overview map" onclick="openMapModal(event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMapModal(event);}">
-        <div class="minimap-container" id="minimap-floating" aria-hidden="true"></div>
-    </aside>
-
-    <main class="grid-container" id="grid" role="grid" aria-label="Bingo board"></main>
-
-    <footer class="page-footer">
-        <span>v3.083</span>
-        <span>&middot;</span>
-        <span id="last-sync-text" aria-live="polite">Last Sync: Never</span>
-        <span class="sync-btn" role="button" tabindex="0" onclick="fetchData(true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();fetchData(true);}">[Sync Now]</span>
-    </footer>
-
-    <div id="modal-overlay" role="dialog" aria-modal="true" aria-label="Tile details" onclick="closeModal()">
-        <div class="modal-content" id="modal-box" onclick="event.stopPropagation()">
-            
-            <!-- Standard Tile View -->
-            <div id="standard-modal-view">
-                <div class="modal-top-bar">
-                    <button class="modal-map-btn" onclick="openMapModalFromTile()" aria-label="Back to overview map" tabindex="0">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/></svg>
-                    </button>
-                    <button class="modal-close-btn" onclick="closeModal()" aria-label="Close dialog" tabindex="0">&times;</button>
-                </div>
-
-                <div id="modal-header" class="modal-header"></div>
-                <div class="modal-img"><img id="modal-image" src="" alt=""></div>
-                
-                <div id="modal-progress-section">
-                    <div class="modal-label">Progress</div>
-                    <div style="height: 12px; margin-bottom: 12px;"><div class="progress-bg"><div id="modal-bar" class="progress-fill"></div></div></div>
-                </div>
-                
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2px;">
-                    <div class="modal-label">Collected Items</div>
-                    <div id="modal-points" class="modal-points-inline">0 PTS</div>
-                </div>
-                <div id="modal-list" class="modal-checklist" style="max-height: 130px; margin-bottom: 12px;"></div>
-                
-                <div class="modal-label">Description</div>
-                <div id="modal-desc" class="modal-description" style="max-height: 80px;"></div>
-            </div>
-
-            <!-- Map Overview View -->
-            <div id="map-modal-view" style="display: none; flex-direction: column; align-items: center;">
-                <div class="modal-top-bar" style="width: 100%;">
-                    <div></div>
-                    <button class="modal-close-btn" onclick="closeModal()" aria-label="Close dialog" tabindex="0">&times;</button>
-                </div>
-                <div class="modal-header" style="margin-top: 0;">OVERVIEW</div>
-                <div class="large-map-grid" id="large-map-grid"></div>
-            </div>
-
-            <!-- Settings View -->
-            <div id="settings-modal-view" style="display: none; flex-direction: column;">
-                <div class="modal-top-bar">
-                    <div></div>
-                    <button class="modal-close-btn" onclick="closeModal()" aria-label="Close dialog" tabindex="0">&times;</button>
-                </div>
-                <div class="modal-header" style="margin-top: 0;">SETTINGS</div>
-
-                <div class="settings-section">
-                    <div class="settings-section-title">Appearance</div>
-                    <div class="settings-row">
-                        <div>
-                            <div class="settings-row-label">Theme</div>
-                            <div class="settings-row-hint">Choose a visual style</div>
-                        </div>
-                        <label for="settings-theme-dropdown" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Select Theme</label>
-                        <select id="settings-theme-dropdown" class="settings-select" onchange="changeTheme(this.value)">
-                            <optgroup label="Classic">
-                                <option value="osrs">OSRS (Original)</option>
-                                <option value="midnight">Midnight OLED</option>
-                            </optgroup>
-                            <optgroup label="Seasons">
-                                <option value="spring">Spring</option>
-                                <option value="summer">Summer</option>
-                                <option value="autumn">Autumn</option>
-                                <option value="winter">Winter</option>
-                            </optgroup>
-                            <optgroup label="Aesthetic">
-                                <option value="abyssal">Abyssal</option>
-                                <option value="volcanic">Volcanic</option>
-                                <option value="cyberpunk">Cyberpunk</option>
-                                <option value="bloodlust">Bloodlust</option>
-                                <option value="royal">Royal</option>
-                                <option value="emerald">Emerald</option>
-                                <option value="solar">Solar</option>
-                                <option value="vaporwave">Vaporwave</option>
-                                <option value="tox">Toxic</option>
-                            </optgroup>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="settings-section">
-                    <div class="settings-section-title">Data</div>
-                    <div class="settings-row">
-                        <div>
-                            <div class="settings-row-label">Sync Interval</div>
-                            <div class="settings-row-hint">How often to refresh data</div>
-                        </div>
-                        <select id="settings-sync-interval" class="settings-select" onchange="changeSyncInterval(this.value)">
-                            <option value="15000">15 seconds</option>
-                            <option value="30000" selected>30 seconds</option>
-                            <option value="60000">1 minute</option>
-                            <option value="120000">2 minutes</option>
-                            <option value="300000">5 minutes</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="settings-version">Bingo Board &middot; v3.083</div>
-            </div>
-        </div>
+  <header class="dashboard" role="banner">
+    <div class="dashboard-main">
+      <h1 id="event-title">Bingo 2026</h1>
+      <p id="team-name">Loading Team...</p>
     </div>
 
-    <script>
-        /* ============================================
-           CONSTANTS & STATE
-           ============================================ */
-        const APP_VERSION = '3.083';
+    <div class="stats-container">
+      <div class="stat-item">
+        <span class="stat-label">Codeword</span>
+        <span id="codeword-display"
+              class="stat-value codeword-hidden"
+              role="button" tabindex="0"
+              aria-label="Codeword hidden. Click to reveal.">?????</span>
+      </div>
 
-        const TEAM_MAP = {
-            "Warriors": {
-                name: "The Spreadsheet Warriors",
-                url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
-                codeword: "BINGO_BLITZ",
-                points: 1250
-            }
-        };
+      <div class="stat-item">
+        <span class="stat-label">Points</span>
+        <span id="total-points" class="stat-value" aria-live="polite">0</span>
+      </div>
 
-        const MAX_TILES = 49;
-        const STORAGE_KEYS = {
-            theme: 'bingo-theme',
-            syncInterval: 'bingo-sync-interval'
-        };
+      <div class="stat-item">
+        <span class="stat-label">Completed</span>
+        <span id="completed-count" class="stat-value" aria-live="polite">0/49</span>
+      </div>
+    </div>
 
-        let currentTeamKey = "Warriors";
-        let currentActiveElement = null;
-        let lastSeenHash = null;
-        let codewordSecret = "";
-        let completionState = [];
-        let tileDataCache = [];
-        let fetchController = null;
-        let syncIntervalId = null;
-        let currentSyncInterval = 30000;
+    <aside class="minimap-wrapper in-dashboard" id="mini-map-trigger"
+           role="button" tabindex="0" aria-label="Open overview map">
+      <div class="minimap-container" id="minimap" aria-hidden="true"></div>
+    </aside>
 
-        /* ============================================
-           UTILITY FUNCTIONS
-           ============================================ */
+    <button class="settings-btn" id="settings-trigger" aria-label="Open settings">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.611 3.611 0 0112 15.6z"/>
+      </svg>
+    </button>
+  </header>
 
-        function escapeHTML(str) {
-            const div = document.createElement('div');
-            div.appendChild(document.createTextNode(str));
-            return div.innerHTML;
+  <aside class="minimap-wrapper floating" id="mini-map-floating"
+         role="button" tabindex="0" aria-label="Open overview map">
+    <div class="minimap-container" id="minimap-floating" aria-hidden="true"></div>
+  </aside>
+
+  <main class="grid-container" id="grid" role="grid" aria-label="Bingo board"></main>
+
+  <footer class="page-footer">
+    <span>v3.083</span>
+    <span>&middot;</span>
+    <span id="last-sync-text" aria-live="polite">Last Sync: Never</span>
+    <span class="sync-btn" id="sync-now" role="button" tabindex="0">[Sync Now]</span>
+  </footer>
+
+  <div id="modal-overlay" role="dialog" aria-modal="true" aria-label="Dialog">
+    <div class="modal-content" id="modal-box" aria-label="Dialog panel">
+      <!-- Standard Tile View -->
+      <div id="standard-modal-view">
+        <div class="modal-top-bar">
+          <button class="modal-map-btn" id="modal-map-back" aria-label="Back to overview map" tabindex="0">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/></svg>
+          </button>
+          <button class="modal-close-btn" id="modal-close-1" aria-label="Close dialog" tabindex="0">&times;</button>
+        </div>
+
+        <div id="modal-header" class="modal-header"></div>
+        <div class="modal-img"><img id="modal-image" src="" alt=""></div>
+
+        <div id="modal-progress-section">
+          <div class="modal-label">Progress</div>
+          <div style="height: 12px; margin-bottom: 12px;">
+            <div class="progress-bg"><div id="modal-bar" class="progress-fill"></div></div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2px;">
+          <div class="modal-label">Collected Items</div>
+          <div id="modal-points" class="modal-points-inline">0 PTS</div>
+        </div>
+        <div id="modal-list" class="modal-checklist" style="max-height: 130px; margin-bottom: 12px;"></div>
+
+        <div class="modal-label">Description</div>
+        <div id="modal-desc" class="modal-description" style="max-height: 80px;"></div>
+      </div>
+
+      <!-- Map Overview View -->
+      <div id="map-modal-view" style="display: none; flex-direction: column; align-items: center;">
+        <div class="modal-top-bar" style="width: 100%;">
+          <div></div>
+          <button class="modal-close-btn" id="modal-close-2" aria-label="Close dialog" tabindex="0">&times;</button>
+        </div>
+        <div class="modal-header" style="margin-top: 0;">OVERVIEW</div>
+        <div class="large-map-grid" id="large-map-grid"></div>
+      </div>
+
+      <!-- Settings View -->
+      <div id="settings-modal-view" style="display: none; flex-direction: column;">
+        <div class="modal-top-bar">
+          <div></div>
+          <button class="modal-close-btn" id="modal-close-3" aria-label="Close dialog" tabindex="0">&times;</button>
+        </div>
+        <div class="modal-header" style="margin-top: 0;">SETTINGS</div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">Appearance</div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Theme</div>
+              <div class="settings-row-hint">Choose a visual style</div>
+            </div>
+            <label for="settings-theme-dropdown" class="sr-only">Select Theme</label>
+            <select id="settings-theme-dropdown" class="settings-select">
+              <optgroup label="Classic">
+                <option value="osrs">OSRS (Original)</option>
+                <option value="midnight">Midnight OLED</option>
+              </optgroup>
+              <optgroup label="Seasons">
+                <option value="spring">Spring</option>
+                <option value="summer">Summer</option>
+                <option value="autumn">Autumn</option>
+                <option value="winter">Winter</option>
+              </optgroup>
+              <optgroup label="Aesthetic">
+                <option value="abyssal">Abyssal</option>
+                <option value="volcanic">Volcanic</option>
+                <option value="cyberpunk">Cyberpunk</option>
+                <option value="bloodlust">Bloodlust</option>
+                <option value="royal">Royal</option>
+                <option value="emerald">Emerald</option>
+                <option value="solar">Solar</option>
+                <option value="vaporwave">Vaporwave</option>
+                <option value="tox">Toxic</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">Data</div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Sync Interval</div>
+              <div class="settings-row-hint">How often to refresh data</div>
+            </div>
+            <select id="settings-sync-interval" class="settings-select">
+              <option value="15000">15 seconds</option>
+              <option value="30000" selected>30 seconds</option>
+              <option value="60000">1 minute</option>
+              <option value="120000">2 minutes</option>
+              <option value="300000">5 minutes</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-version">Bingo Board &middot; v3.083</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================
+       CONSTANTS & STATE
+       ============================================ */
+    const APP_VERSION = '3.083';
+
+    const TEAM_MAP = {
+      "Warriors": {
+        name: "The Spreadsheet Warriors",
+        url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
+        codeword: "BINGO_BLITZ",
+        points: 1250
+      }
+    };
+
+    const MAX_TILES = 49;
+    const STORAGE_KEYS = {
+      theme: 'bingo-theme',
+      syncInterval: 'bingo-sync-interval',
+      codewordVisible: 'bingo-codeword-visible'
+    };
+
+    let currentTeamKey = "Warriors";
+
+    let currentActiveElement = null;  // element temporarily "ghosted"
+    let lastTriggerElement = null;    // for restoring focus
+    let lastSeenHash = null;
+
+    let codewordSecret = "";
+    let completionState = Array(MAX_TILES).fill(false);
+    let tileDataCache = Array(MAX_TILES).fill(null);
+
+    let fetchController = null;
+    let syncIntervalId = null;
+    let currentSyncInterval = 30000;
+    let modalOpen = false;
+
+    // Cache minimap nodes to avoid querySelectorAll on each update:
+    // index(1..49) => [nodeInDashboardMinimap, nodeInFloatingMinimap]
+    const minimapNodesByIndex = new Map();
+
+    // Cached DOM refs
+    const DOM = {};
+    function cacheDom() {
+      DOM.teamName = document.getElementById('team-name');
+      DOM.totalPoints = document.getElementById('total-points');
+      DOM.completedCount = document.getElementById('completed-count');
+      DOM.codeword = document.getElementById('codeword-display');
+
+      DOM.grid = document.getElementById('grid');
+      DOM.lastSyncText = document.getElementById('last-sync-text');
+
+      DOM.miniMapTrigger = document.getElementById('mini-map-trigger');
+      DOM.miniMapFloating = document.getElementById('mini-map-floating');
+
+      DOM.settingsTrigger = document.getElementById('settings-trigger');
+      DOM.syncNow = document.getElementById('sync-now');
+
+      DOM.overlay = document.getElementById('modal-overlay');
+      DOM.box = document.getElementById('modal-box');
+
+      DOM.standardView = document.getElementById('standard-modal-view');
+      DOM.mapView = document.getElementById('map-modal-view');
+      DOM.settingsView = document.getElementById('settings-modal-view');
+
+      DOM.modalHeader = document.getElementById('modal-header');
+      DOM.modalImage = document.getElementById('modal-image');
+      DOM.modalProgressSection = document.getElementById('modal-progress-section');
+      DOM.modalBar = document.getElementById('modal-bar');
+      DOM.modalList = document.getElementById('modal-list');
+      DOM.modalDesc = document.getElementById('modal-desc');
+      DOM.modalPoints = document.getElementById('modal-points');
+
+      DOM.largeMapGrid = document.getElementById('large-map-grid');
+      DOM.modalMapBack = document.getElementById('modal-map-back');
+
+      DOM.themeDropdown = document.getElementById('settings-theme-dropdown');
+      DOM.intervalDropdown = document.getElementById('settings-sync-interval');
+
+      DOM.modalCloses = [
+        document.getElementById('modal-close-1'),
+        document.getElementById('modal-close-2'),
+        document.getElementById('modal-close-3')
+      ].filter(Boolean);
+    }
+
+    /* ============================================
+       UTILS
+       ============================================ */
+    function escapeHTML(str) {
+      const div = document.createElement('div');
+      div.appendChild(document.createTextNode(String(str ?? '')));
+      return div.innerHTML;
+    }
+
+    function simpleHash(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const ch = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + ch;
+        hash |= 0;
+      }
+      return hash;
+    }
+
+    function normalizeNewlines(str) {
+      return String(str).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    }
+
+    // NOTE: Still row-based; does not support multi-line CSV fields.
+    function parseCSVRow(row) {
+      const cols = [];
+      let current = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < row.length; i++) {
+        const ch = row[i];
+        if (inQuotes) {
+          if (ch === '"' && row[i + 1] === '"') { current += '"'; i++; }
+          else if (ch === '"') { inQuotes = false; }
+          else { current += ch; }
+        } else {
+          if (ch === '"') inQuotes = true;
+          else if (ch === ',') { cols.push(current.trim()); current = ''; }
+          else current += ch;
         }
-
-        function simpleHash(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                const ch = str.charCodeAt(i);
-                hash = ((hash << 5) - hash) + ch;
-                hash |= 0;
-            }
-            return hash;
-        }
-
-        function parseCSVRow(row) {
-            const cols = [];
-            let current = '';
-            let inQuotes = false;
-            for (let i = 0; i < row.length; i++) {
-                const ch = row[i];
-                if (inQuotes) {
-                    if (ch === '"' && row[i + 1] === '"') {
-                        current += '"';
-                        i++;
-                    } else if (ch === '"') {
-                        inQuotes = false;
-                    } else {
-                        current += ch;
-                    }
-                } else {
-                    if (ch === '"') {
-                        inQuotes = true;
-                    } else if (ch === ',') {
-                        cols.push(current.trim());
-                        current = '';
-                    } else {
-                        current += ch;
-                    }
-                }
-            }
-            cols.push(current.trim());
-            return cols;
-        }
-
-        function getProgressColor(percent) {
-            if (percent >= 100) return 'var(--text-completed)';
-            const hue = (percent * 120) / 100;
-            return `hsl(${hue}, 70%, 45%)`;
-        }
-
-        function handleImgError(img) {
-            img.style.visibility = 'hidden';
-            img.removeAttribute('src');
-        }
-
-        function storageSave(key, value) {
-            try { localStorage.setItem(key, value); } catch (e) { /* silent */ }
-        }
-
-        function storageLoad(key, fallback) {
-            try { return localStorage.getItem(key) || fallback; } catch (e) { return fallback; }
-        }
-
-        /* ============================================
-           THEME MANAGEMENT
-           ============================================ */
-
-        function changeTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            storageSave(STORAGE_KEYS.theme, theme);
-
-            const settingsDropdown = document.getElementById('settings-theme-dropdown');
-            if (settingsDropdown) settingsDropdown.value = theme;
-        }
-
-        function restoreTheme() {
-            const saved = storageLoad(STORAGE_KEYS.theme, null);
-            if (saved) {
-                document.documentElement.setAttribute('data-theme', saved);
-                const settingsDropdown = document.getElementById('settings-theme-dropdown');
-                if (settingsDropdown) settingsDropdown.value = saved;
-            }
-        }
-
-        /* ============================================
-           SYNC INTERVAL MANAGEMENT
-           ============================================ */
-
-        function changeSyncInterval(ms) {
-            currentSyncInterval = parseInt(ms) || 30000;
-            storageSave(STORAGE_KEYS.syncInterval, currentSyncInterval);
-            restartSyncInterval();
-        }
-
-        function restartSyncInterval() {
-            if (syncIntervalId) clearInterval(syncIntervalId);
-            syncIntervalId = setInterval(() => fetchData(), currentSyncInterval);
-        }
-
-        function restoreSyncInterval() {
-            const saved = parseInt(storageLoad(STORAGE_KEYS.syncInterval, '30000'));
-            if (saved && !isNaN(saved)) {
-                currentSyncInterval = saved;
-                const dropdown = document.getElementById('settings-sync-interval');
-                if (dropdown) dropdown.value = String(saved);
-            }
-        }
-
-        /* ============================================
-           MINIMAP MANAGEMENT
-           ============================================ */
-
-        function buildMinimap(containerId) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-            const fragment = document.createDocumentFragment();
-            for (let i = 1; i <= MAX_TILES; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'mini-tile';
-                dot.dataset.index = i;
-                dot.innerText = i;
-                fragment.appendChild(dot);
-            }
-            container.appendChild(fragment);
-        }
-
-        function updateMinimaps(index, isCompleted) {
-            document.querySelectorAll(`.mini-tile[data-index="${index + 1}"]`).forEach(tile => {
-                if (isCompleted) {
-                    tile.classList.add('complete');
-                } else {
-                    tile.classList.remove('complete');
-                }
-            });
-        }
-
-        /* ============================================
-           DATA FETCHING
-           ============================================ */
-
-        function fetchGlobalData() {
-            const teamData = TEAM_MAP[currentTeamKey];
-            if (!teamData) return;
-            document.getElementById('team-name').innerText = teamData.name;
-            document.getElementById('total-points').innerText = teamData.points.toLocaleString();
-            codewordSecret = teamData.codeword;
-        }
-
-        async function fetchData(isManual = false) {
-            if (fetchController) {
-                fetchController.abort();
-            }
-            fetchController = new AbortController();
-
-            try {
-                const teamData = TEAM_MAP[currentTeamKey];
-                if (!teamData) return;
-
-                const response = await fetch(
-                    `${teamData.url}&t=${Date.now()}`,
-                    {
-                        method: 'GET',
-                        headers: { 'pragma': 'no-cache', 'cache-control': 'no-cache' },
-                        signal: fetchController.signal
-                    }
-                );
-
-                const rawData = await response.text();
-                const dataHash = simpleHash(rawData);
-                if (!isManual && lastSeenHash === dataHash) return;
-                lastSeenHash = dataHash;
-
-                const syncText = document.getElementById('last-sync-text');
-                syncText.innerText = `Last Sync: ${new Date().toLocaleTimeString()}`;
-                syncText.classList.remove('sync-flash');
-                void syncText.offsetWidth;
-                syncText.classList.add('sync-flash');
-
-                const rows = rawData.split('\n').slice(1);
-                const grid = document.getElementById('grid');
-                grid.innerHTML = '';
-                tileDataCache = [];
-
-                const fragment = document.createDocumentFragment();
-
-                rows.forEach((row, index) => {
-                    if (index >= MAX_TILES) return;
-                    const rawRow = row.trim();
-                    if (!rawRow) return;
-
-                    const cols = parseCSVRow(rawRow);
-                    if (cols.length < 4) return;
-
-                    const title = cols[0] || `Tile ${index + 1}`;
-                    const imgName = cols[1] || '';
-                    const current = Math.max(0, parseInt(cols[2]) || 0);
-                    const goal = Math.max(1, parseInt(cols[3]) || 1);
-                    const itemList = cols[4] ? cols[4].split(',').filter(s => s.trim()) : [];
-                    const description = cols[5] || '';
-                    const pts = cols[6] || '0';
-
-                    const percent = Math.min((current / goal) * 100, 100);
-                    const isCompleted = percent === 100;
-                    const barColor = getProgressColor(percent);
-                    const finalImgSrc = (imgName.includes('http')) ? imgName : `./images/${imgName}`;
-
-                    completionState[index] = isCompleted;
-                    updateMinimaps(index, isCompleted);
-
-                    let checklistHtml = '';
-                    itemList.forEach(item => {
-                        const trimmed = item.trim();
-                        if (trimmed) {
-                            checklistHtml += `<div class="check-item"><span class="check-mark"></span> ${escapeHTML(trimmed)}</div>`;
-                        }
-                    });
-
-                    const pkg = {
-                        id: index + 1,
-                        title: title,
-                        img: finalImgSrc,
-                        percent: percent,
-                        barColor: barColor,
-                        checklistHtml: checklistHtml,
-                        description: description,
-                        isCompleted: isCompleted,
-                        points: pts
-                    };
-                    tileDataCache.push(pkg);
-
-                    const tile = document.createElement('div');
-                    tile.className = `tile${isCompleted ? ' completed' : ''}`;
-                    tile.setAttribute('role', 'button');
-                    tile.setAttribute('tabindex', '0');
-                    tile.setAttribute('aria-label',
-                        `Tile ${index + 1}: ${title} - ${isCompleted ? 'Complete' : Math.round(percent) + '% complete'}`
-                    );
-
-                    tile.onclick = (e) => openModal(e, pkg);
-                    tile.onkeydown = (e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            openModal(e, pkg);
-                        }
-                    };
-
-                    const safeTitle = escapeHTML(title);
-                    const safePts = escapeHTML(pts);
-                    const safeImgSrc = escapeHTML(finalImgSrc);
-
-                    tile.innerHTML = `
-                        <div class="header-box"><div class="header-content">${index + 1} | ${safeTitle}</div></div>
-                        <div class="img-container"><img src="${safeImgSrc}" alt="${safeTitle}" onerror="handleImgError(this)"></div>
-                        <div class="progress-container"><div class="progress-bg"><div class="progress-fill" style="width: ${percent}%; background-color: ${barColor}"></div></div></div>
-                        <div class="checklist-box">${checklistHtml}</div>
-                        <div class="point-badge">${safePts} PTS</div>
-                    `;
-
-                    fragment.appendChild(tile);
-                });
-
-                grid.appendChild(fragment);
-
-            } catch (e) {
-                if (e.name === 'AbortError') return;
-                console.error("Sync Error:", e);
-            } finally {
-                fetchController = null;
-            }
-        }
-
-        /* ============================================
-           MODAL MANAGEMENT
-           ============================================ */
-
-        function hideAllModalViews() {
-            document.getElementById('standard-modal-view').style.display = 'none';
-            document.getElementById('map-modal-view').style.display = 'none';
-            document.getElementById('settings-modal-view').style.display = 'none';
-        }
-
-        function showModal(triggerEl, animateFromTrigger) {
-            const overlay = document.getElementById('modal-overlay');
-            const box = document.getElementById('modal-box');
-
-            if (currentActiveElement && currentActiveElement.isConnected) {
-                currentActiveElement.classList.remove('ghost');
-            }
-
-            if (triggerEl && triggerEl.classList && triggerEl.classList.contains('tile')) {
-                currentActiveElement = triggerEl;
-                currentActiveElement.classList.add('ghost');
-            } else if (triggerEl && (triggerEl.id === 'mini-map-trigger' || triggerEl.id === 'mini-map-floating')) {
-                currentActiveElement = triggerEl;
-                currentActiveElement.classList.add('ghost');
-            } else {
-                currentActiveElement = triggerEl || null;
-            }
-
-            let rect;
-            if (animateFromTrigger && triggerEl && triggerEl.getBoundingClientRect) {
-                rect = triggerEl.getBoundingClientRect();
-            } else {
-                rect = { top: window.innerHeight / 2, left: window.innerWidth / 2, height: 0, width: 0 };
-            }
-
-            box.style.top = (rect.top + rect.height / 2) + 'px';
-            box.style.left = (rect.left + rect.width / 2) + 'px';
-
-            overlay.style.display = 'flex';
-            setTimeout(() => {
-                overlay.classList.add('active');
-                box.classList.add('active');
-                const firstClose = box.querySelector('.modal-close-btn');
-                if (firstClose) firstClose.focus();
-            }, 10);
-
-            document.body.style.overflow = 'hidden';
-        }
-
-        function openModal(e, data) {
-            const box = document.getElementById('modal-box');
-            box.classList.remove('map-mode');
-
-            if (data.isCompleted) {
-                box.classList.add('completed');
-                document.getElementById('modal-progress-section').style.display = 'none';
-            } else {
-                box.classList.remove('completed');
-                document.getElementById('modal-progress-section').style.display = 'block';
-            }
-
-            hideAllModalViews();
-            document.getElementById('standard-modal-view').style.display = 'block';
-
-            document.getElementById('modal-header').innerText = `${data.id} | ${data.title}`;
-
-            const modalImg = document.getElementById('modal-image');
-            modalImg.style.visibility = 'visible';
-            modalImg.onerror = () => handleImgError(modalImg);
-            modalImg.src = data.img;
-            modalImg.alt = data.title;
-
-            document.getElementById('modal-points').innerText = `${data.points} PTS`;
-            document.getElementById('modal-bar').style.width = data.percent + '%';
-            document.getElementById('modal-bar').style.backgroundColor = data.barColor;
-            document.getElementById('modal-list').innerHTML = data.checklistHtml;
-            document.getElementById('modal-desc').innerText = data.description;
-
-            box.setAttribute('aria-label', `Details for tile ${data.id}: ${data.title}`);
-
-            showModal(e.currentTarget, true);
-        }
-
-        function buildLargeMapGrid() {
-            const largeGrid = document.getElementById('large-map-grid');
-            largeGrid.innerHTML = '';
-
-            const mapFragment = document.createDocumentFragment();
-            for (let i = 1; i <= MAX_TILES; i++) {
-                const cell = document.createElement('div');
-                cell.className = `large-map-tile${completionState[i - 1] ? ' complete' : ''}`;
-                cell.innerText = i;
-                cell.setAttribute('role', 'button');
-                cell.setAttribute('tabindex', '0');
-                cell.setAttribute('aria-label', `Tile ${i}${completionState[i - 1] ? ' - Complete' : ''}`);
-
-                const tileIndex = i;
-                cell.onclick = (ev) => {
-                    ev.stopPropagation();
-                    const pkg = tileDataCache[tileIndex - 1];
-                    if (pkg) openModal({ currentTarget: cell }, pkg);
-                };
-                cell.onkeydown = (ev) => {
-                    if (ev.key === 'Enter' || ev.key === ' ') {
-                        ev.preventDefault();
-                        ev.stopPropagation();
-                        const pkg = tileDataCache[tileIndex - 1];
-                        if (pkg) openModal({ currentTarget: cell }, pkg);
-                    }
-                };
-
-                mapFragment.appendChild(cell);
-            }
-            largeGrid.appendChild(mapFragment);
-        }
-
-        function openMapModal(e) {
-            const box = document.getElementById('modal-box');
-            box.classList.add('map-mode');
-            box.classList.remove('completed');
-
-            hideAllModalViews();
-            document.getElementById('map-modal-view').style.display = 'flex';
-
-            buildLargeMapGrid();
-
-            box.setAttribute('aria-label', 'Bingo board overview map');
-
-            const trigger = e ? (e.currentTarget || document.getElementById('mini-map-trigger')) : null;
-            showModal(trigger, !!trigger);
-        }
-
-        function openMapModalFromTile() {
-            const box = document.getElementById('modal-box');
-
-            if (currentActiveElement && currentActiveElement.isConnected) {
-                currentActiveElement.classList.remove('ghost');
-            }
-            currentActiveElement = null;
-
-            box.classList.add('map-mode');
-            box.classList.remove('completed');
-
-            hideAllModalViews();
-            document.getElementById('map-modal-view').style.display = 'flex';
-
-            buildLargeMapGrid();
-
-            box.setAttribute('aria-label', 'Bingo board overview map');
-        }
-
-        function openSettingsModal(e) {
-            const box = document.getElementById('modal-box');
-            box.classList.remove('map-mode', 'completed');
-
-            hideAllModalViews();
-            document.getElementById('settings-modal-view').style.display = 'flex';
-
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'osrs';
-            const settingsDropdown = document.getElementById('settings-theme-dropdown');
-            if (settingsDropdown) settingsDropdown.value = currentTheme;
-
-            const intervalDropdown = document.getElementById('settings-sync-interval');
-            if (intervalDropdown) intervalDropdown.value = String(currentSyncInterval);
-
-            box.setAttribute('aria-label', 'Settings');
-
-            showModal(e.currentTarget, true);
-        }
-
-        function closeModal() {
-            const overlay = document.getElementById('modal-overlay');
-            const box = document.getElementById('modal-box');
-
-            overlay.classList.remove('active');
-            box.classList.remove('active');
-
-            if (currentActiveElement && currentActiveElement.isConnected) {
-                currentActiveElement.classList.remove('ghost');
-            }
-
-            setTimeout(() => {
-                overlay.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }, 500);
-        }
-
-        /* ============================================
-           CODEWORD TOGGLE
-           ============================================ */
-
-        function toggleCodeword() {
-            const el = document.getElementById('codeword-display');
-            el.classList.toggle('codeword-hidden');
-            if (el.classList.contains('codeword-hidden')) {
-                el.innerText = "????";
-                el.setAttribute('aria-label', 'Codeword hidden. Click to reveal.');
-            } else {
-                el.innerText = codewordSecret;
-                el.setAttribute('aria-label', 'Codeword: ' + codewordSecret + '. Click to hide.');
-            }
-        }
-
-        /* ============================================
-           KEYBOARD SHORTCUTS
-           ============================================ */
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
+      }
+      cols.push(current.trim());
+      return cols;
+    }
+
+    function getProgressColor(percent) {
+      if (percent >= 100) return 'var(--text-completed)';
+      const hue = (percent * 120) / 100;
+      return `hsl(${hue}, 70%, 45%)`;
+    }
+
+    function handleImgError(img) {
+      img.style.visibility = 'hidden';
+      img.removeAttribute('src');
+    }
+
+    function storageSave(key, value) {
+      try { localStorage.setItem(key, String(value)); } catch (e) {}
+    }
+
+    function storageLoad(key, fallback) {
+      try {
+        const v = localStorage.getItem(key);
+        return (v === null || v === undefined) ? fallback : v;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
+    // Allow http(s) remote, else sanitize local path.
+    function safeImgSrc(imgName) {
+      const raw = String(imgName || '').trim();
+      if (!raw) return '';
+      if (/^https?:\/\//i.test(raw)) return raw;
+
+      const cleaned = raw.replace(/[^a-zA-Z0-9._/-]/g, '');
+      return `./images/${cleaned}`;
+    }
+
+    function computeCompletedCount() {
+      const done = completionState.reduce((acc, v) => acc + (v ? 1 : 0), 0);
+      DOM.completedCount.innerText = `${done}/${MAX_TILES}`;
+    }
+
+    /* ============================================
+       THEME
+       ============================================ */
+    function applyTheme(theme) {
+      if (!theme || theme === 'osrs') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+    }
+
+    function changeTheme(theme) {
+      applyTheme(theme);
+      storageSave(STORAGE_KEYS.theme, theme);
+      if (DOM.themeDropdown) DOM.themeDropdown.value = theme;
+    }
+
+    function restoreTheme() {
+      const saved = storageLoad(STORAGE_KEYS.theme, 'osrs');
+      applyTheme(saved);
+      if (DOM.themeDropdown) DOM.themeDropdown.value = saved;
+    }
+
+    /* ============================================
+       SYNC INTERVAL
+       ============================================ */
+    function changeSyncInterval(ms) {
+      currentSyncInterval = parseInt(ms, 10) || 30000;
+      storageSave(STORAGE_KEYS.syncInterval, currentSyncInterval);
+      restartSyncInterval();
+    }
+
+    function restartSyncInterval() {
+      if (syncIntervalId) clearInterval(syncIntervalId);
+      syncIntervalId = setInterval(() => fetchData(false), currentSyncInterval);
+    }
+
+    function restoreSyncInterval() {
+      const saved = parseInt(storageLoad(STORAGE_KEYS.syncInterval, '30000'), 10);
+      if (saved && !isNaN(saved)) currentSyncInterval = saved;
+      if (DOM.intervalDropdown) DOM.intervalDropdown.value = String(currentSyncInterval);
+    }
+
+    /* ============================================
+       MINIMAPS
+       ============================================ */
+    function buildMinimap(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      container.innerHTML = '';
+      const fragment = document.createDocumentFragment();
+
+      for (let i = 1; i <= MAX_TILES; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'mini-tile';
+        dot.dataset.index = String(i);
+        dot.innerText = String(i);
+
+        fragment.appendChild(dot);
+
+        if (!minimapNodesByIndex.has(i)) minimapNodesByIndex.set(i, []);
+        minimapNodesByIndex.get(i).push(dot);
+      }
+      container.appendChild(fragment);
+    }
+
+    function setMinimapComplete(index1Based, isCompleted) {
+      const nodes = minimapNodesByIndex.get(index1Based) || [];
+      for (const n of nodes) {
+        if (isCompleted) n.classList.add('complete');
+        else n.classList.remove('complete');
+      }
+    }
+
+    function resetAllMinimaps() {
+      for (let i = 1; i <= MAX_TILES; i++) setMinimapComplete(i, false);
+    }
+
+    /* ============================================
+       DATA
+       ============================================ */
+    function fetchGlobalData() {
+      const teamData = TEAM_MAP[currentTeamKey];
+      if (!teamData) return;
+
+      DOM.teamName.innerText = teamData.name;
+      DOM.totalPoints.innerText = Number(teamData.points || 0).toLocaleString();
+      codewordSecret = teamData.codeword || '';
+    }
+
+    function setSyncStatusOk() {
+      DOM.lastSyncText.classList.remove('sync-error');
+    }
+
+    function setSyncStatusError(msg) {
+      DOM.lastSyncText.classList.add('sync-error');
+      DOM.lastSyncText.innerText = `Sync failed: ${msg}`;
+    }
+
+    function flashSyncTime() {
+      const now = new Date().toLocaleTimeString();
+      DOM.lastSyncText.innerText = `Last Sync: ${now}`;
+      DOM.lastSyncText.classList.remove('sync-flash');
+      void DOM.lastSyncText.offsetWidth;
+      DOM.lastSyncText.classList.add('sync-flash');
+    }
+
+    async function fetchData(isManual = false) {
+      if (fetchController) fetchController.abort();
+      fetchController = new AbortController();
+
+      try {
+        const teamData = TEAM_MAP[currentTeamKey];
+        if (!teamData) return;
+
+        const response = await fetch(`${teamData.url}&t=${Date.now()}`, {
+          method: 'GET',
+          headers: { 'pragma': 'no-cache', 'cache-control': 'no-cache' },
+          signal: fetchController.signal
         });
 
-        /* ============================================
-           INITIALIZATION
-           ============================================ */
+        const rawData = normalizeNewlines(await response.text());
+        const dataHash = simpleHash(rawData);
 
-        function init() {
-            restoreTheme();
-            restoreSyncInterval();
+        if (!isManual && lastSeenHash === dataHash) return;
+        lastSeenHash = dataHash;
 
-            buildMinimap('minimap');
-            buildMinimap('minimap-floating');
+        setSyncStatusOk();
+        flashSyncTime();
 
-            for (let i = 0; i < MAX_TILES; i++) {
-                completionState.push(false);
+        // Reset per-sync state (prevents stale completion/map state)
+        completionState = Array(MAX_TILES).fill(false);
+        tileDataCache = Array(MAX_TILES).fill(null);
+        resetAllMinimaps();
+
+        const lines = rawData.split('\n');
+        const rows = lines.slice(1); // skip header
+        let tileCount = 0;
+
+        for (let r = 0; r < rows.length && tileCount < MAX_TILES; r++) {
+          const rawRow = rows[r];
+          if (!rawRow || !rawRow.trim()) continue;
+
+          const cols = parseCSVRow(rawRow.trim());
+          if (cols.length < 4) continue;
+
+          const tileIndex = tileCount; // pack rows into tiles 1..49
+          const id = tileIndex + 1;
+
+          const title = cols[0] || `Tile ${id}`;
+          const imgName = cols[1] || '';
+          const current = Math.max(0, parseInt(cols[2], 10) || 0);
+          const goal = Math.max(1, parseInt(cols[3], 10) || 1);
+
+          // NOTE: this assumes item list cell doesn't contain commas.
+          const itemList = cols[4] ? cols[4].split(',').filter(s => s.trim()) : [];
+          const description = cols[5] || '';
+          const pts = cols[6] || '0';
+
+          const percent = Math.min((current / goal) * 100, 100);
+          const isCompleted = percent === 100;
+
+          completionState[tileIndex] = isCompleted;
+          setMinimapComplete(id, isCompleted);
+
+          let checklistHtml = '';
+          for (const item of itemList) {
+            const trimmed = item.trim();
+            if (trimmed) {
+              checklistHtml += `<div class="check-item"><span class="check-mark"></span> ${escapeHTML(trimmed)}</div>`;
             }
+          }
 
-            fetchGlobalData();
-            fetchData();
+          tileDataCache[tileIndex] = {
+            id,
+            title,
+            img: safeImgSrc(imgName),
+            percent,
+            barColor: getProgressColor(percent),
+            checklistHtml: checklistHtml || `<div class="check-item">No items listed.</div>`,
+            description,
+            isCompleted,
+            points: pts,
+            noData: false
+          };
 
-            restartSyncInterval();
+          tileCount++;
         }
 
-        init();
-    </script>
+        // Fill missing tiles with placeholders so board remains 49 tiles
+        for (let i = 0; i < MAX_TILES; i++) {
+          if (!tileDataCache[i]) {
+            tileDataCache[i] = {
+              id: i + 1,
+              title: 'No Data',
+              img: '',
+              percent: 0,
+              barColor: getProgressColor(0),
+              checklistHtml: `<div class="check-item">No data available for this tile.</div>`,
+              description: '',
+              isCompleted: false,
+              points: '0',
+              noData: true
+            };
+          }
+        }
+
+        renderGrid();
+        computeCompletedCount();
+      } catch (e) {
+        if (e.name === 'AbortError') return;
+        console.error("Sync Error:", e);
+        setSyncStatusError('Network error');
+      } finally {
+        fetchController = null;
+      }
+    }
+
+    function renderGrid() {
+      DOM.grid.innerHTML = '';
+      const fragment = document.createDocumentFragment();
+
+      for (let i = 0; i < MAX_TILES; i++) {
+        const pkg = tileDataCache[i];
+        const isCompleted = !!pkg.isCompleted;
+
+        const tile = document.createElement('div');
+        tile.className = `tile${isCompleted ? ' completed' : ''}${pkg.noData ? ' no-data' : ''}`;
+        tile.setAttribute('role', 'button');
+        tile.setAttribute('tabindex', pkg.noData ? '-1' : '0');
+        tile.dataset.tileIndex = String(i);
+
+        const aria = pkg.noData
+          ? `Tile ${pkg.id}: No data`
+          : `Tile ${pkg.id}: ${pkg.title} - ${isCompleted ? 'Complete' : Math.round(pkg.percent) + '% complete'}`;
+        tile.setAttribute('aria-label', aria);
+
+        if (!pkg.noData) {
+          tile.addEventListener('click', (e) => openModalFromTile(tile, pkg, e));
+          tile.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              openModalFromTile(tile, pkg, e);
+            }
+          });
+        }
+
+        const safeTitle = escapeHTML(pkg.title);
+        const safePts = escapeHTML(pkg.points);
+
+        tile.innerHTML = `
+          <div class="header-box"><div class="header-content">${pkg.id} | ${safeTitle}</div></div>
+          <div class="img-container"><img alt="${safeTitle}"></div>
+          <div class="progress-container"><div class="progress-bg"><div class="progress-fill"></div></div></div>
+          <div class="checklist-box">${pkg.checklistHtml}</div>
+          <div class="point-badge">${safePts} PTS</div>
+        `;
+
+        const img = tile.querySelector('img');
+        if (pkg.img) {
+          img.style.visibility = 'visible';
+          img.addEventListener('error', () => handleImgError(img), { once: true });
+          img.src = pkg.img;
+        } else {
+          handleImgError(img);
+        }
+
+        const fill = tile.querySelector('.progress-fill');
+        fill.style.width = pkg.percent + '%';
+        fill.style.backgroundColor = pkg.barColor;
+
+        if (isCompleted) {
+          const pc = tile.querySelector('.progress-container');
+          if (pc) pc.style.display = 'none';
+        }
+
+        fragment.appendChild(tile);
+      }
+
+      DOM.grid.appendChild(fragment);
+    }
+
+    /* ============================================
+       MODAL
+       ============================================ */
+    function hideAllModalViews() {
+      DOM.standardView.style.display = 'none';
+      DOM.mapView.style.display = 'none';
+      DOM.settingsView.style.display = 'none';
+    }
+
+    function showModal(triggerEl, animateFromTrigger) {
+      // Un-ghost old active
+      if (currentActiveElement && currentActiveElement.isConnected) {
+        currentActiveElement.classList.remove('ghost');
+      }
+
+      lastTriggerElement = triggerEl || lastTriggerElement || null;
+
+      // Ghost tile/minimap trigger to create "pop from tile" effect
+      if (triggerEl && triggerEl.classList && triggerEl.classList.contains('tile')) {
+        currentActiveElement = triggerEl;
+        currentActiveElement.classList.add('ghost');
+      } else if (triggerEl && (triggerEl.id === 'mini-map-trigger' || triggerEl.id === 'mini-map-floating')) {
+        currentActiveElement = triggerEl;
+        currentActiveElement.classList.add('ghost');
+      } else {
+        currentActiveElement = triggerEl || null;
+      }
+
+      let rect;
+      if (animateFromTrigger && triggerEl && triggerEl.getBoundingClientRect) {
+        rect = triggerEl.getBoundingClientRect();
+      } else {
+        rect = { top: window.innerHeight / 2, left: window.innerWidth / 2, height: 0, width: 0 };
+      }
+
+      DOM.box.style.top = (rect.top + rect.height / 2) + 'px';
+      DOM.box.style.left = (rect.left + rect.width / 2) + 'px';
+
+      DOM.overlay.style.display = 'flex';
+      setTimeout(() => {
+        DOM.overlay.classList.add('active');
+        DOM.box.classList.add('active');
+        modalOpen = true;
+
+        const firstClose = DOM.box.querySelector('.modal-close-btn');
+        if (firstClose) firstClose.focus();
+      }, 10);
+
+      document.body.style.overflow = 'hidden';
+    }
+
+    function openModalFromTile(tileEl, data, ev) {
+      DOM.box.classList.remove('map-mode');
+
+      if (data.isCompleted) {
+        DOM.box.classList.add('completed');
+        DOM.modalProgressSection.style.display = 'none';
+      } else {
+        DOM.box.classList.remove('completed');
+        DOM.modalProgressSection.style.display = 'block';
+      }
+
+      hideAllModalViews();
+      DOM.standardView.style.display = 'block';
+
+      DOM.modalHeader.innerText = `${data.id} | ${data.title}`;
+
+      // Set modal image safely
+      DOM.modalImage.src = '';
+      DOM.modalImage.onerror = null;
+      DOM.modalImage.style.visibility = 'visible';
+      DOM.modalImage.alt = data.title;
+
+      if (data.img) {
+        DOM.modalImage.onerror = () => handleImgError(DOM.modalImage);
+        DOM.modalImage.src = data.img;
+      } else {
+        handleImgError(DOM.modalImage);
+      }
+
+      DOM.modalPoints.innerText = `${data.points} PTS`;
+      DOM.modalBar.style.width = data.percent + '%';
+      DOM.modalBar.style.backgroundColor = data.barColor;
+      DOM.modalList.innerHTML = data.checklistHtml;
+      DOM.modalDesc.innerText = data.description || '';
+
+      DOM.box.setAttribute('aria-label', `Details for tile ${data.id}: ${data.title}`);
+      showModal(tileEl, true);
+
+      if (ev) ev.stopPropagation();
+    }
+
+    function buildLargeMapGrid() {
+      DOM.largeMapGrid.innerHTML = '';
+      const mapFragment = document.createDocumentFragment();
+
+      for (let i = 1; i <= MAX_TILES; i++) {
+        const cell = document.createElement('div');
+        cell.className = `large-map-tile${completionState[i - 1] ? ' complete' : ''}`;
+        cell.innerText = String(i);
+        cell.setAttribute('role', 'button');
+        cell.setAttribute('tabindex', '0');
+        cell.setAttribute('aria-label', `Tile ${i}${completionState[i - 1] ? ' - Complete' : ''}`);
+
+        cell.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          const pkg = tileDataCache[i - 1];
+          if (pkg && !pkg.noData) openModalFromTile(cell, pkg, ev);
+        });
+
+        cell.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Enter' || ev.key === ' ') {
+            ev.preventDefault();
+            ev.stopPropagation();
+            const pkg = tileDataCache[i - 1];
+            if (pkg && !pkg.noData) openModalFromTile(cell, pkg, ev);
+          }
+        });
+
+        mapFragment.appendChild(cell);
+      }
+
+      DOM.largeMapGrid.appendChild(mapFragment);
+    }
+
+    function openMapModal(triggerEl) {
+      DOM.box.classList.add('map-mode');
+      DOM.box.classList.remove('completed');
+
+      hideAllModalViews();
+      DOM.mapView.style.display = 'flex';
+
+      buildLargeMapGrid();
+      DOM.box.setAttribute('aria-label', 'Bingo board overview map');
+
+      showModal(triggerEl, !!triggerEl);
+    }
+
+    function openMapModalFromTile() {
+      if (currentActiveElement && currentActiveElement.isConnected) {
+        currentActiveElement.classList.remove('ghost');
+      }
+      currentActiveElement = null;
+
+      DOM.box.classList.add('map-mode');
+      DOM.box.classList.remove('completed');
+
+      hideAllModalViews();
+      DOM.mapView.style.display = 'flex';
+
+      buildLargeMapGrid();
+      DOM.box.setAttribute('aria-label', 'Bingo board overview map');
+    }
+
+    function openSettingsModal(triggerEl) {
+      DOM.box.classList.remove('map-mode', 'completed');
+
+      hideAllModalViews();
+      DOM.settingsView.style.display = 'flex';
+
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'osrs';
+      if (DOM.themeDropdown) DOM.themeDropdown.value = currentTheme;
+      if (DOM.intervalDropdown) DOM.intervalDropdown.value = String(currentSyncInterval);
+
+      DOM.box.setAttribute('aria-label', 'Settings');
+      showModal(triggerEl, true);
+    }
+
+    function closeModal() {
+      DOM.overlay.classList.remove('active');
+      DOM.box.classList.remove('active');
+      modalOpen = false;
+
+      if (currentActiveElement && currentActiveElement.isConnected) {
+        currentActiveElement.classList.remove('ghost');
+      }
+
+      setTimeout(() => {
+        DOM.overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+
+        if (lastTriggerElement && typeof lastTriggerElement.focus === 'function') {
+          lastTriggerElement.focus();
+        }
+      }, 500);
+    }
+
+    function trapFocusInModal(e) {
+      if (!modalOpen) return;
+      if (e.key !== 'Tab') return;
+
+      const focusable = DOM.box.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+
+      const list = Array.from(focusable).filter(el => !el.disabled && el.offsetParent !== null);
+      if (list.length === 0) return;
+
+      const first = list[0];
+      const last = list[list.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    /* ============================================
+       CODEWORD
+       ============================================ */
+    function setCodewordVisible(visible) {
+      if (visible) {
+        DOM.codeword.classList.remove('codeword-hidden');
+        DOM.codeword.innerText = codewordSecret || '';
+        DOM.codeword.setAttribute('aria-label', 'Codeword: ' + (codewordSecret || '') + '. Click to hide.');
+      } else {
+        DOM.codeword.classList.add('codeword-hidden');
+        DOM.codeword.innerText = "?????";
+        DOM.codeword.setAttribute('aria-label', 'Codeword hidden. Click to reveal.');
+      }
+      storageSave(STORAGE_KEYS.codewordVisible, visible ? '1' : '0');
+    }
+
+    function toggleCodeword() {
+      const hidden = DOM.codeword.classList.contains('codeword-hidden');
+      setCodewordVisible(hidden);
+    }
+
+    function restoreCodewordVisibility() {
+      const v = storageLoad(STORAGE_KEYS.codewordVisible, '0');
+      setCodewordVisible(v === '1');
+    }
+
+    /* ============================================
+       KEYBOARD SHORTCUTS + GRID ARROW NAV
+       ============================================ */
+    function isTile(el) {
+      return el && el.classList && el.classList.contains('tile') && el.hasAttribute('data-tile-index');
+    }
+
+    function moveTileFocus(currentEl, delta) {
+      const idx = parseInt(currentEl.dataset.tileIndex, 10);
+      if (Number.isNaN(idx)) return;
+      const next = idx + delta;
+      if (next < 0 || next >= MAX_TILES) return;
+      const nextEl = DOM.grid.querySelector(`.tile[data-tile-index="${next}"]`);
+      if (nextEl && nextEl.tabIndex >= 0) nextEl.focus();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (modalOpen) {
+        if (e.key === 'Escape') closeModal();
+        else trapFocusInModal(e);
+        return;
+      }
+
+      const active = document.activeElement;
+      if (!isTile(active)) return;
+
+      if (e.key === 'ArrowRight') { e.preventDefault(); moveTileFocus(active, +1); }
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); moveTileFocus(active, -1); }
+      if (e.key === 'ArrowDown')  { e.preventDefault(); moveTileFocus(active, +7); }
+      if (e.key === 'ArrowUp')    { e.preventDefault(); moveTileFocus(active, -7); }
+    });
+
+    /* ============================================
+       EVENTS
+       ============================================ */
+    function wireEvents() {
+      // Codeword
+      DOM.codeword.addEventListener('click', toggleCodeword);
+      DOM.codeword.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleCodeword();
+        }
+      });
+
+      // Minimap triggers
+      const wireOpenMap = (el) => {
+        el.addEventListener('click', () => openMapModal(el));
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openMapModal(el);
+          }
+        });
+      };
+      wireOpenMap(DOM.miniMapTrigger);
+      wireOpenMap(DOM.miniMapFloating);
+
+      // Settings
+      DOM.settingsTrigger.addEventListener('click', () => openSettingsModal(DOM.settingsTrigger));
+      DOM.settingsTrigger.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openSettingsModal(DOM.settingsTrigger);
+        }
+      });
+
+      // Sync now
+      DOM.syncNow.addEventListener('click', () => fetchData(true));
+      DOM.syncNow.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          fetchData(true);
+        }
+      });
+
+      // Modal close buttons
+      for (const btn of DOM.modalCloses) {
+        btn.addEventListener('click', closeModal);
+      }
+
+      // Overlay click closes modal (but clicking inside box does not)
+      DOM.overlay.addEventListener('click', (e) => {
+        if (e.target === DOM.overlay) closeModal();
+      });
+      DOM.box.addEventListener('click', (e) => e.stopPropagation());
+
+      // Back-to-map button from tile modal
+      DOM.modalMapBack.addEventListener('click', openMapModalFromTile);
+
+      // Settings dropdowns
+      DOM.themeDropdown.addEventListener('change', () => changeTheme(DOM.themeDropdown.value));
+      DOM.intervalDropdown.addEventListener('change', () => changeSyncInterval(DOM.intervalDropdown.value));
+
+      // Pause/resume syncing when tab hidden
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          if (syncIntervalId) clearInterval(syncIntervalId);
+          syncIntervalId = null;
+        } else {
+          restartSyncInterval();
+          // Optional: immediate refresh when returning
+          fetchData(false);
+        }
+      });
+    }
+
+    /* ============================================
+       INIT
+       ============================================ */
+    function init() {
+      cacheDom();
+      wireEvents();
+
+      minimapNodesByIndex.clear();
+      buildMinimap('minimap');
+      buildMinimap('minimap-floating');
+
+      restoreTheme();
+      restoreSyncInterval();
+
+      fetchGlobalData();
+      restoreCodewordVisibility();
+
+      fetchData(false);
+      restartSyncInterval();
+    }
+
+    init();
+  </script>
 </body>
 </html>
