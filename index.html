@@ -665,13 +665,24 @@
 
     // Allow http(s) remote, else sanitize local path.
     function safeImgSrc(imgName) {
-      const raw = String(imgName || '').trim();
-      if (!raw) return '';
-      if (/^https?:\/\//i.test(raw)) return raw;
+  const raw = String(imgName || '').trim();
+  if (!raw) return '';
 
-      const cleaned = raw.replace(/[^a-zA-Z0-9._/-]/g, '');
-      return `./images/${cleaned}`;
-    }
+  // Allow only http/https for remote images
+  if (/^https?:\/\//i.test(raw)) return raw;
+
+  // Prevent path traversal and normalize slashes
+  const parts = raw
+    .replace(/\\/g, '/')
+    .split('/')
+    .filter(Boolean)
+    .filter(p => p !== '.' && p !== '..');
+
+  // Encode each segment so spaces/apostrophes work in URLs
+  const encoded = parts.map(p => encodeURIComponent(p)).join('/');
+
+  return `./images/${encoded}`;
+}
 
     function computeCompletedCount() {
       const done = completionState.reduce((acc, v) => acc + (v ? 1 : 0), 0);
@@ -858,7 +869,7 @@
             img: safeImgSrc(imgName),
             percent,
             barColor: getProgressColor(percent),
-            checklistHtml: checklistHtml || `<div class="check-item">No items listed.</div>`,
+            checklistHtml: checklistHtml,
             description,
             isCompleted,
             points: pts,
