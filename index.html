@@ -508,835 +508,649 @@
     </div>
   </div>
 
-  <script>
-    /* ============================================
-       CONSTANTS & STATE
-       ============================================ */
-    const APP_VERSION = '3.083';
+<script>
+(() => {
+  /* =========================
+     CONFIG / STATE
+     ========================= */
+  const APP_VERSION = '3.083';
+  const MAX_TILES = 49;
 
-    const TEAM_MAP = {
-      "Warriors": {
-        name: "The Spreadsheet Warriors",
-        url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
-        codeword: "BINGO_BLITZ",
-        points: 1250
-      }
-    };
-
-    const MAX_TILES = 49;
-    const STORAGE_KEYS = {
-      theme: 'bingo-theme',
-      syncInterval: 'bingo-sync-interval',
-      codewordVisible: 'bingo-codeword-visible'
-    };
-
-    let currentTeamKey = "Warriors";
-
-    let currentActiveElement = null;  // element temporarily "ghosted"
-    let lastTriggerElement = null;    // for restoring focus
-    let lastSeenHash = null;
-
-    let codewordSecret = "";
-    let completionState = Array(MAX_TILES).fill(false);
-    let tileDataCache = Array(MAX_TILES).fill(null);
-
-    let fetchController = null;
-    let syncIntervalId = null;
-    let currentSyncInterval = 30000;
-    let modalOpen = false;
-
-    // Cache minimap nodes to avoid querySelectorAll on each update:
-    // index(1..49) => [nodeInDashboardMinimap, nodeInFloatingMinimap]
-    const minimapNodesByIndex = new Map();
-
-    // Cached DOM refs
-    const DOM = {};
-    function cacheDom() {
-      DOM.teamName = document.getElementById('team-name');
-      DOM.totalPoints = document.getElementById('total-points');
-      DOM.completedCount = document.getElementById('completed-count');
-      DOM.codeword = document.getElementById('codeword-display');
-
-      DOM.grid = document.getElementById('grid');
-      DOM.lastSyncText = document.getElementById('last-sync-text');
-
-      DOM.miniMapTrigger = document.getElementById('mini-map-trigger');
-      DOM.miniMapFloating = document.getElementById('mini-map-floating');
-
-      DOM.settingsTrigger = document.getElementById('settings-trigger');
-      DOM.syncNow = document.getElementById('sync-now');
-
-      DOM.overlay = document.getElementById('modal-overlay');
-      DOM.box = document.getElementById('modal-box');
-
-      DOM.standardView = document.getElementById('standard-modal-view');
-      DOM.mapView = document.getElementById('map-modal-view');
-      DOM.settingsView = document.getElementById('settings-modal-view');
-
-      DOM.modalHeader = document.getElementById('modal-header');
-      DOM.modalImage = document.getElementById('modal-image');
-      DOM.modalProgressSection = document.getElementById('modal-progress-section');
-      DOM.modalBar = document.getElementById('modal-bar');
-      DOM.modalList = document.getElementById('modal-list');
-      DOM.modalDesc = document.getElementById('modal-desc');
-      DOM.modalPoints = document.getElementById('modal-points');
-
-      DOM.largeMapGrid = document.getElementById('large-map-grid');
-      DOM.modalMapBack = document.getElementById('modal-map-back');
-
-      DOM.themeDropdown = document.getElementById('settings-theme-dropdown');
-      DOM.intervalDropdown = document.getElementById('settings-sync-interval');
-
-      DOM.modalCloses = [
-        document.getElementById('modal-close-1'),
-        document.getElementById('modal-close-2'),
-        document.getElementById('modal-close-3')
-      ].filter(Boolean);
+  const TEAM_MAP = {
+    Warriors: {
+      name: "The Spreadsheet Warriors",
+      url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
+      codeword: "BINGO_BLITZ",
+      points: 1250
     }
+  };
 
-    /* ============================================
-       UTILS
-       ============================================ */
-    function escapeHTML(str) {
-      const div = document.createElement('div');
-      div.appendChild(document.createTextNode(String(str ?? '')));
-      return div.innerHTML;
-    }
+  const STORAGE_KEYS = {
+    theme: 'bingo-theme',
+    syncInterval: 'bingo-sync-interval',
+    codewordVisible: 'bingo-codeword-visible'
+  };
 
-    function simpleHash(str) {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        const ch = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + ch;
-        hash |= 0;
-      }
-      return hash;
-    }
+  let currentTeamKey = 'Warriors';
+  let codewordSecret = '';
+  let lastSeenHash = null;
 
-    function normalizeNewlines(str) {
-      return String(str).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    }
+  let completion = Array(MAX_TILES).fill(false);
+  let tiles = Array(MAX_TILES).fill(null);
 
-    // NOTE: Still row-based; does not support multi-line CSV fields.
-    function parseCSVRow(row) {
-      const cols = [];
-      let current = '';
-      let inQuotes = false;
+  let fetchController = null;
+  let syncIntervalId = null;
+  let syncMs = 30000;
 
-      for (let i = 0; i < row.length; i++) {
-        const ch = row[i];
-        if (inQuotes) {
-          if (ch === '"' && row[i + 1] === '"') { current += '"'; i++; }
-          else if (ch === '"') { inQuotes = false; }
-          else { current += ch; }
-        } else {
-          if (ch === '"') inQuotes = true;
-          else if (ch === ',') { cols.push(current.trim()); current = ''; }
-          else current += ch;
-        }
-      }
-      cols.push(current.trim());
-      return cols;
-    }
+  let modalOpen = false;
+  let lastTriggerEl = null;
+  let ghostEl = null;
 
-    function getProgressColor(percent) {
-      if (percent >= 100) return 'var(--text-completed)';
-      const hue = (percent * 120) / 100;
-      return `hsl(${hue}, 70%, 45%)`;
-    }
+  /* =========================
+     DOM HELPERS
+     ========================= */
+  const $ = (id) => document.getElementById(id);
 
-    function handleImgError(img) {
-      img.style.visibility = 'hidden';
-      img.removeAttribute('src');
-    }
+  const DOM = {
+    teamName: $('team-name'),
+    totalPoints: $('total-points'),
+    completedCount: $('completed-count'),
+    codeword: $('codeword-display'),
+    grid: $('grid'),
+    lastSync: $('last-sync-text'),
+    syncNow: $('sync-now'),
+    settingsTrigger: $('settings-trigger'),
+    miniDash: $('mini-map-trigger'),
+    miniFloat: $('mini-map-floating'),
 
-    function storageSave(key, value) {
-      try { localStorage.setItem(key, String(value)); } catch (e) {}
-    }
+    overlay: $('modal-overlay'),
+    box: $('modal-box'),
 
-    function storageLoad(key, fallback) {
-      try {
-        const v = localStorage.getItem(key);
-        return (v === null || v === undefined) ? fallback : v;
-      } catch (e) {
-        return fallback;
-      }
-    }
+    viewStd: $('standard-modal-view'),
+    viewMap: $('map-modal-view'),
+    viewSettings: $('settings-modal-view'),
 
-    // Allow http(s) remote, else sanitize local path.
-    function safeImgSrc(imgName) {
-  const raw = String(imgName || '').trim();
-  if (!raw) return '';
+    modalHeader: $('modal-header'),
+    modalImage: $('modal-image'),
+    modalProgressSection: $('modal-progress-section'),
+    modalBar: $('modal-bar'),
+    modalList: $('modal-list'),
+    modalDesc: $('modal-desc'),
+    modalPoints: $('modal-points'),
 
-  // Allow only http/https for remote images
-  if (/^https?:\/\//i.test(raw)) return raw;
+    mapBack: $('modal-map-back'),
+    bigMap: $('large-map-grid'),
 
-  // Prevent path traversal and normalize slashes
-  const parts = raw
-    .replace(/\\/g, '/')
-    .split('/')
-    .filter(Boolean)
-    .filter(p => p !== '.' && p !== '..');
+    themeSel: $('settings-theme-dropdown'),
+    intervalSel: $('settings-sync-interval'),
+  };
 
-  // Encode each segment so spaces/apostrophes work in URLs
-  const encoded = parts.map(p => encodeURIComponent(p)).join('/');
+  // Minimaps: index 1..49 => [node,node]
+  const miniNodes = Array.from({ length: MAX_TILES + 1 }, () => []);
 
-  return `./images/${encoded}`;
-}
+  /* =========================
+     SMALL UTILS
+     ========================= */
+  const storageSave = (k, v) => { try { localStorage.setItem(k, String(v)); } catch {} };
+  const storageLoad = (k, fb) => { try { const v = localStorage.getItem(k); return v ?? fb; } catch { return fb; } };
 
-    function computeCompletedCount() {
-      const done = completionState.reduce((acc, v) => acc + (v ? 1 : 0), 0);
-      DOM.completedCount.innerText = `${done}/${MAX_TILES}`;
-    }
+  const normalizeNL = (s) => String(s).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
-    /* ============================================
-       THEME
-       ============================================ */
-    function applyTheme(theme) {
-      if (!theme || theme === 'osrs') {
-        document.documentElement.removeAttribute('data-theme');
+  const simpleHash = (str) => {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; }
+    return h;
+  };
+
+  const escapeHTML = (str) => {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(String(str ?? '')));
+    return d.innerHTML;
+  };
+
+  const parseCSVRow = (row) => {
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < row.length; i++) {
+      const ch = row[i];
+      if (inQ) {
+        if (ch === '"' && row[i + 1] === '"') { cur += '"'; i++; }
+        else if (ch === '"') inQ = false;
+        else cur += ch;
       } else {
-        document.documentElement.setAttribute('data-theme', theme);
+        if (ch === '"') inQ = true;
+        else if (ch === ',') { cols.push(cur.trim()); cur = ''; }
+        else cur += ch;
       }
     }
+    cols.push(cur.trim());
+    return cols;
+  };
 
-    function changeTheme(theme) {
-      applyTheme(theme);
-      storageSave(STORAGE_KEYS.theme, theme);
-      if (DOM.themeDropdown) DOM.themeDropdown.value = theme;
+  const getProgressColor = (pct) => {
+    if (pct >= 100) return 'var(--text-completed)';
+    const hue = (pct * 120) / 100;
+    return `hsl(${hue}, 70%, 45%)`;
+  };
+
+  const handleImgError = (img) => {
+    img.style.visibility = 'hidden';
+    img.removeAttribute('src');
+  };
+
+  // FIX: supports spaces/apostrophes by URL-encoding, blocks traversal
+  const safeImgSrc = (imgName) => {
+    const raw = String(imgName || '').trim();
+    if (!raw) return '';
+    if (/^https?:\/\//i.test(raw)) return raw;
+
+    const parts = raw.replace(/\\/g, '/')
+      .split('/')
+      .filter(Boolean)
+      .filter(p => p !== '.' && p !== '..');
+
+    return `./images/${parts.map(encodeURIComponent).join('/')}`;
+  };
+
+  const applyTheme = (theme) => {
+    if (!theme || theme === 'osrs') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', theme);
+  };
+
+  const hideViews = () => {
+    DOM.viewStd.style.display = 'none';
+    DOM.viewMap.style.display = 'none';
+    DOM.viewSettings.style.display = 'none';
+  };
+
+  const setMinimapComplete = (id1, done) => {
+    for (const n of miniNodes[id1]) n.classList.toggle('complete', !!done);
+  };
+
+  const resetMinimaps = () => {
+    for (let i = 1; i <= MAX_TILES; i++) setMinimapComplete(i, false);
+  };
+
+  const updateCompletedStat = () => {
+    const done = completion.reduce((a, v) => a + (v ? 1 : 0), 0);
+    DOM.completedCount.innerText = `${done}/${MAX_TILES}`;
+  };
+
+  const flashSync = () => {
+    DOM.lastSync.classList.remove('sync-error');
+    DOM.lastSync.innerText = `Last Sync: ${new Date().toLocaleTimeString()}`;
+    DOM.lastSync.classList.remove('sync-flash');
+    void DOM.lastSync.offsetWidth;
+    DOM.lastSync.classList.add('sync-flash');
+  };
+
+  const syncError = (msg) => {
+    DOM.lastSync.classList.add('sync-error');
+    DOM.lastSync.innerText = `Sync failed: ${msg}`;
+  };
+
+  /* =========================
+     MINIMAP BUILD
+     ========================= */
+  const buildMinimap = (containerId) => {
+    const el = $(containerId);
+    if (!el) return;
+    el.innerHTML = '';
+
+    const frag = document.createDocumentFragment();
+    for (let i = 1; i <= MAX_TILES; i++) {
+      const d = document.createElement('div');
+      d.className = 'mini-tile';
+      d.dataset.index = String(i);
+      d.innerText = String(i);
+      frag.appendChild(d);
+      miniNodes[i].push(d);
     }
-
-    function restoreTheme() {
-      const saved = storageLoad(STORAGE_KEYS.theme, 'osrs');
-      applyTheme(saved);
-      if (DOM.themeDropdown) DOM.themeDropdown.value = saved;
-    }
-
-    /* ============================================
-       SYNC INTERVAL
-       ============================================ */
-    function changeSyncInterval(ms) {
-      currentSyncInterval = parseInt(ms, 10) || 30000;
-      storageSave(STORAGE_KEYS.syncInterval, currentSyncInterval);
-      restartSyncInterval();
-    }
-
-    function restartSyncInterval() {
-      if (syncIntervalId) clearInterval(syncIntervalId);
-      syncIntervalId = setInterval(() => fetchData(false), currentSyncInterval);
-    }
-
-    function restoreSyncInterval() {
-      const saved = parseInt(storageLoad(STORAGE_KEYS.syncInterval, '30000'), 10);
-      if (saved && !isNaN(saved)) currentSyncInterval = saved;
-      if (DOM.intervalDropdown) DOM.intervalDropdown.value = String(currentSyncInterval);
-    }
-
-    /* ============================================
-       MINIMAPS
-       ============================================ */
-    function buildMinimap(containerId) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-
-      container.innerHTML = '';
-      const fragment = document.createDocumentFragment();
-
-      for (let i = 1; i <= MAX_TILES; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'mini-tile';
-        dot.dataset.index = String(i);
-        dot.innerText = String(i);
-
-        fragment.appendChild(dot);
-
-        if (!minimapNodesByIndex.has(i)) minimapNodesByIndex.set(i, []);
-        minimapNodesByIndex.get(i).push(dot);
-      }
-      container.appendChild(fragment);
-    }
-
-    function setMinimapComplete(index1Based, isCompleted) {
-      const nodes = minimapNodesByIndex.get(index1Based) || [];
-      for (const n of nodes) {
-        if (isCompleted) n.classList.add('complete');
-        else n.classList.remove('complete');
-      }
-    }
-
-    function resetAllMinimaps() {
-      for (let i = 1; i <= MAX_TILES; i++) setMinimapComplete(i, false);
-    }
-
-    /* ============================================
-       DATA
-       ============================================ */
-    function fetchGlobalData() {
-      const teamData = TEAM_MAP[currentTeamKey];
-      if (!teamData) return;
-
-      DOM.teamName.innerText = teamData.name;
-      DOM.totalPoints.innerText = Number(teamData.points || 0).toLocaleString();
-      codewordSecret = teamData.codeword || '';
-    }
-
-    function setSyncStatusOk() {
-      DOM.lastSyncText.classList.remove('sync-error');
-    }
-
-    function setSyncStatusError(msg) {
-      DOM.lastSyncText.classList.add('sync-error');
-      DOM.lastSyncText.innerText = `Sync failed: ${msg}`;
-    }
-
-    function flashSyncTime() {
-      const now = new Date().toLocaleTimeString();
-      DOM.lastSyncText.innerText = `Last Sync: ${now}`;
-      DOM.lastSyncText.classList.remove('sync-flash');
-      void DOM.lastSyncText.offsetWidth;
-      DOM.lastSyncText.classList.add('sync-flash');
-    }
-
-    async function fetchData(isManual = false) {
-      if (fetchController) fetchController.abort();
-      fetchController = new AbortController();
-
-      try {
-        const teamData = TEAM_MAP[currentTeamKey];
-        if (!teamData) return;
-
-        const response = await fetch(`${teamData.url}&t=${Date.now()}`, {
-          method: 'GET',
-          headers: { 'pragma': 'no-cache', 'cache-control': 'no-cache' },
-          signal: fetchController.signal
-        });
-
-        const rawData = normalizeNewlines(await response.text());
-        const dataHash = simpleHash(rawData);
-
-        if (!isManual && lastSeenHash === dataHash) return;
-        lastSeenHash = dataHash;
-
-        setSyncStatusOk();
-        flashSyncTime();
-
-        // Reset per-sync state (prevents stale completion/map state)
-        completionState = Array(MAX_TILES).fill(false);
-        tileDataCache = Array(MAX_TILES).fill(null);
-        resetAllMinimaps();
-
-        const lines = rawData.split('\n');
-        const rows = lines.slice(1); // skip header
-        let tileCount = 0;
-
-        for (let r = 0; r < rows.length && tileCount < MAX_TILES; r++) {
-          const rawRow = rows[r];
-          if (!rawRow || !rawRow.trim()) continue;
-
-          const cols = parseCSVRow(rawRow.trim());
-          if (cols.length < 4) continue;
-
-          const tileIndex = tileCount; // pack rows into tiles 1..49
-          const id = tileIndex + 1;
-
-          const title = cols[0] || `Tile ${id}`;
-          const imgName = cols[1] || '';
-          const current = Math.max(0, parseInt(cols[2], 10) || 0);
-          const goal = Math.max(1, parseInt(cols[3], 10) || 1);
-
-          // NOTE: this assumes item list cell doesn't contain commas.
-          const itemList = cols[4] ? cols[4].split(',').filter(s => s.trim()) : [];
-          const description = cols[5] || '';
-          const pts = cols[6] || '0';
-
-          const percent = Math.min((current / goal) * 100, 100);
-          const isCompleted = percent === 100;
-
-          completionState[tileIndex] = isCompleted;
-          setMinimapComplete(id, isCompleted);
-
-          let checklistHtml = '';
-          for (const item of itemList) {
-            const trimmed = item.trim();
-            if (trimmed) {
-              checklistHtml += `<div class="check-item"><span class="check-mark"></span> ${escapeHTML(trimmed)}</div>`;
-            }
-          }
-
-          tileDataCache[tileIndex] = {
-            id,
-            title,
-            img: safeImgSrc(imgName),
-            percent,
-            barColor: getProgressColor(percent),
-            checklistHtml: checklistHtml,
-            description,
-            isCompleted,
-            points: pts,
-            noData: false
-          };
-
-          tileCount++;
-        }
-
-        // Fill missing tiles with placeholders so board remains 49 tiles
-        for (let i = 0; i < MAX_TILES; i++) {
-          if (!tileDataCache[i]) {
-            tileDataCache[i] = {
-              id: i + 1,
-              title: 'No Data',
-              img: '',
-              percent: 0,
-              barColor: getProgressColor(0),
-              checklistHtml: `<div class="check-item">No data available for this tile.</div>`,
-              description: '',
-              isCompleted: false,
-              points: '0',
-              noData: true
-            };
-          }
-        }
-
-        renderGrid();
-        computeCompletedCount();
-      } catch (e) {
-        if (e.name === 'AbortError') return;
-        console.error("Sync Error:", e);
-        setSyncStatusError('Network error');
-      } finally {
-        fetchController = null;
-      }
-    }
-
-    function renderGrid() {
-      DOM.grid.innerHTML = '';
-      const fragment = document.createDocumentFragment();
-
-      for (let i = 0; i < MAX_TILES; i++) {
-        const pkg = tileDataCache[i];
-        const isCompleted = !!pkg.isCompleted;
-
-        const tile = document.createElement('div');
-        tile.className = `tile${isCompleted ? ' completed' : ''}${pkg.noData ? ' no-data' : ''}`;
-        tile.setAttribute('role', 'button');
-        tile.setAttribute('tabindex', pkg.noData ? '-1' : '0');
-        tile.dataset.tileIndex = String(i);
-
-        const aria = pkg.noData
-          ? `Tile ${pkg.id}: No data`
-          : `Tile ${pkg.id}: ${pkg.title} - ${isCompleted ? 'Complete' : Math.round(pkg.percent) + '% complete'}`;
-        tile.setAttribute('aria-label', aria);
-
-        if (!pkg.noData) {
-          tile.addEventListener('click', (e) => openModalFromTile(tile, pkg, e));
-          tile.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              openModalFromTile(tile, pkg, e);
-            }
-          });
-        }
-
-        const safeTitle = escapeHTML(pkg.title);
-        const safePts = escapeHTML(pkg.points);
-
-        tile.innerHTML = `
-          <div class="header-box"><div class="header-content">${pkg.id} | ${safeTitle}</div></div>
-          <div class="img-container"><img alt="${safeTitle}"></div>
-          <div class="progress-container"><div class="progress-bg"><div class="progress-fill"></div></div></div>
-          <div class="checklist-box">${pkg.checklistHtml}</div>
-          <div class="point-badge">${safePts} PTS</div>
-        `;
-
-        const img = tile.querySelector('img');
-        if (pkg.img) {
-          img.style.visibility = 'visible';
-          img.addEventListener('error', () => handleImgError(img), { once: true });
-          img.src = pkg.img;
-        } else {
-          handleImgError(img);
-        }
-
-        const fill = tile.querySelector('.progress-fill');
-        fill.style.width = pkg.percent + '%';
-        fill.style.backgroundColor = pkg.barColor;
-
-        if (isCompleted) {
-          const pc = tile.querySelector('.progress-container');
-          if (pc) pc.style.display = 'none';
-        }
-
-        fragment.appendChild(tile);
-      }
-
-      DOM.grid.appendChild(fragment);
-    }
-
-    /* ============================================
-       MODAL
-       ============================================ */
-    function hideAllModalViews() {
-      DOM.standardView.style.display = 'none';
-      DOM.mapView.style.display = 'none';
-      DOM.settingsView.style.display = 'none';
-    }
-
-    function showModal(triggerEl, animateFromTrigger) {
-      // Un-ghost old active
-      if (currentActiveElement && currentActiveElement.isConnected) {
-        currentActiveElement.classList.remove('ghost');
-      }
-
-      lastTriggerElement = triggerEl || lastTriggerElement || null;
-
-      // Ghost tile/minimap trigger to create "pop from tile" effect
-      if (triggerEl && triggerEl.classList && triggerEl.classList.contains('tile')) {
-        currentActiveElement = triggerEl;
-        currentActiveElement.classList.add('ghost');
-      } else if (triggerEl && (triggerEl.id === 'mini-map-trigger' || triggerEl.id === 'mini-map-floating')) {
-        currentActiveElement = triggerEl;
-        currentActiveElement.classList.add('ghost');
-      } else {
-        currentActiveElement = triggerEl || null;
-      }
-
-      let rect;
-      if (animateFromTrigger && triggerEl && triggerEl.getBoundingClientRect) {
-        rect = triggerEl.getBoundingClientRect();
-      } else {
-        rect = { top: window.innerHeight / 2, left: window.innerWidth / 2, height: 0, width: 0 };
-      }
-
-      DOM.box.style.top = (rect.top + rect.height / 2) + 'px';
-      DOM.box.style.left = (rect.left + rect.width / 2) + 'px';
-
-      DOM.overlay.style.display = 'flex';
-      setTimeout(() => {
-        DOM.overlay.classList.add('active');
-        DOM.box.classList.add('active');
-        modalOpen = true;
-
-        const firstClose = DOM.box.querySelector('.modal-close-btn');
-        if (firstClose) firstClose.focus();
-      }, 10);
-
-      document.body.style.overflow = 'hidden';
-    }
-
-    function openModalFromTile(tileEl, data, ev) {
-      DOM.box.classList.remove('map-mode');
-
-      if (data.isCompleted) {
-        DOM.box.classList.add('completed');
-        DOM.modalProgressSection.style.display = 'none';
-      } else {
-        DOM.box.classList.remove('completed');
-        DOM.modalProgressSection.style.display = 'block';
-      }
-
-      hideAllModalViews();
-      DOM.standardView.style.display = 'block';
-
-      DOM.modalHeader.innerText = `${data.id} | ${data.title}`;
-
-      // Set modal image safely
-      DOM.modalImage.src = '';
-      DOM.modalImage.onerror = null;
-      DOM.modalImage.style.visibility = 'visible';
-      DOM.modalImage.alt = data.title;
-
-      if (data.img) {
-        DOM.modalImage.onerror = () => handleImgError(DOM.modalImage);
-        DOM.modalImage.src = data.img;
-      } else {
-        handleImgError(DOM.modalImage);
-      }
-
-      DOM.modalPoints.innerText = `${data.points} PTS`;
-      DOM.modalBar.style.width = data.percent + '%';
-      DOM.modalBar.style.backgroundColor = data.barColor;
-      DOM.modalList.innerHTML = data.checklistHtml;
-      DOM.modalDesc.innerText = data.description || '';
-
-      DOM.box.setAttribute('aria-label', `Details for tile ${data.id}: ${data.title}`);
-      showModal(tileEl, true);
-
-      if (ev) ev.stopPropagation();
-    }
-
-    function buildLargeMapGrid() {
-      DOM.largeMapGrid.innerHTML = '';
-      const mapFragment = document.createDocumentFragment();
-
-      for (let i = 1; i <= MAX_TILES; i++) {
-        const cell = document.createElement('div');
-        cell.className = `large-map-tile${completionState[i - 1] ? ' complete' : ''}`;
-        cell.innerText = String(i);
-        cell.setAttribute('role', 'button');
-        cell.setAttribute('tabindex', '0');
-        cell.setAttribute('aria-label', `Tile ${i}${completionState[i - 1] ? ' - Complete' : ''}`);
-
-        cell.addEventListener('click', (ev) => {
-          ev.stopPropagation();
-          const pkg = tileDataCache[i - 1];
-          if (pkg && !pkg.noData) openModalFromTile(cell, pkg, ev);
-        });
-
-        cell.addEventListener('keydown', (ev) => {
-          if (ev.key === 'Enter' || ev.key === ' ') {
-            ev.preventDefault();
-            ev.stopPropagation();
-            const pkg = tileDataCache[i - 1];
-            if (pkg && !pkg.noData) openModalFromTile(cell, pkg, ev);
-          }
-        });
-
-        mapFragment.appendChild(cell);
-      }
-
-      DOM.largeMapGrid.appendChild(mapFragment);
-    }
-
-    function openMapModal(triggerEl) {
-      DOM.box.classList.add('map-mode');
-      DOM.box.classList.remove('completed');
-
-      hideAllModalViews();
-      DOM.mapView.style.display = 'flex';
-
-      buildLargeMapGrid();
-      DOM.box.setAttribute('aria-label', 'Bingo board overview map');
-
-      showModal(triggerEl, !!triggerEl);
-    }
-
-    function openMapModalFromTile() {
-      if (currentActiveElement && currentActiveElement.isConnected) {
-        currentActiveElement.classList.remove('ghost');
-      }
-      currentActiveElement = null;
-
-      DOM.box.classList.add('map-mode');
-      DOM.box.classList.remove('completed');
-
-      hideAllModalViews();
-      DOM.mapView.style.display = 'flex';
-
-      buildLargeMapGrid();
-      DOM.box.setAttribute('aria-label', 'Bingo board overview map');
-    }
-
-    function openSettingsModal(triggerEl) {
-      DOM.box.classList.remove('map-mode', 'completed');
-
-      hideAllModalViews();
-      DOM.settingsView.style.display = 'flex';
-
-      const currentTheme = document.documentElement.getAttribute('data-theme') || 'osrs';
-      if (DOM.themeDropdown) DOM.themeDropdown.value = currentTheme;
-      if (DOM.intervalDropdown) DOM.intervalDropdown.value = String(currentSyncInterval);
-
-      DOM.box.setAttribute('aria-label', 'Settings');
-      showModal(triggerEl, true);
-    }
-
-    function closeModal() {
-      DOM.overlay.classList.remove('active');
-      DOM.box.classList.remove('active');
-      modalOpen = false;
-
-      if (currentActiveElement && currentActiveElement.isConnected) {
-        currentActiveElement.classList.remove('ghost');
-      }
-
-      setTimeout(() => {
-        DOM.overlay.style.display = 'none';
-        document.body.style.overflow = 'auto';
-
-        if (lastTriggerElement && typeof lastTriggerElement.focus === 'function') {
-          lastTriggerElement.focus();
-        }
-      }, 500);
-    }
-
-    function trapFocusInModal(e) {
-      if (!modalOpen) return;
-      if (e.key !== 'Tab') return;
-
-      const focusable = DOM.box.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    el.appendChild(frag);
+  };
+
+  /* =========================
+     RENDER
+     ========================= */
+  const renderGrid = () => {
+    DOM.grid.innerHTML = '';
+    const frag = document.createDocumentFragment();
+
+    for (let i = 0; i < MAX_TILES; i++) {
+      const t = tiles[i];
+      const done = !!t.isCompleted;
+
+      const tile = document.createElement('div');
+      tile.className = `tile${done ? ' completed' : ''}${t.noData ? ' no-data' : ''}`;
+      tile.dataset.tileIndex = String(i);
+      tile.setAttribute('role', 'button');
+      tile.tabIndex = t.noData ? -1 : 0;
+      tile.setAttribute('aria-label',
+        t.noData
+          ? `Tile ${t.id}: No data`
+          : `Tile ${t.id}: ${t.title} - ${done ? 'Complete' : Math.round(t.percent) + '% complete'}`
       );
 
-      const list = Array.from(focusable).filter(el => !el.disabled && el.offsetParent !== null);
-      if (list.length === 0) return;
+      const safeTitle = escapeHTML(t.title);
+      const safePts = escapeHTML(t.points);
 
-      const first = list[0];
-      const last = list[list.length - 1];
+      tile.innerHTML = `
+        <div class="header-box"><div class="header-content">${t.id} | ${safeTitle}</div></div>
+        <div class="img-container"><img alt="${safeTitle}"></div>
+        <div class="progress-container"><div class="progress-bg"><div class="progress-fill"></div></div></div>
+        <div class="checklist-box">${t.checklistHtml /* blank allowed */}</div>
+        <div class="point-badge">${safePts} PTS</div>
+      `;
 
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    }
-
-    /* ============================================
-       CODEWORD
-       ============================================ */
-    function setCodewordVisible(visible) {
-      if (visible) {
-        DOM.codeword.classList.remove('codeword-hidden');
-        DOM.codeword.innerText = codewordSecret || '';
-        DOM.codeword.setAttribute('aria-label', 'Codeword: ' + (codewordSecret || '') + '. Click to hide.');
+      const img = tile.querySelector('img');
+      if (t.img) {
+        img.style.visibility = 'visible';
+        img.addEventListener('error', () => handleImgError(img), { once: true });
+        img.src = t.img;
       } else {
-        DOM.codeword.classList.add('codeword-hidden');
-        DOM.codeword.innerText = "?????";
-        DOM.codeword.setAttribute('aria-label', 'Codeword hidden. Click to reveal.');
+        handleImgError(img);
       }
-      storageSave(STORAGE_KEYS.codewordVisible, visible ? '1' : '0');
+
+      const fill = tile.querySelector('.progress-fill');
+      fill.style.width = t.percent + '%';
+      fill.style.backgroundColor = t.barColor;
+
+      if (done) tile.querySelector('.progress-container')?.style && (tile.querySelector('.progress-container').style.display = 'none');
+
+      frag.appendChild(tile);
     }
 
-    function toggleCodeword() {
-      const hidden = DOM.codeword.classList.contains('codeword-hidden');
-      setCodewordVisible(hidden);
+    DOM.grid.appendChild(frag);
+  };
+
+  const buildBigMap = () => {
+    DOM.bigMap.innerHTML = '';
+    const frag = document.createDocumentFragment();
+
+    for (let i = 1; i <= MAX_TILES; i++) {
+      const cell = document.createElement('div');
+      cell.className = `large-map-tile${completion[i - 1] ? ' complete' : ''}`;
+      cell.dataset.index = String(i);
+      cell.innerText = String(i);
+      cell.tabIndex = 0;
+      cell.setAttribute('role', 'button');
+      frag.appendChild(cell);
+    }
+    DOM.bigMap.appendChild(frag);
+  };
+
+  /* =========================
+     MODAL
+     ========================= */
+  const showModal = (triggerEl, animate = true) => {
+    if (ghostEl?.isConnected) ghostEl.classList.remove('ghost');
+    lastTriggerEl = triggerEl || lastTriggerEl;
+    ghostEl = triggerEl;
+
+    if (ghostEl?.classList?.contains('tile') || ghostEl?.id === 'mini-map-trigger' || ghostEl?.id === 'mini-map-floating') {
+      ghostEl.classList.add('ghost');
     }
 
-    function restoreCodewordVisibility() {
-      const v = storageLoad(STORAGE_KEYS.codewordVisible, '0');
-      setCodewordVisible(v === '1');
+    const rect = (animate && triggerEl?.getBoundingClientRect)
+      ? triggerEl.getBoundingClientRect()
+      : { top: innerHeight / 2, left: innerWidth / 2, height: 0, width: 0 };
+
+    DOM.box.style.top = (rect.top + rect.height / 2) + 'px';
+    DOM.box.style.left = (rect.left + rect.width / 2) + 'px';
+
+    DOM.overlay.style.display = 'flex';
+    setTimeout(() => {
+      DOM.overlay.classList.add('active');
+      DOM.box.classList.add('active');
+      modalOpen = true;
+      DOM.box.querySelector('.modal-close-btn')?.focus();
+    }, 10);
+
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeModal = () => {
+    DOM.overlay.classList.remove('active');
+    DOM.box.classList.remove('active');
+    modalOpen = false;
+
+    if (ghostEl?.isConnected) ghostEl.classList.remove('ghost');
+
+    setTimeout(() => {
+      DOM.overlay.style.display = 'none';
+      document.body.style.overflow = 'auto';
+      lastTriggerEl?.focus?.();
+    }, 500);
+  };
+
+  const openTileModalByIndex = (tileIndex, triggerEl) => {
+    const t = tiles[tileIndex];
+    if (!t || t.noData) return;
+
+    DOM.box.classList.toggle('completed', !!t.isCompleted);
+
+    hideViews();
+    DOM.viewStd.style.display = 'block';
+
+    DOM.modalHeader.innerText = `${t.id} | ${t.title}`;
+    DOM.modalPoints.innerText = `${t.points} PTS`;
+
+    DOM.modalProgressSection.style.display = t.isCompleted ? 'none' : 'block';
+    DOM.modalBar.style.width = t.percent + '%';
+    DOM.modalBar.style.backgroundColor = t.barColor;
+
+    DOM.modalList.innerHTML = t.checklistHtml; // blank allowed
+    DOM.modalDesc.innerText = t.description || '';
+
+    DOM.modalImage.src = '';
+    DOM.modalImage.onerror = null;
+    DOM.modalImage.style.visibility = 'visible';
+    DOM.modalImage.alt = t.title;
+
+    if (t.img) {
+      DOM.modalImage.onerror = () => handleImgError(DOM.modalImage);
+      DOM.modalImage.src = t.img;
+    } else {
+      handleImgError(DOM.modalImage);
     }
 
-    /* ============================================
-       KEYBOARD SHORTCUTS + GRID ARROW NAV
-       ============================================ */
-    function isTile(el) {
-      return el && el.classList && el.classList.contains('tile') && el.hasAttribute('data-tile-index');
-    }
+    showModal(triggerEl, true);
+  };
 
-    function moveTileFocus(currentEl, delta) {
-      const idx = parseInt(currentEl.dataset.tileIndex, 10);
-      if (Number.isNaN(idx)) return;
-      const next = idx + delta;
-      if (next < 0 || next >= MAX_TILES) return;
-      const nextEl = DOM.grid.querySelector(`.tile[data-tile-index="${next}"]`);
-      if (nextEl && nextEl.tabIndex >= 0) nextEl.focus();
-    }
+  const openMapModal = (triggerEl) => {
+    DOM.box.classList.remove('completed');
+    hideViews();
+    DOM.viewMap.style.display = 'flex';
+    buildBigMap();
+    showModal(triggerEl, true);
+  };
 
-    document.addEventListener('keydown', (e) => {
-      if (modalOpen) {
-        if (e.key === 'Escape') closeModal();
-        else trapFocusInModal(e);
+  const openSettingsModal = (triggerEl) => {
+    DOM.box.classList.remove('completed');
+    hideViews();
+    DOM.viewSettings.style.display = 'flex';
+
+    const theme = document.documentElement.getAttribute('data-theme') || 'osrs';
+    DOM.themeSel.value = theme;
+    DOM.intervalSel.value = String(syncMs);
+
+    showModal(triggerEl, true);
+  };
+
+  /* =========================
+     CODEWORD
+     ========================= */
+  const setCodewordVisible = (visible) => {
+    DOM.codeword.classList.toggle('codeword-hidden', !visible);
+    DOM.codeword.innerText = visible ? (codewordSecret || '') : '?????';
+    DOM.codeword.setAttribute('aria-label',
+      visible ? `Codeword: ${codewordSecret}. Click to hide.` : 'Codeword hidden. Click to reveal.'
+    );
+    storageSave(STORAGE_KEYS.codewordVisible, visible ? '1' : '0');
+  };
+
+  const toggleCodeword = () => {
+    setCodewordVisible(DOM.codeword.classList.contains('codeword-hidden'));
+  };
+
+  /* =========================
+     FETCH / PARSE
+     ========================= */
+  const fetchGlobal = () => {
+    const t = TEAM_MAP[currentTeamKey];
+    DOM.teamName.innerText = t.name;
+    DOM.totalPoints.innerText = Number(t.points || 0).toLocaleString();
+    codewordSecret = t.codeword || '';
+  };
+
+  async function fetchData(manual = false) {
+    if (fetchController) fetchController.abort();
+    fetchController = new AbortController();
+
+    try {
+      const team = TEAM_MAP[currentTeamKey];
+      const res = await fetch(`${team.url}&t=${Date.now()}`, {
+        headers: { 'pragma': 'no-cache', 'cache-control': 'no-cache' },
+        signal: fetchController.signal
+      });
+
+      const raw = normalizeNL(await res.text());
+      const h = simpleHash(raw);
+      if (!manual && lastSeenHash === h) return;
+      lastSeenHash = h;
+
+      flashSync();
+
+      completion = Array(MAX_TILES).fill(false);
+      tiles = Array(MAX_TILES).fill(null);
+      resetMinimaps();
+
+      const rows = raw.split('\n').slice(1);
+      let count = 0;
+
+      for (const line of rows) {
+        if (count >= MAX_TILES) break;
+        if (!line || !line.trim()) continue;
+
+        const cols = parseCSVRow(line.trim());
+        if (cols.length < 4) continue;
+
+        const id = count + 1;
+        const title = cols[0] || `Tile ${id}`;
+        const img = safeImgSrc(cols[1] || '');
+        const current = Math.max(0, parseInt(cols[2], 10) || 0);
+        const goal = Math.max(1, parseInt(cols[3], 10) || 1);
+        const items = cols[4] ? cols[4].split(',').map(s => s.trim()).filter(Boolean) : [];
+        const description = cols[5] || '';
+        const points = cols[6] || '0';
+
+        const percent = Math.min((current / goal) * 100, 100);
+        const isCompleted = percent === 100;
+
+        completion[count] = isCompleted;
+        setMinimapComplete(id, isCompleted);
+
+        // CHANGE: if no items, checklistHtml stays '' (blank)
+        const checklistHtml = items.map(it =>
+          `<div class="check-item"><span class="check-mark"></span> ${escapeHTML(it)}</div>`
+        ).join('');
+
+        tiles[count] = {
+          id, title, img,
+          percent, barColor: getProgressColor(percent),
+          checklistHtml, description,
+          isCompleted, points,
+          noData: false
+        };
+
+        count++;
+      }
+
+      for (let i = 0; i < MAX_TILES; i++) {
+        if (!tiles[i]) {
+          tiles[i] = {
+            id: i + 1,
+            title: 'No Data',
+            img: '',
+            percent: 0,
+            barColor: getProgressColor(0),
+            checklistHtml: '',
+            description: '',
+            isCompleted: false,
+            points: '0',
+            noData: true
+          };
+        }
+      }
+
+      renderGrid();
+      updateCompletedStat();
+    } catch (e) {
+      if (e.name !== 'AbortError') {
+        console.error(e);
+        syncError('Network error');
+      }
+    } finally {
+      fetchController = null;
+    }
+  }
+
+  /* =========================
+     EVENTS (condensed)
+     ========================= */
+  function trapFocus(e) {
+    if (!modalOpen || e.key !== 'Tab') return;
+    const focusable = [...DOM.box.querySelectorAll('button,select,[tabindex]:not([tabindex="-1"])')]
+      .filter(el => !el.disabled && el.offsetParent !== null);
+    if (!focusable.length) return;
+    const first = focusable[0], last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+
+  function restartInterval() {
+    if (syncIntervalId) clearInterval(syncIntervalId);
+    syncIntervalId = setInterval(() => fetchData(false), syncMs);
+  }
+
+  function init() {
+    // theme
+    const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
+    applyTheme(savedTheme);
+    DOM.themeSel.value = savedTheme;
+
+    // interval
+    syncMs = parseInt(storageLoad(STORAGE_KEYS.syncInterval, '30000'), 10) || 30000;
+    DOM.intervalSel.value = String(syncMs);
+
+    // minimaps
+    miniNodes.forEach(arr => arr.length = 0);
+    buildMinimap('minimap');
+    buildMinimap('minimap-floating');
+
+    fetchGlobal();
+
+    // codeword visibility restore
+    setCodewordVisible(storageLoad(STORAGE_KEYS.codewordVisible, '0') === '1');
+
+    // Delegated events
+    DOM.grid.addEventListener('click', (e) => {
+      const tileEl = e.target.closest('.tile');
+      if (!tileEl || tileEl.classList.contains('no-data')) return;
+      openTileModalByIndex(parseInt(tileEl.dataset.tileIndex, 10), tileEl);
+    });
+
+    DOM.grid.addEventListener('keydown', (e) => {
+      const tileEl = e.target.closest('.tile');
+      if (!tileEl) return;
+
+      // Enter/Space open
+      if ((e.key === 'Enter' || e.key === ' ') && !tileEl.classList.contains('no-data')) {
+        e.preventDefault();
+        openTileModalByIndex(parseInt(tileEl.dataset.tileIndex, 10), tileEl);
         return;
       }
 
-      const active = document.activeElement;
-      if (!isTile(active)) return;
+      // Arrow navigation (7x7)
+      const idx = parseInt(tileEl.dataset.tileIndex, 10);
+      if (Number.isNaN(idx)) return;
 
-      if (e.key === 'ArrowRight') { e.preventDefault(); moveTileFocus(active, +1); }
-      if (e.key === 'ArrowLeft')  { e.preventDefault(); moveTileFocus(active, -1); }
-      if (e.key === 'ArrowDown')  { e.preventDefault(); moveTileFocus(active, +7); }
-      if (e.key === 'ArrowUp')    { e.preventDefault(); moveTileFocus(active, -7); }
+      const move = (d) => {
+        const next = idx + d;
+        if (next < 0 || next >= MAX_TILES) return;
+        DOM.grid.querySelector(`.tile[data-tile-index="${next}"]`)?.focus();
+      };
+
+      if (e.key === 'ArrowRight') { e.preventDefault(); move(+1); }
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); move(-1); }
+      if (e.key === 'ArrowDown')  { e.preventDefault(); move(+7); }
+      if (e.key === 'ArrowUp')    { e.preventDefault(); move(-7); }
     });
 
-    /* ============================================
-       EVENTS
-       ============================================ */
-    function wireEvents() {
-      // Codeword
-      DOM.codeword.addEventListener('click', toggleCodeword);
-      DOM.codeword.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          toggleCodeword();
-        }
+    DOM.codeword.addEventListener('click', toggleCodeword);
+    DOM.codeword.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCodeword(); }
+    });
+
+    // minimap opens overview
+    const wireMapOpen = (el) => {
+      el.addEventListener('click', () => openMapModal(el));
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openMapModal(el); }
       });
+    };
+    wireMapOpen(DOM.miniDash);
+    wireMapOpen(DOM.miniFloat);
 
-      // Minimap triggers
-      const wireOpenMap = (el) => {
-        el.addEventListener('click', () => openMapModal(el));
-        el.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            openMapModal(el);
-          }
-        });
-      };
-      wireOpenMap(DOM.miniMapTrigger);
-      wireOpenMap(DOM.miniMapFloating);
+    // map tile click open tile
+    DOM.bigMap.addEventListener('click', (e) => {
+      const cell = e.target.closest('.large-map-tile');
+      if (!cell) return;
+      const id = parseInt(cell.dataset.index, 10);
+      if (!id) return;
+      openTileModalByIndex(id - 1, cell);
+    });
+    DOM.bigMap.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const cell = e.target.closest('.large-map-tile');
+      if (!cell) return;
+      e.preventDefault();
+      const id = parseInt(cell.dataset.index, 10);
+      if (!id) return;
+      openTileModalByIndex(id - 1, cell);
+    });
 
-      // Settings
-      DOM.settingsTrigger.addEventListener('click', () => openSettingsModal(DOM.settingsTrigger));
-      DOM.settingsTrigger.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          openSettingsModal(DOM.settingsTrigger);
-        }
-      });
+    // settings
+    DOM.settingsTrigger.addEventListener('click', () => openSettingsModal(DOM.settingsTrigger));
+    DOM.themeSel.addEventListener('change', () => {
+      const v = DOM.themeSel.value;
+      applyTheme(v);
+      storageSave(STORAGE_KEYS.theme, v);
+    });
+    DOM.intervalSel.addEventListener('change', () => {
+      syncMs = parseInt(DOM.intervalSel.value, 10) || 30000;
+      storageSave(STORAGE_KEYS.syncInterval, syncMs);
+      restartInterval();
+    });
 
-      // Sync now
-      DOM.syncNow.addEventListener('click', () => fetchData(true));
-      DOM.syncNow.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          fetchData(true);
-        }
-      });
+    // modal close
+    DOM.overlay.addEventListener('click', (e) => { if (e.target === DOM.overlay) closeModal(); });
+    document.querySelectorAll('.modal-close-btn').forEach(btn => btn.addEventListener('click', closeModal));
+    DOM.mapBack.addEventListener('click', () => {
+      if (ghostEl?.isConnected) ghostEl.classList.remove('ghost');
+      ghostEl = null;
+      hideViews(); DOM.viewMap.style.display = 'flex';
+      buildBigMap();
+    });
 
-      // Modal close buttons
-      for (const btn of DOM.modalCloses) {
-        btn.addEventListener('click', closeModal);
+    // sync now
+    DOM.syncNow.addEventListener('click', () => fetchData(true));
+    DOM.syncNow.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fetchData(true); }
+    });
+
+    // modal key handling
+    document.addEventListener('keydown', (e) => {
+      if (modalOpen && e.key === 'Escape') closeModal();
+      trapFocus(e);
+    });
+
+    // pause syncing when hidden
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (syncIntervalId) clearInterval(syncIntervalId);
+        syncIntervalId = null;
+      } else {
+        restartInterval();
+        fetchData(false);
       }
+    });
 
-      // Overlay click closes modal (but clicking inside box does not)
-      DOM.overlay.addEventListener('click', (e) => {
-        if (e.target === DOM.overlay) closeModal();
-      });
-      DOM.box.addEventListener('click', (e) => e.stopPropagation());
+    fetchData(false);
+    restartInterval();
+  }
 
-      // Back-to-map button from tile modal
-      DOM.modalMapBack.addEventListener('click', openMapModalFromTile);
-
-      // Settings dropdowns
-      DOM.themeDropdown.addEventListener('change', () => changeTheme(DOM.themeDropdown.value));
-      DOM.intervalDropdown.addEventListener('change', () => changeSyncInterval(DOM.intervalDropdown.value));
-
-      // Pause/resume syncing when tab hidden
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-          if (syncIntervalId) clearInterval(syncIntervalId);
-          syncIntervalId = null;
-        } else {
-          restartSyncInterval();
-          // Optional: immediate refresh when returning
-          fetchData(false);
-        }
-      });
-    }
-
-    /* ============================================
-       INIT
-       ============================================ */
-    function init() {
-      cacheDom();
-      wireEvents();
-
-      minimapNodesByIndex.clear();
-      buildMinimap('minimap');
-      buildMinimap('minimap-floating');
-
-      restoreTheme();
-      restoreSyncInterval();
-
-      fetchGlobalData();
-      restoreCodewordVisibility();
-
-      fetchData(false);
-      restartSyncInterval();
-    }
-
-    init();
-  </script>
-</body>
-</html>
+  init();
+})();
+</script>
