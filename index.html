@@ -977,13 +977,25 @@
       };
     }
 
+    // Get team from URL parameter
     const params = new URLSearchParams(window.location.search);
-    const requestedTeam = params.get('team');
+    const adminMode = params.get('admin') === 'true';
+    
     const teamKeys = Object.keys(TEAM_MAP);
 
-    if (requestedTeam && TEAM_MAP[requestedTeam]) {
-      currentTeamKey = requestedTeam;
+    // If requesting a specific team
+    if (params.get('team')) {
+      if (TEAM_MAP[params.get('team')]) {
+        currentTeamKey = params.get('team');
+      } else {
+        // Invalid team requested
+        currentTeamKey = '';
+      }
+    } else if (adminMode && teamKeys.length > 0) {
+      // Admin mode: show team selector
+      currentTeamKey = teamKeys[0];
     } else if (teamKeys.length > 0) {
+      // Non-admin: default to first team (shouldn't happen in production)
       currentTeamKey = teamKeys[0];
     } else {
       currentTeamKey = '';
@@ -1083,7 +1095,7 @@
   };
 
   const safeImgSrc = (imgName) => {
-    const raw = String(imgName || '').trim();
+    const raw = String(imgname || '').trim();
     if (!raw) return '';
     if (/^https?:\/\//i.test(raw)) return raw;
     const parts = raw.replace(/\\/g, '/').split('/').filter(Boolean).filter(p => p !== '.' && p !== '..');

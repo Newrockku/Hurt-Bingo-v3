@@ -683,6 +683,11 @@
           <button class="btn btn-secondary" id="add-team-btn">+ Add New Team</button>
           <button class="btn btn-primary" id="save-teams-btn">Save All Teams</button>
         </div>
+        <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border-main);">
+          <div class="form-label">Shareable Team Links</div>
+          <div class="form-hint">Share these links with teams. Each link locks them to their own board.</div>
+          <div id="team-links-container" style="display:flex; flex-direction:column; gap:12px; margin-top:12px;"></div>
+        </div>
       </div>
     </div>
 
@@ -1005,6 +1010,36 @@
     DOM.teamList.appendChild(frag);
   }
 
+  function generateTeamLinks() {
+    const container = document.getElementById('team-links-container');
+    if (!container) return;
+    
+    const keys = Object.keys(teamsConfig);
+    const frag = document.createDocumentFragment();
+    
+    keys.forEach(key => {
+      const team = teamsConfig[key];
+      const baseUrl = window.location.origin + window.location.pathname.replace('settings.html', 'index.html');
+      const teamUrl = `${baseUrl}?team=${key}`;
+      
+      const linkDiv = document.createElement('div');
+      linkDiv.style.cssText = 'background:var(--bg-main); border:1px solid var(--border-main); padding:12px; border-radius:4px; display:flex; gap:8px; align-items:center;';
+      
+      linkDiv.innerHTML = `
+        <div style="flex:1; overflow:hidden;">
+          <div style="font-size:12px; color:var(--text-dim); margin-bottom:4px;">${escapeHTML(team.name || key)}</div>
+          <input type="text" readonly value="${teamUrl}" class="team-link-input" style="width:100%; padding:6px; background:var(--bg-well); border:1px solid var(--border-main); color:var(--text-main); border-radius:3px; font-family:monospace; font-size:11px;">
+        </div>
+        <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText('${teamUrl}'); alert('Copied!');">Copy</button>
+      `;
+      
+      frag.appendChild(linkDiv);
+    });
+    
+    container.innerHTML = '';
+    container.appendChild(frag);
+  }
+
   function collectTeamsFromDOM() {
     const newTeams = {};
     const items = DOM.teamList.querySelectorAll('.team-item');
@@ -1034,6 +1069,7 @@
     teamsConfig = teams;
     save(STORAGE_KEYS.teams, teamsConfig);
     renderTeamList();
+    generateTeamLinks();
     toast(`${Object.keys(teams).length} team(s) saved!`);
   }
 
@@ -1049,6 +1085,7 @@
       color: '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')
     };
     renderTeamList();
+    generateTeamLinks();
     toast('New team added');
   }
 
