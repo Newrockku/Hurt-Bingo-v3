@@ -708,7 +708,6 @@
     teams: 'bingo-teams-config'
   };
 
-  // Fallback team if nothing in storage
   const DEFAULT_TEAMS = {
     Warriors: {
       name: "The Spreadsheet Warriors",
@@ -721,6 +720,16 @@
   let TEAM_MAP = {};
   let eventConfig = {};
   let currentTeamKey = '';
+  let codewordSecret = '';
+  let lastSeenHash = null;
+  let completion = Array(MAX_TILES).fill(false);
+  let tiles = Array(MAX_TILES).fill(null);
+  let fetchController = null;
+  let syncIntervalId = null;
+  let syncMs = 30000;
+  let modalOpen = false;
+  let lastTriggerEl = null;
+  let ghostEl = null;
 
   function loadSharedConfig() {
     try {
@@ -737,7 +746,6 @@
       eventConfig = {};
     }
 
-    // Determine which team to show from URL param
     const params = new URLSearchParams(window.location.search);
     const requestedTeam = params.get('team');
     const teamKeys = Object.keys(TEAM_MAP);
@@ -750,218 +758,6 @@
       currentTeamKey = '';
     }
   }
-  const DESC_DISMISS_KEY = 'bingo-desc-dismissed';
-
-  function renderEventDescription() {
-    const desc = (eventConfig.description || '').trim();
-
-    // Check if user dismissed this session
-    const dismissed = sessionStorage.getItem(DESC_DISMISS_KEY);
-
-    if (!desc || dismissed === '1') {
-      DOM.descBar.style.display = 'none';
-      return;
-    }
-
-    DOM.descBarText.textContent = desc;
-    DOM.descBar.style.display = 'flex';
-  }
-  S
-  const THEME_VARS = [
-    '--bg-body','--bg-tile','--bg-well','--bg-completed','--bg-completed-well',
-    '--border-main','--border-completed','--accent',
-    '--text-main','--text-bright','--text-dim','--text-completed'
-  ];
-
-  const THEMES = {
-    osrs: null,
-    midnight: {
-      '--bg-body':'#000000','--bg-tile':'#0e0e0e','--bg-well':'#060606',
-      '--bg-completed':'#1a1a1a','--bg-completed-well':'#0d0d0d',
-      '--border-main':'#2a2a2a','--border-completed':'#e0e0e0',
-      '--accent':'#ffffff','--text-main':'#d4d4d4','--text-bright':'#ffffff',
-      '--text-dim':'#4a4a4a','--text-completed':'#e0e0e0'
-    },
-    parchment: {
-      '--bg-body':'#2c2416','--bg-tile':'#3d3322','--bg-well':'#241e12',
-      '--bg-completed':'#2a3a1e','--bg-completed-well':'#1e2c14',
-      '--border-main':'#6b5b3e','--border-completed':'#8aba5a',
-      '--accent':'#d4a843','--text-main':'#d4a843','--text-bright':'#f0dca0',
-      '--text-dim':'#7a6b50','--text-completed':'#8aba5a'
-    },
-    spring: {
-      '--bg-body':'#1e2e1e','--bg-tile':'#2a402a','--bg-well':'#162416',
-      '--bg-completed':'#3d2a4d','--bg-completed-well':'#2a1c36',
-      '--border-main':'#5a8a5a','--border-completed':'#c77dff',
-      '--accent':'#7dffb3','--text-main':'#7dffb3','--text-bright':'#d0ffe0',
-      '--text-dim':'#6a8a6a','--text-completed':'#c77dff'
-    },
-    summer: {
-      '--bg-body':'#0f2a3a','--bg-tile':'#1a4058','--bg-well':'#0a1f2d',
-      '--bg-completed':'#5a4010','--bg-completed-well':'#3d2b0a',
-      '--border-main':'#3a7ea8','--border-completed':'#ffc833',
-      '--accent':'#00e5ff','--text-main':'#00e5ff','--text-bright':'#b3f5ff',
-      '--text-dim':'#4a7a8f','--text-completed':'#ffc833'
-    },
-    autumn: {
-      '--bg-body':'#261410','--bg-tile':'#3d2218','--bg-well':'#1a0e0a',
-      '--bg-completed':'#1a3040','--bg-completed-well':'#0f1f2a',
-      '--border-main':'#8a5040','--border-completed':'#4a9ac4',
-      '--accent':'#ff8533','--text-main':'#ff8533','--text-bright':'#ffc599',
-      '--text-dim':'#8a6a5a','--text-completed':'#4a9ac4'
-    },
-    winter: {
-      '--bg-body':'#141a22','--bg-tile':'#222e3a','--bg-well':'#0e1419',
-      '--bg-completed':'#3a2228','--bg-completed-well':'#261418',
-      '--border-main':'#4a6a82','--border-completed':'#ff7a7a',
-      '--accent':'#8ad4ff','--text-main':'#8ad4ff','--text-bright':'#d6efff',
-      '--text-dim':'#5a6e7e','--text-completed':'#ff7a7a'
-    },
-    abyssal: {
-      '--bg-body':'#030810','--bg-tile':'#081428','--bg-well':'#020508',
-      '--bg-completed':'#003838','--bg-completed-well':'#001f1f',
-      '--border-main':'#0e2040','--border-completed':'#50ffd0',
-      '--accent':'#50ffd0','--text-main':'#50ffd0','--text-bright':'#b0d8e8',
-      '--text-dim':'#3a5070','--text-completed':'#50ffd0'
-    },
-    volcanic: {
-      '--bg-body':'#100808','--bg-tile':'#1e1010','--bg-well':'#080404',
-      '--bg-completed':'#401500','--bg-completed-well':'#280e00',
-      '--border-main':'#4a2020','--border-completed':'#ff5500',
-      '--accent':'#ff5500','--text-main':'#ff6a20','--text-bright':'#ffb380',
-      '--text-dim':'#6a4040','--text-completed':'#ff5500'
-    },
-    cyberpunk: {
-      '--bg-body':'#0a0118','--bg-tile':'#1a0a30','--bg-well':'#06010e',
-      '--bg-completed':'#80002a','--bg-completed-well':'#500018',
-      '--border-main':'#4a1a6a','--border-completed':'#00e8c8',
-      '--accent':'#ffe030','--text-main':'#ff1a60','--text-bright':'#ff80a0',
-      '--text-dim':'#6a4070','--text-completed':'#00e8c8'
-    },
-    bloodlust: {
-      '--bg-body':'#140404','--bg-tile':'#220808','--bg-well':'#0e0202',
-      '--bg-completed':'#400808','--bg-completed-well':'#280404',
-      '--border-main':'#4a1414','--border-completed':'#ff4040',
-      '--accent':'#ff4040','--text-main':'#e02020','--text-bright':'#ff8080',
-      '--text-dim':'#5a3030','--text-completed':'#ff4040'
-    },
-    royal: {
-      '--bg-body':'#160a24','--bg-tile':'#2e1650','--bg-well':'#0e0618',
-      '--bg-completed':'#4a3800','--bg-completed-well':'#302400',
-      '--border-main':'#4a2870','--border-completed':'#ffd700',
-      '--accent':'#ffc830','--text-main':'#c8a030','--text-bright':'#ffe899',
-      '--text-dim':'#6a4890','--text-completed':'#ffd700'
-    },
-    emerald: {
-      '--bg-body':'#04160c','--bg-tile':'#0a2e18','--bg-well':'#020e08',
-      '--bg-completed':'#104828','--bg-completed-well':'#0a3018',
-      '--border-main':'#1a5030','--border-completed':'#30d868',
-      '--accent':'#50e880','--text-main':'#50e880','--text-bright':'#a0ffc0',
-      '--text-dim':'#2a5a3a','--text-completed':'#30d868'
-    },
-    solar: {
-      '--bg-body':'#2a1e14','--bg-tile':'#44301e','--bg-well':'#1e140e',
-      '--bg-completed':'#6a4a08','--bg-completed-well':'#483208',
-      '--border-main':'#6a4a30','--border-completed':'#f0c020',
-      '--accent':'#ffcc33','--text-main':'#e8b020','--text-bright':'#fff0b0',
-      '--text-dim':'#7a6040','--text-completed':'#f0c020'
-    },
-    vaporwave: {
-      '--bg-body':'#0a0240','--bg-tile':'#1a0830','--bg-well':'#06012a',
-      '--bg-completed':'#a0408a','--bg-completed-well':'#6a2860',
-      '--border-main':'#3020a0','--border-completed':'#00d8f0',
-      '--accent':'#00d8f0','--text-main':'#b070ff','--text-bright':'#e0b0ff',
-      '--text-dim':'#5a3880','--text-completed':'#00d8f0'
-    },
-    tox: {
-      '--bg-body':'#100010','--bg-tile':'#200020','--bg-well':'#0a000a',
-      '--bg-completed':'#0a200a','--bg-completed-well':'#061406',
-      '--border-main':'#400040','--border-completed':'#30ff18',
-      '--accent':'#d0ff10','--text-main':'#d0ff10','--text-bright':'#e8ff88',
-      '--text-dim':'#604060','--text-completed':'#30ff18'
-    },
-    ocean: {
-      '--bg-body':'#040e1a','--bg-tile':'#0a1e30','--bg-well':'#02080f',
-      '--bg-completed':'#004048','--bg-completed-well':'#002830',
-      '--border-main':'#10304a','--border-completed':'#00c8a0',
-      '--accent':'#0090d0','--text-main':'#40b8e8','--text-bright':'#90e0ff',
-      '--text-dim':'#2a5068','--text-completed':'#00c8a0'
-    },
-    frost: {
-      '--bg-body':'#0c1420','--bg-tile':'#162030','--bg-well':'#080e18',
-      '--bg-completed':'#183048','--bg-completed-well':'#102038',
-      '--border-main':'#304868','--border-completed':'#90d8ff',
-      '--accent':'#b0e8ff','--text-main':'#80c8f0','--text-bright':'#d8f0ff',
-      '--text-dim':'#406080','--text-completed':'#90d8ff'
-    },
-    sandstorm: {
-      '--bg-body':'#1e1810','--bg-tile':'#302818','--bg-well':'#14100a',
-      '--bg-completed':'#484020','--bg-completed-well':'#302a14',
-      '--border-main':'#5a4a2a','--border-completed':'#d8b840',
-      '--accent':'#e8c848','--text-main':'#d0a830','--text-bright':'#f0dea0',
-      '--text-dim':'#6a5a38','--text-completed':'#d8b840'
-    },
-    nebula: {
-      '--bg-body':'#0a0414','--bg-tile':'#140a24','--bg-well':'#06020e',
-      '--bg-completed':'#1a1040','--bg-completed-well':'#100a28',
-      '--border-main':'#281848','--border-completed':'#c080ff',
-      '--accent':'#a060ff','--text-main':'#9070e0','--text-bright':'#d0b8ff',
-      '--text-dim':'#443060','--text-completed':'#c080ff'
-    },
-    forest: {
-      '--bg-body':'#0a120a','--bg-tile':'#142014','--bg-well':'#060e06',
-      '--bg-completed':'#183818','--bg-completed-well':'#102810',
-      '--border-main':'#2a4a2a','--border-completed':'#68d068',
-      '--accent':'#88e088','--text-main':'#60c060','--text-bright':'#b0f0b0',
-      '--text-dim':'#3a5a3a','--text-completed':'#68d068'
-    },
-    noir: {
-      '--bg-body':'#0e0e0e','--bg-tile':'#1a1a1a','--bg-well':'#080808',
-      '--bg-completed':'#2a2a1e','--bg-completed-well':'#1a1a14',
-      '--border-main':'#333333','--border-completed':'#c8b870',
-      '--accent':'#c8b870','--text-main':'#a0a0a0','--text-bright':'#d8d8d0',
-      '--text-dim':'#505050','--text-completed':'#c8b870'
-    },
-    sakura: {
-      '--bg-body':'#1a0e14','--bg-tile':'#2a1824','--bg-well':'#12080e',
-      '--bg-completed':'#3a1830','--bg-completed-well':'#281020',
-      '--border-main':'#4a2840','--border-completed':'#ff88b8',
-      '--accent':'#ff88b8','--text-main':'#e870a0','--text-bright':'#ffc0d8',
-      '--text-dim':'#5a3850','--text-completed':'#ff88b8'
-    },
-    copper: {
-      '--bg-body':'#10120e','--bg-tile':'#1e201a','--bg-well':'#0a0c08',
-      '--bg-completed':'#2a3028','--bg-completed-well':'#1e2418',
-      '--border-main':'#3a4030','--border-completed':'#60b8a0',
-      '--accent':'#d08850','--text-main':'#c08048','--text-bright':'#e8c0a0',
-      '--text-dim':'#505840','--text-completed':'#60b8a0'
-    },
-    arctic: {
-      '--bg-body':'#060c14','--bg-tile':'#0e1824','--bg-well':'#04080e',
-      '--bg-completed':'#0a2030','--bg-completed-well':'#061420',
-      '--border-main':'#1a3048','--border-completed':'#30e8a0',
-      '--accent':'#40d0a0','--text-main':'#50b8d0','--text-bright':'#a0e8f0',
-      '--text-dim':'#2a4860','--text-completed':'#30e8a0'
-    },
-    obsidian: {
-      '--bg-body':'#080808','--bg-tile':'#141410','--bg-well':'#040404',
-      '--bg-completed':'#282010','--bg-completed-well':'#1a1408',
-      '--border-main':'#2a2820','--border-completed':'#d8a830',
-      '--accent':'#d8a830','--text-main':'#c09828','--text-bright':'#f0d888',
-      '--text-dim':'#484030','--text-completed':'#d8a830'
-    }
-  };
-
-  let codewordSecret = '';
-  let lastSeenHash = null;
-  let completion = Array(MAX_TILES).fill(false);
-  let tiles = Array(MAX_TILES).fill(null);
-  let fetchController = null;
-  let syncIntervalId = null;
-  let syncMs = 30000;
-  let modalOpen = false;
-  let lastTriggerEl = null;
-  let ghostEl = null;
 
   const $ = (id) => document.getElementById(id);
   const DOM = {
@@ -1263,13 +1059,14 @@
 
   /* ========================= FETCH ========================= */
   const fetchGlobal = () => {
+    // Update event title
+    const titleEl = document.getElementById('event-title');
+    if (titleEl) titleEl.innerText = eventConfig.name || 'Bingo 2026';
+
     if (!currentTeamKey || !TEAM_MAP[currentTeamKey]) {
       DOM.teamName.innerText = 'No team configured';
       DOM.totalPoints.innerText = '0';
       codewordSecret = '';
-      // Update event title from config
-      const titleEl = document.getElementById('event-title');
-      if (titleEl) titleEl.innerText = eventConfig.name || 'Bingo 2026';
       return;
     }
 
@@ -1277,22 +1074,36 @@
     DOM.teamName.innerText = t.name || currentTeamKey;
     DOM.totalPoints.innerText = Number(t.points || 0).toLocaleString();
     codewordSecret = t.codeword || '';
-
-    // Update event title from shared config
-    const titleEl = document.getElementById('event-title');
-    if (titleEl) titleEl.innerText = eventConfig.name || 'Bingo 2026';
   };
 
   async function fetchData(manual = false) {
+    // Guard: no team configured
     if (!currentTeamKey || !TEAM_MAP[currentTeamKey]) {
+      console.warn('No team configured, skipping fetch.');
       syncError('No team configured');
+
+      // Fill grid with empty tiles so it doesn't stay blank
+      tiles = Array(MAX_TILES).fill(null).map((_, i) => ({
+        id: i + 1, title: 'No Data', img: '', percent: 0,
+        barColor: getProgressColor(0), checklistHtml: '',
+        description: '', isCompleted: false, points: '0', noData: true
+      }));
+      renderGrid();
+      updateCompletedStat();
       return;
     }
 
     if (fetchController) fetchController.abort();
     fetchController = new AbortController();
+
     try {
       const team = TEAM_MAP[currentTeamKey];
+
+      if (!team.url) {
+        syncError('No URL configured for team');
+        return;
+      }
+
       const res = await fetch(`${team.url}&t=${Date.now()}`, {
         headers: { 'pragma': 'no-cache', 'cache-control': 'no-cache' },
         signal: fetchController.signal
@@ -1703,7 +1514,7 @@
   }
 
   function init() {
-    // Load team/event config from shared localStorage
+    // Load shared config FIRST
     loadSharedConfig();
 
     const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
@@ -1720,13 +1531,18 @@
 
     fetchGlobal();
     setCodewordVisible(storageLoad(STORAGE_KEYS.codewordVisible, '0') === '1');
-    renderEventDescription();
 
-    DOM.descBarClose.addEventListener('click', () => {
-      DOM.descBar.style.display = 'none';
-      sessionStorage.setItem(DESC_DISMISS_KEY, '1');
-    });
-    
+    // Event description
+    if (typeof renderEventDescription === 'function') {
+      renderEventDescription();
+    }
+    if (DOM.descBarClose) {
+      DOM.descBarClose.addEventListener('click', () => {
+        DOM.descBar.style.display = 'none';
+        try { sessionStorage.setItem('bingo-desc-dismissed', '1'); } catch {}
+      });
+    }
+
     // Grid delegation
     DOM.grid.addEventListener('click', (e) => {
       const tileEl = e.target.closest('.tile');
@@ -1838,6 +1654,8 @@
         if (syncIntervalId) clearInterval(syncIntervalId);
         syncIntervalId = null;
       } else {
+        loadSharedConfig();
+        fetchGlobal();
         restartInterval();
         fetchData(false);
       }
