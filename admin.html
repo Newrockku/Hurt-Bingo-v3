@@ -532,7 +532,7 @@
     }
   let descDismissed = false;
 
-  function renderDescription() {
+  function renderEventDescription() {
     const desc = (eventConfig.description || '').trim();
     if (!desc || descDismissed) {
       DOM.descBanner.style.display = 'none';
@@ -886,7 +886,7 @@
 
   function renderAll() {
     const sorted = getSortedTeams();
-    renderDescription();
+    renderEventDescription();
     renderGlobalStats(sorted);
     renderLeaderboard(sorted);
     renderTeamCards(sorted);
@@ -896,7 +896,7 @@
   function init() {
     loadSharedConfig();
     
-renderDescription();
+renderEventDescription();
 
     DOM.descDismiss.addEventListener('click', () => {
       descDismissed = true;
