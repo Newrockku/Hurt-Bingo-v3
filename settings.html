@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
-       :root {
+    :root {
       --bg-body: #342e25;
       --bg-card: #494034;
       --bg-well: #342e25;
@@ -44,7 +44,8 @@
       display: flex; flex-direction: column; align-items: center;
       min-height: 100vh;
     }
-        /* --- Page Header --- */
+
+    /* --- Page Header --- */
     .page-header {
       width: 100%; max-width: 960px;
       background: var(--bg-card); border: 2px solid var(--border-main);
@@ -155,7 +156,8 @@
       width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer;
     }
     .form-checkbox-label { font-size: 0.9rem; color: var(--text-bright); cursor: pointer; }
-        /* --- Buttons --- */
+
+    /* --- Buttons --- */
     .form-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
 
     .btn {
@@ -228,6 +230,18 @@
       border: 1px solid var(--border-main);
     }
 
+    /* --- Tile Editor --- */
+    .tile-item-card {
+      background: var(--bg-well); border: 1px solid var(--border-main);
+      border-radius: 4px; padding: 12px; margin-bottom: 8px;
+    }
+
+    .tile-count-badge {
+      font-size: 0.7rem; background: var(--bg-well);
+      color: var(--text-dim); padding: 2px 8px; border-radius: 10px;
+      border: 1px solid var(--border-main);
+    }
+
     /* --- Variable Table --- */
     .var-table { width: 100%; border-collapse: collapse; }
     .var-table th {
@@ -277,7 +291,6 @@
     }
     .toast.error { border-color: var(--danger); color: var(--danger); }
     .toast.warning { border-color: var(--warning); color: var(--warning); }
-
     .toast.show { opacity: 1; }
 
     /* --- Page Footer --- */
@@ -296,6 +309,7 @@
       .form-row { flex-direction: column; }
       .form-row .form-group { min-width: 100%; }
       .var-table th:nth-child(4), .var-table td:nth-child(4) { display: none; }
+      .tile-item-card { grid-template-columns: 1fr !important; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -308,7 +322,7 @@
   <header class="page-header">
     <div class="page-header-left">
       <h1 class="page-title">⚙ Game Settings</h1>
-      <p class="page-subtitle">Configure event details, teams, board variables, and data sources</p>
+      <p class="page-subtitle">Configure event details, teams, tiles, board variables, and data sources</p>
     </div>
     <a href="admin.html" class="nav-btn">
       <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
@@ -333,9 +347,13 @@
             <input type="text" id="cfg-event-name" class="form-input medium" value="Bingo 2026" maxlength="50">
           </div>
           <div class="form-group">
-            <label class="form-label" for="cfg-tile-count">Total Tiles</label>
-            <div class="form-hint">Grid size (max 49 for 7×7)</div>
-            <input type="number" id="cfg-tile-count" class="form-input short" value="49" min="1" max="49">
+            <label class="form-label" for="cfg-board-size">Board Size</label>
+            <div class="form-hint">Grid dimensions (e.g., 5 = 5×5)</div>
+            <select id="cfg-board-size" class="form-select" style="max-width:180px;">
+              <option value="5" selected>5×5 (25 tiles)</option>
+              <option value="6">6×6 (36 tiles)</option>
+              <option value="7">7×7 (49 tiles)</option>
+            </select>
           </div>
         </div>
 
@@ -394,7 +412,56 @@
         </div>
       </div>
     </div>
-        <!-- ===== TEAM MANAGEMENT ===== -->
+
+    <!-- ===== TILE MANAGEMENT ===== -->
+    <div class="settings-card">
+      <div class="card-header" tabindex="0" data-section="tiles" role="button" aria-expanded="false">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        <span class="card-title">Tile Management</span>
+        <span class="tile-count-badge" id="tile-count-badge">0 Tiles</span>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body" id="section-tiles">
+        <div class="form-hint" style="margin-bottom:14px;">
+          Define the tiles that will appear on the board. Ensure you have at least as many tiles as your board size (e.g., 25 tiles for a 5×5 board).
+        </div>
+        <div class="tile-editor-wrapper">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="new-tile-image">Image <span class="form-required">*</span></label>
+              <div class="form-hint">Filename (e.g., tile.png) or full URL</div>
+              <input type="text" id="new-tile-image" class="form-input medium" placeholder="tile-image.png">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="new-tile-title">Title <span class="form-required">*</span></label>
+              <input type="text" id="new-tile-title" class="form-input medium" placeholder="Tile Name" maxlength="50">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="new-tile-desc">Description</label>
+            <div class="form-hint">Shown in tile modal when clicked</div>
+            <textarea id="new-tile-desc" class="form-textarea" placeholder="What is this tile about?" style="min-height:60px;"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="new-tile-points">Point Value <span class="form-required">*</span></label>
+              <input type="number" id="new-tile-points" class="form-input short" value="100" min="0">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-secondary" id="add-tile-btn">+ Add Tile</button>
+          </div>
+        </div>
+
+        <div id="tile-list" style="margin-top:20px;"></div>
+
+        <div class="form-actions" style="margin-top:16px;">
+          <button class="btn btn-primary" id="save-tiles-btn">Save All Tiles</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TEAM MANAGEMENT ===== -->
     <div class="settings-card">
       <div class="card-header" tabindex="0" data-section="teams" role="button" aria-expanded="false">
         <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
@@ -425,7 +492,7 @@
       </div>
       <div class="card-body" id="section-variables">
         <div class="form-hint" style="margin-bottom:14px;">
-          These are the expected CSV columns from each team's Google Sheet. Ensure your sheet headers match this structure.
+          These are the expected CSV columns from each team's Google Sheet. Ensure your sheet headers match this structure exactly.
         </div>
         <table class="var-table">
           <thead>
@@ -483,6 +550,7 @@
         </div>
         <div class="form-actions">
           <button class="btn btn-danger" id="clear-teams-btn">Delete All Teams</button>
+          <button class="btn btn-danger" id="clear-tiles-btn">Delete All Tiles</button>
           <button class="btn btn-danger" id="clear-all-data-btn">Wipe All Local Data</button>
         </div>
       </div>
@@ -499,19 +567,21 @@
     <span>&middot;</span>
     <span>Bingo Board System</span>
   </footer>
-    <script>
+
+  <script>
 (() => {
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
     teams: 'bingo-teams-config',
-    customVars: 'bingo-custom-vars'
+    customVars: 'bingo-custom-vars',
+    tiles: 'bingo-tiles-config'
   };
 
   const MAX_TEAMS = 8;
 
   const DEFAULT_EVENT = {
     name: 'Bingo 2026',
-    tileCount: 49,
+    boardSize: 5,
     startDate: '',
     endDate: '',
     description: '',
@@ -532,9 +602,14 @@
     }
   };
 
+  const DEFAULT_TILES = [
+    { image: 'tile-1.png', title: 'Sample Tile 1', description: 'This is a sample tile', points: 100 },
+    { image: 'tile-2.png', title: 'Sample Tile 2', description: 'This is another sample tile', points: 150 }
+  ];
+
   const SHEET_COLUMNS = [
-    { col: 'A', key: 'title',       type: 'string',  desc: 'Display name for the tile' },
-    { col: 'B', key: 'image',       type: 'url',     desc: 'Image filename or URL for tile artwork' },
+    { col: 'A', key: 'image',       type: 'url',     desc: 'Image filename or URL for tile artwork' },
+    { col: 'B', key: 'title',       type: 'string',  desc: 'Display name for the tile' },
     { col: 'C', key: 'current',     type: 'number',  desc: 'Current progress value' },
     { col: 'D', key: 'goal',        type: 'number',  desc: 'Target goal value (tile completes when current ≥ goal)' },
     { col: 'E', key: 'items',       type: 'string',  desc: 'Comma-separated checklist items' },
@@ -544,6 +619,7 @@
 
   let eventConfig = { ...DEFAULT_EVENT };
   let teamsConfig = {};
+  let tilesConfig = [];
   let customVars = [];
 
   /* --- DOM --- */
@@ -551,7 +627,7 @@
   const DOM = {
     // Event
     eventName:     $('cfg-event-name'),
-    tileCount:     $('cfg-tile-count'),
+    boardSize:     $('cfg-board-size'),
     startDate:     $('cfg-start-date'),
     endDate:       $('cfg-end-date'),
     description:   $('cfg-description'),
@@ -562,6 +638,15 @@
     allowThemes:   $('cfg-allow-themes'),
     saveEventBtn:  $('save-event-btn'),
     resetEventBtn: $('reset-event-btn'),
+    // Tiles
+    tileList:       $('tile-list'),
+    tileCountBadge: $('tile-count-badge'),
+    newTileImage:   $('new-tile-image'),
+    newTileTitle:   $('new-tile-title'),
+    newTileDesc:    $('new-tile-desc'),
+    newTilePoints:  $('new-tile-points'),
+    addTileBtn:     $('add-tile-btn'),
+    saveTilesBtn:   $('save-tiles-btn'),
     // Teams
     teamList:       $('team-list'),
     teamCountBadge: $('team-count-badge'),
@@ -578,6 +663,7 @@
     ioArea:     $('io-area'),
     // Danger
     clearTeamsBtn: $('clear-teams-btn'),
+    clearTilesBtn: $('clear-tiles-btn'),
     clearAllBtn:   $('clear-all-data-btn'),
     // Toast
     toast: $('toast')
@@ -604,7 +690,8 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => DOM.toast.classList.remove('show'), duration);
   };
-    /* ========================= COLLAPSIBLE CARDS ========================= */
+
+  /* ========================= COLLAPSIBLE CARDS ========================= */
   function initCards() {
     document.querySelectorAll('.card-header').forEach(header => {
       header.addEventListener('click', () => toggleCard(header));
@@ -634,7 +721,7 @@
 
   function populateEventForm() {
     DOM.eventName.value = eventConfig.name;
-    DOM.tileCount.value = eventConfig.tileCount;
+    DOM.boardSize.value = eventConfig.boardSize || 5;
     DOM.startDate.value = eventConfig.startDate || '';
     DOM.endDate.value = eventConfig.endDate || '';
     DOM.description.value = eventConfig.description || '';
@@ -657,7 +744,7 @@
 
     eventConfig = {
       name: name,
-      tileCount: Math.min(49, Math.max(1, parseInt(DOM.tileCount.value, 10) || 49)),
+      boardSize: parseInt(DOM.boardSize.value, 10) || 5,
       startDate: DOM.startDate.value,
       endDate: DOM.endDate.value,
       description: DOM.description.value.trim(),
@@ -670,6 +757,81 @@
 
     save(STORAGE_KEYS.eventConfig, eventConfig);
     toast('Event settings saved!');
+  }
+
+  /* ========================= TILE MANAGEMENT ========================= */
+  function loadTiles() {
+    const saved = load(STORAGE_KEYS.tiles);
+    tilesConfig = saved || [];
+    renderTileList();
+  }
+
+  function renderTileList() {
+    const count = tilesConfig.length;
+    DOM.tileCountBadge.textContent = `${count} Tile${count !== 1 ? 's' : ''}`;
+    DOM.tileList.innerHTML = '';
+
+    if (count === 0) {
+      DOM.tileList.innerHTML = '<div style="color:var(--text-dim); font-size:0.85rem; padding:8px 0;">No tiles configured.</div>';
+      return;
+    }
+
+    const frag = document.createDocumentFragment();
+    tilesConfig.forEach((tile, idx) => {
+      const item = document.createElement('div');
+      item.className = 'tile-item-card';
+      item.style.cssText = `display:grid; grid-template-columns:60px 1fr auto; gap:12px; align-items:start;`;
+      item.innerHTML = `
+        <img src="${escapeHTML(tile.image)}" alt="${escapeHTML(tile.title)}" style="width:60px; height:60px; object-fit:contain; border-radius:3px; background:var(--bg-body); border:1px solid var(--border-main);" onerror="this.style.display='none';">
+        <div>
+          <div style="font-weight:bold; color:var(--text-bright); margin-bottom:2px;">${escapeHTML(tile.title)} (${tile.points} pts)</div>
+          <div style="font-size:0.75rem; color:var(--text-dim); margin-bottom:4px;">IMG: ${escapeHTML(tile.image)}</div>
+          <div style="font-size:0.8rem; color:var(--text-bright); line-height:1.4;">${escapeHTML(tile.description || '(no description)')}</div>
+        </div>
+        <button class="btn btn-danger btn-sm delete-tile-btn" data-idx="${idx}" style="padding:4px 8px; height:fit-content;">Delete</button>
+      `;
+      frag.appendChild(item);
+    });
+    DOM.tileList.appendChild(frag);
+
+    // Wire delete buttons
+    DOM.tileList.querySelectorAll('.delete-tile-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        if (confirm(`Delete "${tilesConfig[idx].title}"? This won't be saved until you click Save.`)) {
+          tilesConfig.splice(idx, 1);
+          renderTileList();
+        }
+      });
+    });
+  }
+
+  function addNewTile() {
+    const image = DOM.newTileImage.value.trim();
+    const title = DOM.newTileTitle.value.trim();
+    const description = DOM.newTileDesc.value.trim();
+    const points = parseInt(DOM.newTilePoints.value, 10) || 0;
+
+    if (!image) { toast('Image is required', 'error'); DOM.newTileImage.focus(); return; }
+    if (!title) { toast('Title is required', 'error'); DOM.newTileTitle.focus(); return; }
+
+    tilesConfig.push({ image, title, description, points });
+    DOM.newTileImage.value = '';
+    DOM.newTileTitle.value = '';
+    DOM.newTileDesc.value = '';
+    DOM.newTilePoints.value = '100';
+    renderTileList();
+    DOM.newTileImage.focus();
+    toast('Tile added');
+  }
+
+  function saveTiles() {
+    if (tilesConfig.length === 0) {
+      toast('Add at least one tile before saving', 'warning');
+      return;
+    }
+    save(STORAGE_KEYS.tiles, tilesConfig);
+    toast(`${tilesConfig.length} tile(s) saved!`);
   }
 
   /* ========================= TEAM MANAGEMENT ========================= */
@@ -870,7 +1032,8 @@
     }
     toast('New team added — fill in the details and save');
   }
-    /* ========================= SHEET VARIABLES TABLE ========================= */
+
+  /* ========================= SHEET VARIABLES TABLE ========================= */
   function renderVarTable() {
     DOM.varTableBody.innerHTML = '';
     const frag = document.createDocumentFragment();
@@ -977,6 +1140,7 @@
       exportedAt: new Date().toISOString(),
       event: eventConfig,
       teams: teamsConfig,
+      tiles: tilesConfig,
       customVars: customVars
     };
     DOM.ioArea.value = JSON.stringify(data, null, 2);
@@ -1014,6 +1178,12 @@
         renderTeamList();
       }
 
+      if (Array.isArray(data.tiles)) {
+        tilesConfig = data.tiles.slice(0, 49);
+        save(STORAGE_KEYS.tiles, tilesConfig);
+        renderTileList();
+      }
+
       if (Array.isArray(data.customVars)) {
         customVars = data.customVars.slice(0, 10);
         save(STORAGE_KEYS.customVars, customVars);
@@ -1037,20 +1207,31 @@
     toast('All teams deleted', 'warning');
   }
 
+  function clearAllTiles() {
+    if (!confirm('Delete ALL tiles? This will save immediately.')) return;
+    tilesConfig = [];
+    save(STORAGE_KEYS.tiles, tilesConfig);
+    renderTileList();
+    toast('All tiles deleted', 'warning');
+  }
+
   function clearAllData() {
-    if (!confirm('This will wipe ALL game settings, teams, and custom variables from local storage. Are you absolutely sure?')) return;
+    if (!confirm('This will wipe ALL game settings, teams, tiles, and custom variables from local storage. Are you absolutely sure?')) return;
     if (!confirm('Final confirmation — this CANNOT be undone. Proceed?')) return;
 
     localStorage.removeItem(STORAGE_KEYS.eventConfig);
     localStorage.removeItem(STORAGE_KEYS.teams);
+    localStorage.removeItem(STORAGE_KEYS.tiles);
     localStorage.removeItem(STORAGE_KEYS.customVars);
 
     eventConfig = { ...DEFAULT_EVENT };
     teamsConfig = {};
+    tilesConfig = [];
     customVars = [];
 
     populateEventForm();
     renderTeamList();
+    renderTileList();
     renderVarTable();
     renderCustomVarEditor();
 
@@ -1069,12 +1250,20 @@
   function init() {
     initCards();
     loadEventConfig();
+    loadTiles();
     loadTeams();
     loadCustomVars();
 
     // Event settings
     DOM.saveEventBtn.addEventListener('click', saveEventConfig);
     DOM.resetEventBtn.addEventListener('click', resetEventDefaults);
+
+    // Tiles
+    DOM.addTileBtn.addEventListener('click', addNewTile);
+    DOM.saveTilesBtn.addEventListener('click', saveTiles);
+    DOM.newTileTitle.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') DOM.addTileBtn.click();
+    });
 
     // Teams
     DOM.addTeamBtn.addEventListener('click', addNewTeam);
@@ -1094,6 +1283,7 @@
 
     // Danger zone
     DOM.clearTeamsBtn.addEventListener('click', clearAllTeams);
+    DOM.clearTilesBtn.addEventListener('click', clearAllTiles);
     DOM.clearAllBtn.addEventListener('click', clearAllData);
 
     // Warn before leaving with unsaved changes
@@ -1113,6 +1303,7 @@
     // Clear dirty flag on save
     const clearDirty = () => { formDirty = false; };
     DOM.saveEventBtn.addEventListener('click', clearDirty);
+    DOM.saveTilesBtn.addEventListener('click', clearDirty);
     DOM.saveTeamsBtn.addEventListener('click', clearDirty);
   }
 

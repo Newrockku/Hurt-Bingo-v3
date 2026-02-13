@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Game Settings - Bingo Admin</title>
+  <title>Admin Dashboard - Bingo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -13,18 +13,28 @@
       --bg-body: #342e25;
       --bg-card: #494034;
       --bg-well: #342e25;
+      --bg-completed: #1e3a1e;
+      --bg-completed-well: #162a16;
       --border-main: #6d604e;
-      --border-hover: #ffac00;
+      --border-completed: #4caf50;
       --accent: #ffac00;
+      --accent-secondary: #c89b3c;
       --text-main: #ffac00;
       --text-bright: #ffee00;
       --text-dim: #858476;
+      --text-completed: #4caf50;
       --danger: #ff6d6d;
       --success: #4caf50;
+      --warning: #ffcc33;
     }
 
     * { box-sizing: border-box; }
     html { scrollbar-gutter: stable; overflow-y: scroll; }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-well); }
+    ::-webkit-scrollbar-thumb { background: var(--bg-card); border: 2px solid var(--bg-well); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border-main); }
 
     body {
       background-color: var(--bg-body);
@@ -35,679 +45,477 @@
       min-height: 100vh;
     }
 
-    .settings-container { width: 100%; max-width: 1200px; }
-
-    .settings-header {
+    .admin-header {
+      width: 100%; max-width: 1200px;
       background: var(--bg-card); border: 2px solid var(--border-main);
       padding: 20px 30px; margin-bottom: 24px;
       display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     }
-    .settings-title { font-size: 1.8rem; margin: 0; font-weight: bold; color: var(--text-bright); }
-    .settings-header-actions { display: flex; gap: 10px; }
 
-    .settings-btn {
+    .admin-header-left {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+
+    .admin-title {
+      font-size: 2rem; margin: 0; font-weight: bold;
+      color: var(--text-bright); text-transform: uppercase;
+      letter-spacing: 2px; text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+    }
+
+    .admin-subtitle {
+      font-size: 0.85rem; color: var(--text-dim); margin: 0;
+    }
+
+    .admin-header-actions {
+      display: flex; gap: 10px; flex-wrap: wrap;
+    }
+
+    .admin-btn {
       background: var(--bg-well); border: 2px solid var(--border-main);
-      color: var(--text-main); padding: 8px 18px;
+      color: var(--text-main); padding: 10px 20px;
       font-family: 'Cabin Condensed', sans-serif; font-size: 0.9rem;
       cursor: pointer; border-radius: 4px; transition: all 0.2s ease;
       text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+      font-weight: bold;
     }
-    .settings-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--bg-card); }
-    .settings-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .settings-btn.primary { border-color: var(--accent); color: var(--accent); }
-    .settings-btn.primary:hover { background: var(--accent); color: var(--bg-body); }
-    .settings-btn.danger { border-color: var(--danger); color: var(--danger); }
-    .settings-btn.danger:hover { background: var(--danger); color: white; }
 
-    .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px; margin-bottom: 24px; }
+    .admin-btn:hover {
+      border-color: var(--accent); color: var(--accent); background: var(--bg-card);
+    }
 
-    .settings-section {
+    .admin-btn:focus-visible {
+      outline: 2px solid var(--accent); outline-offset: 2px;
+    }
+
+    .admin-btn.primary {
+      background: var(--accent); border-color: var(--accent);
+      color: var(--bg-body); font-weight: bold;
+    }
+
+    .admin-btn.primary:hover {
+      background: #e09800; border-color: #e09800;
+    }
+
+    .admin-btn svg {
+      width: 18px; height: 18px; fill: currentColor;
+    }
+
+    .dashboard-container {
+      width: 100%; max-width: 1200px;
+      display: grid; grid-template-columns: 2fr 1fr; gap: 24px;
+      padding-bottom: 40px;
+    }
+
+    .dashboard-section {
       background: var(--bg-card); border: 2px solid var(--border-main);
-      padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    }
-    .settings-section h2 {
-      font-size: 1.1rem; margin: 0 0 16px 0; color: var(--text-bright);
-      text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border-main);
-      padding-bottom: 8px;
+      padding: 24px; border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
-    .form-group { margin-bottom: 16px; }
-    .form-group:last-child { margin-bottom: 0; }
-
-    label {
-      display: block; font-size: 0.85rem; text-transform: uppercase;
-      color: var(--text-dim); letter-spacing: 0.5px; margin-bottom: 6px;
+    .section-title {
+      font-size: 1.2rem; font-weight: bold; color: var(--text-bright);
+      margin: 0 0 16px 0; text-transform: uppercase; letter-spacing: 1px;
     }
 
-    input[type="text"],
-    input[type="number"],
-    select,
-    textarea {
-      width: 100%; padding: 10px 12px; background: var(--bg-well);
-      border: 1px solid var(--border-main); color: var(--text-main);
-      font-family: 'Cabin Condensed', sans-serif; font-size: 0.95rem;
-      border-radius: 4px; transition: border-color 0.2s ease;
-    }
-    input[type="text"]:focus,
-    input[type="number"]:focus,
-    select:focus,
-    textarea:focus {
-      outline: none; border-color: var(--accent); box-shadow: 0 0 8px rgba(255,172,0,0.2);
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px; margin-bottom: 20px;
     }
 
-    textarea { resize: vertical; min-height: 80px; }
-
-    .radio-group, .checkbox-group {
-      display: flex; flex-direction: column; gap: 8px;
-    }
-
-    .radio-item, .checkbox-item {
-      display: flex; align-items: center; gap: 8px; cursor: pointer;
-    }
-
-    input[type="radio"],
-    input[type="checkbox"] {
-      width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent);
-    }
-
-    .radio-item label, .checkbox-item label {
-      margin: 0; text-transform: none; font-size: 0.9rem; cursor: pointer;
-    }
-
-    .help-text {
-      font-size: 0.75rem; color: var(--text-dim); margin-top: 4px; font-style: italic;
-    }
-
-    .tiles-editor {
+    .stat-card {
       background: var(--bg-well); border: 1px solid var(--border-main);
-      padding: 16px; border-radius: 4px; margin-top: 12px;
+      padding: 16px; border-radius: 4px; text-align: center;
     }
 
-    .tiles-list {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 8px; margin-bottom: 12px; max-height: 300px; overflow-y: auto;
+    .stat-value {
+      font-size: 2rem; font-weight: bold; color: var(--accent);
+      margin-bottom: 4px;
     }
 
-    .tile-item {
-      background: var(--bg-card); border: 1px solid var(--border-main);
-      padding: 8px; border-radius: 3px; font-size: 0.75rem; text-align: center;
-      cursor: grab; transition: all 0.2s ease; position: relative;
-    }
-    .tile-item:hover { border-color: var(--accent); }
-    .tile-item.dragging { opacity: 0.5; }
-    .tile-item .remove-tile {
-      position: absolute; top: 2px; right: 2px; background: var(--danger);
-      color: white; border: none; width: 16px; height: 16px; border-radius: 2px;
-      cursor: pointer; font-size: 0.6rem; padding: 0; display: none;
-    }
-    .tile-item:hover .remove-tile { display: flex; align-items: center; justify-content: center; }
-
-    .tile-input-group {
-      display: flex; gap: 8px; margin-bottom: 8px;
-    }
-    .tile-input-group input { flex: 1; }
-    .tile-input-group button { flex: 0 0 auto; }
-
-    .tile-presets {
-      background: rgba(255,172,0,0.08); border: 1px solid var(--border-main);
-      padding: 12px; border-radius: 4px; margin-bottom: 12px;
-    }
-    .tile-presets h4 { margin: 0 0 8px 0; font-size: 0.8rem; color: var(--text-dim); }
-    .preset-buttons {
-      display: flex; flex-wrap: wrap; gap: 6px;
-    }
-    .preset-btn {
-      background: transparent; border: 1px solid var(--border-main);
-      color: var(--text-main); padding: 6px 10px; font-size: 0.75rem;
-      cursor: pointer; border-radius: 3px; transition: all 0.2s ease;
-    }
-    .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-    .players-editor {
-      margin-top: 12px;
+    .stat-label {
+      font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);
+      letter-spacing: 0.5px;
     }
 
-    .player-item {
+    .team-list {
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    .team-card {
       background: var(--bg-well); border: 1px solid var(--border-main);
-      padding: 12px; border-radius: 3px; margin-bottom: 8px;
-      display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end;
+      padding: 16px; border-radius: 4px;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; transition: all 0.2s ease;
     }
 
-    .player-item input { margin-bottom: 0; }
-
-    .remove-player-btn {
-      background: var(--danger); border: none; color: white;
-      padding: 8px 12px; border-radius: 3px; cursor: pointer;
-      font-size: 0.8rem; font-family: 'Cabin Condensed', sans-serif;
-      transition: all 0.2s ease;
+    .team-card:hover {
+      border-color: var(--accent); box-shadow: 0 0 10px rgba(255,172,0,0.2);
     }
-    .remove-player-btn:hover { opacity: 0.8; }
 
-    .board-arrangement {
+    .team-info {
+      display: flex; align-items: center; gap: 12px; flex: 1;
+    }
+
+    .team-color-badge {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 2px solid var(--border-main); flex-shrink: 0;
+    }
+
+    .team-details {
+      display: flex; flex-direction: column; gap: 2px;
+    }
+
+    .team-name {
+      font-weight: bold; color: var(--text-bright); font-size: 0.95rem;
+    }
+
+    .team-meta {
+      font-size: 0.75rem; color: var(--text-dim);
+    }
+
+    .team-score {
+      font-size: 1.5rem; font-weight: bold; color: var(--accent);
+      text-align: right;
+    }
+
+    .team-points {
+      font-size: 0.7rem; color: var(--text-dim); margin-top: 4px;
+    }
+
+    .leaderboard {
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    .leaderboard-entry {
       background: var(--bg-well); border: 1px solid var(--border-main);
-      padding: 16px; border-radius: 4px; margin-top: 12px;
+      padding: 12px; border-radius: 4px;
+      display: grid; grid-template-columns: 30px 1fr auto; gap: 12px; align-items: center;
     }
 
-    .board-preview {
-      display: grid; gap: 4px; margin-bottom: 12px;
-      margin-top: 12px;
+    .leaderboard-rank {
+      font-size: 1.3rem; font-weight: bold; color: var(--accent);
+      text-align: center;
     }
 
-    .board-preview-row { display: grid; gap: 4px; }
+    .leaderboard-info {
+      display: flex; flex-direction: column; gap: 2px;
+    }
 
-    .board-tile {
-      aspect-ratio: 1; background: var(--bg-card); border: 1px solid var(--border-main);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.65rem; text-align: center; padding: 4px;
-      border-radius: 3px; cursor: grab; transition: all 0.2s ease;
+    .leaderboard-name {
+      color: var(--text-bright); font-weight: bold;
     }
-    .board-tile:hover { border-color: var(--accent); background: rgba(255,172,0,0.08); }
-    .board-tile.dragging { opacity: 0.3; }
 
-    .arrangement-presets {
-      background: rgba(255,172,0,0.08); border: 1px solid var(--border-main);
-      padding: 12px; border-radius: 4px; margin-bottom: 12px;
+    .leaderboard-detail {
+      font-size: 0.75rem; color: var(--text-dim);
     }
-    .arrangement-presets h4 { margin: 0 0 8px 0; font-size: 0.8rem; color: var(--text-dim); }
 
-    .save-status {
-      padding: 12px; border-radius: 4px; margin-bottom: 16px;
-      text-align: center; font-weight: bold; display: none;
+    .leaderboard-score {
+      font-size: 1.2rem; font-weight: bold; color: var(--success);
     }
-    .save-status.success {
-      background: rgba(76,175,80,0.15); border: 1px solid var(--success);
-      color: var(--success); display: block;
+
+    .activity-feed {
+      display: flex; flex-direction: column; gap: 10px;
+      max-height: 400px; overflow-y: auto;
     }
-    .save-status.error {
-      background: rgba(255,109,109,0.15); border: 1px solid var(--danger);
-      color: var(--danger); display: block;
+
+    .activity-item {
+      background: var(--bg-well); border-left: 3px solid var(--accent);
+      padding: 12px; border-radius: 2px;
+      font-size: 0.85rem; color: var(--text-bright);
+    }
+
+    .activity-timestamp {
+      font-size: 0.7rem; color: var(--text-dim); margin-top: 4px;
+    }
+
+    .page-footer {
+      width: 100%; max-width: 1200px;
+      padding: 20px 0 10px 0; font-size: 0.7rem;
+      color: var(--border-main);
+      text-align: center; border-top: 1px solid var(--border-main);
     }
 
     @media (max-width: 900px) {
-      .settings-grid { grid-template-columns: 1fr; }
-      .player-item { grid-template-columns: 1fr; }
+      .dashboard-container {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-header {
+        flex-direction: column; align-items: flex-start;
+      }
+
+      .admin-title {
+        font-size: 1.5rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
     }
   </style>
 </head>
 <body>
-  <div class="settings-container">
-    <header class="settings-header">
-      <h1 class="settings-title">⚙️ Game Settings</h1>
-      <div class="settings-header-actions">
-        <button class="settings-btn" id="save-btn">💾 Save All Settings</button>
-        <a href="admin.html" class="settings-btn">← Back to Admin</a>
-      </div>
-    </header>
 
-    <div id="save-status" class="save-status"></div>
+  <header class="admin-header">
+    <div class="admin-header-left">
+      <h1 class="admin-title">📊 Admin Dashboard</h1>
+      <p class="admin-subtitle">Real-time overview of the entire bingo event</p>
+    </div>
+    <div class="admin-header-actions">
+      <a href="settings.html" class="admin-btn primary">
+        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.611 3.611 0 0112 15.6z"/></svg>
+        Configure Game
+      </a>
+      <button class="admin-btn" id="refresh-btn">
+        <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78l-2.58 2.58h6v-6l-2.57 2.57z"/></svg>
+        Refresh
+      </button>
+    </div>
+  </header>
 
-    <div class="settings-grid">
-      <!-- Event Configuration -->
-      <div class="settings-section" id="event-section">
-        <h2>Event Configuration</h2>
-
-        <div class="form-group">
-          <label for="event-name">Event Title</label>
-          <input type="text" id="event-name" placeholder="e.g., Bingo 2026">
-          <div class="help-text">The name displayed on all player sheets</div>
-        </div>
-
-        <div class="form-group">
-          <label for="event-format">Event Format</label>
-          <div class="radio-group">
-            <div class="radio-item">
-              <input type="radio" id="format-blackout" name="event-format" value="blackout">
-              <label for="format-blackout">Blackout Bingo (Everyone competes individually)</label>
-            </div>
-            <div class="radio-item">
-              <input type="radio" id="format-clan" name="event-format" value="clan">
-              <label for="format-clan">Clan vs Clan (Team-based competition)</label>
-            </div>
+  <div class="dashboard-container">
+    <!-- LEFT COLUMN: EVENT OVERVIEW & TEAMS -->
+    <div>
+      <!-- Event Stats -->
+      <div class="dashboard-section">
+        <h2 class="section-title">📈 Event Overview</h2>
+        <div class="stats-grid" id="event-stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="total-teams">0</div>
+            <div class="stat-label">Teams</div>
           </div>
-          <div class="help-text">Choose the competition format for your event</div>
-        </div>
-
-        <div class="form-group">
-          <label for="board-size">Board Size</label>
-          <select id="board-size">
-            <option value="5">5x5 (25 tiles)</option>
-            <option value="6">6x6 (36 tiles)</option>
-            <option value="7">7x7 (49 tiles)</option>
-          </select>
-          <div class="help-text">Select the dimensions for your bingo board</div>
-        </div>
-
-        <div class="form-group">
-          <label for="codeword">Codeword</label>
-          <input type="text" id="codeword" placeholder="e.g., BINGO_BLITZ" maxlength="50">
-          <div class="help-text">Appears on player sheets as verification code</div>
-        </div>
-
-        <div class="form-group">
-          <label for="event-description">Event Description (Optional)</label>
-          <textarea id="event-description" placeholder="Add any special instructions or rules..."></textarea>
-          <div class="help-text">Displayed as a banner on the admin dashboard</div>
+          <div class="stat-card">
+            <div class="stat-value" id="total-tiles">0</div>
+            <div class="stat-label">Tiles</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="avg-completion">0%</div>
+            <div class="stat-label">Avg Completion</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="total-points">0</div>
+            <div class="stat-label">Total Points</div>
+          </div>
         </div>
       </div>
 
-      <!-- Tiles Management -->
-      <div class="settings-section" id="tiles-section">
-        <h2>Tiles Management</h2>
-
-        <div class="tile-presets">
-          <h4>📋 Quick Presets</h4>
-          <div class="preset-buttons">
-            <button class="preset-btn" data-preset="random">Random Order</button>
-            <button class="preset-btn" data-preset="alphabetical">A-Z Order</button>
-            <button class="preset-btn" data-preset="reverse">Z-A Order</button>
-            <button class="preset-btn" data-preset="grouped">Grouped</button>
-            <button class="preset-btn" data-preset="clear">Clear All</button>
+      <!-- Teams List -->
+      <div class="dashboard-section">
+        <h2 class="section-title">👥 Team Standings</h2>
+        <div class="team-list" id="team-list-container">
+          <div style="color:var(--text-dim); font-size:0.85rem; padding:16px; text-align:center;">
+            No teams configured. Go to Configure to set up teams.
           </div>
-        </div>
-
-        <div class="tile-input-group">
-          <input type="text" id="new-tile-input" placeholder="Enter tile name...">
-          <button class="settings-btn primary" id="add-tile-btn">Add Tile</button>
-        </div>
-
-        <div class="tiles-editor">
-          <div class="help-text" style="margin-bottom: 8px;">Tiles: <span id="tile-count">0</span></div>
-          <div class="tiles-list" id="tiles-list"></div>
-        </div>
-      </div>
-
-      <!-- Players Management -->
-      <div class="settings-section" id="players-section">
-        <h2>Players / Teams</h2>
-
-        <div class="form-group" id="format-dependent-players">
-          <label for="team-name">Team Name (Clan Mode)</label>
-          <input type="text" id="team-name" placeholder="e.g., The Warriors">
-          <div class="help-text">Team name for Clan vs Clan format</div>
-        </div>
-
-        <div class="players-editor">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <label style="margin: 0; font-size: 0.75rem;">Players</label>
-            <span id="player-count" style="font-size: 0.8rem; color: var(--text-dim);">0 Players</span>
-          </div>
-          <div id="players-list"></div>
-          <button class="settings-btn" id="add-player-btn" style="width: 100%; margin-top: 12px;">+ Add Player</button>
-        </div>
-      </div>
-
-      <!-- Board Arrangement -->
-      <div class="settings-section" id="arrangement-section" style="grid-column: 1 / -1;">
-        <h2>Board Tile Arrangement</h2>
-
-        <div class="arrangement-presets">
-          <h4>📐 Arrangement Presets</h4>
-          <div class="preset-buttons">
-            <button class="preset-btn" data-arrangement="sequential">Sequential</button>
-            <button class="preset-btn" data-arrangement="random">Random</button>
-            <button class="preset-btn" data-arrangement="alternating">Alternating</button>
-          </div>
-        </div>
-
-        <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 12px;">
-          Drag tiles to rearrange them on the board. The order matters for tile placement.
-        </p>
-
-        <div class="board-arrangement">
-          <div id="board-preview" class="board-preview"></div>
-        </div>
-
-        <div style="background: rgba(255,172,0,0.08); border: 1px solid var(--border-main); padding: 12px; border-radius: 4px; font-size: 0.8rem; color: var(--text-dim);">
-          <strong>Board Size:</strong> <span id="board-size-display">5x5</span> |
-          <strong>Tiles Created:</strong> <span id="tiles-created-display">0</span>
         </div>
       </div>
     </div>
 
-    <div style="text-align: center; margin-top: 24px; margin-bottom: 24px;">
-      <button class="settings-btn primary" id="save-btn-bottom" style="padding: 12px 32px; font-size: 1rem;">💾 Save All Settings</button>
+    <!-- RIGHT COLUMN: LEADERBOARD & ACTIVITY -->
+    <div>
+      <!-- Leaderboard -->
+      <div class="dashboard-section">
+        <h2 class="section-title">🏆 Leaderboard</h2>
+        <div class="leaderboard" id="leaderboard-container">
+          <div style="color:var(--text-dim); font-size:0.85rem; padding:16px; text-align:center;">
+            Waiting for data...
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity Feed -->
+      <div class="dashboard-section">
+        <h2 class="section-title">📝 Recent Activity</h2>
+        <div class="activity-feed" id="activity-feed-container">
+          <div style="color:var(--text-dim); font-size:0.85rem; padding:16px; text-align:center;">
+            No activity yet
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
+  <footer class="page-footer">
+    <p>Bingo Admin Dashboard v1.0 &middot; Real-time Event Monitor</p>
+  </footer>
+
   <script>
 (() => {
-  /* ========================= CONFIG & STATE ========================= */
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
     teams: 'bingo-teams-config',
+    tiles: 'bingo-tiles-config',
+    customVars: 'bingo-custom-vars'
   };
 
   let eventConfig = {};
-  let tiles = [];
-  let players = [];
-  let tileArrangement = [];
-  let maxTiles = 25;
+  let teamsConfig = {};
+  let tilesConfig = [];
+  let syncIntervalId = null;
 
-  /* ========================= DOM ========================= */
+  const $ = (id) => document.getElementById(id);
   const DOM = {
-    eventName: document.getElementById('event-name'),
-    eventFormat: document.querySelectorAll('input[name="event-format"]'),
-    boardSize: document.getElementById('board-size'),
-    codeword: document.getElementById('codeword'),
-    eventDesc: document.getElementById('event-description'),
-    teamName: document.getElementById('team-name'),
-    newTileInput: document.getElementById('new-tile-input'),
-    addTileBtn: document.getElementById('add-tile-btn'),
-    tilesList: document.getElementById('tiles-list'),
-    tileCount: document.getElementById('tile-count'),
-    playersList: document.getElementById('players-list'),
-    playerCount: document.getElementById('player-count'),
-    addPlayerBtn: document.getElementById('add-player-btn'),
-    boardPreview: document.getElementById('board-preview'),
-    boardSizeDisplay: document.getElementById('board-size-display'),
-    tilesCreatedDisplay: document.getElementById('tiles-created-display'),
-    saveBtns: [document.getElementById('save-btn'), document.getElementById('save-btn-bottom')],
-    saveStatus: document.getElementById('save-status'),
-    formatDepPlayers: document.getElementById('format-dependent-players'),
+    totalTeams: $('total-teams'),
+    totalTiles: $('total-tiles'),
+    avgCompletion: $('avg-completion'),
+    totalPoints: $('total-points'),
+    teamListContainer: $('team-list-container'),
+    leaderboardContainer: $('leaderboard-container'),
+    activityFeedContainer: $('activity-feed-container'),
+    refreshBtn: $('refresh-btn')
   };
 
-  /* ========================= LOAD ========================= */
-  function loadSettings() {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.eventConfig);
-      eventConfig = saved ? JSON.parse(saved) : {};
-    } catch {
-      eventConfig = {};
-    }
+  /* --- Helpers --- */
+  const load = (key) => {
+    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; }
+  };
 
-    DOM.eventName.value = eventConfig.name || 'Bingo 2026';
-    DOM.codeword.value = eventConfig.codeword || '';
-    DOM.eventDesc.value = eventConfig.description || '';
-    DOM.boardSize.value = eventConfig.boardSize || '5';
-    DOM.teamName.value = eventConfig.teamName || '';
-
-    const format = eventConfig.format || 'blackout';
-    document.getElementById(`format-${format}`).checked = true;
-    updateFormatUI();
-
-    tiles = eventConfig.tiles || [];
-    players = eventConfig.players || [];
-    tileArrangement = eventConfig.arrangement || [];
-
-    maxTiles = Math.pow(parseInt(DOM.boardSize.value), 2);
-
-    renderTiles();
-    renderPlayers();
-    renderBoardPreview();
+  function loadConfig() {
+    eventConfig = load(STORAGE_KEYS.eventConfig) || {};
+    teamsConfig = load(STORAGE_KEYS.teams) || {};
+    tilesConfig = load(STORAGE_KEYS.tiles) || [];
   }
 
-  /* ========================= FORMAT HANDLING ========================= */
-  function updateFormatUI() {
-    const format = Array.from(DOM.eventFormat).find(r => r.checked)?.value || 'blackout';
-    if (format === 'clan') {
-      DOM.formatDepPlayers.style.display = 'block';
-    } else {
-      DOM.formatDepPlayers.style.display = 'none';
-    }
+  function renderEventStats() {
+    const teamCount = Object.keys(teamsConfig).length;
+    const tileCount = tilesConfig.length;
+    const totalTeamPoints = Object.values(teamsConfig).reduce((sum, t) => sum + (parseInt(t.points, 10) || 0), 0);
+
+    DOM.totalTeams.textContent = teamCount;
+    DOM.totalTiles.textContent = tileCount;
+    DOM.totalPoints.textContent = totalTeamPoints.toLocaleString();
+
+    // Placeholder for average completion (would come from live data)
+    DOM.avgCompletion.textContent = '0%';
   }
 
-  DOM.eventFormat.forEach(radio => {
-    radio.addEventListener('change', updateFormatUI);
-  });
+  function renderTeamStandings() {
+    DOM.teamListContainer.innerHTML = '';
 
-  /* ========================= BOARD SIZE ========================= */
-  DOM.boardSize.addEventListener('change', () => {
-    maxTiles = Math.pow(parseInt(DOM.boardSize.value), 2);
-    DOM.boardSizeDisplay.innerText = `${DOM.boardSize.value}x${DOM.boardSize.value}`;
-    renderBoardPreview();
-  });
-
-  /* ========================= TILES MANAGEMENT ========================= */
-  function renderTiles() {
-    DOM.tilesList.innerHTML = '';
-    DOM.tileCount.innerText = tiles.length;
-    DOM.tilesCreatedDisplay.innerText = tiles.length;
-
-    tiles.forEach((tile, idx) => {
-      const div = document.createElement('div');
-      div.className = 'tile-item';
-      div.draggable = true;
-      div.dataset.index = idx;
-      div.innerHTML = `
-        <div style="word-wrap: break-word; flex: 1;">${escapeHTML(tile)}</div>
-        <button class="remove-tile" onclick="event.stopPropagation();" title="Remove">×</button>`;
-
-      div.querySelectorAll('.remove-tile').forEach(btn => {
-        btn.addEventListener('click', () => {
-          tiles.splice(idx, 1);
-          renderTiles();
-          renderBoardPreview();
-        });
-      });
-
-      div.addEventListener('dragstart', handleTileDragStart);
-      div.addEventListener('dragend', handleTileDragEnd);
-      div.addEventListener('dragover', handleTileDragOver);
-      div.addEventListener('drop', handleTileDrop);
-
-      DOM.tilesList.appendChild(div);
-    });
-  }
-
-  let draggedTile = null;
-  function handleTileDragStart(e) {
-    draggedTile = this;
-    this.classList.add('dragging');
-  }
-  function handleTileDragEnd(e) {
-    this.classList.remove('dragging');
-    draggedTile = null;
-  }
-  function handleTileDragOver(e) {
-    e.preventDefault();
-    if (!draggedTile || draggedTile === this) return;
-    const thisIndex = parseInt(this.dataset.index);
-    const dragIndex = parseInt(draggedTile.dataset.index);
-    if (thisIndex !== dragIndex) {
-      [tiles[thisIndex], tiles[dragIndex]] = [tiles[dragIndex], tiles[thisIndex]];
-      renderTiles();
-    }
-  }
-  function handleTileDrop(e) {
-    e.preventDefault();
-  }
-
-  DOM.addTileBtn.addEventListener('click', () => {
-    const val = DOM.newTileInput.value.trim();
-    if (!val) return;
-    if (tiles.length >= maxTiles) {
-      showStatus(`Maximum ${maxTiles} tiles allowed`, 'error');
+    const keys = Object.keys(teamsConfig);
+    if (keys.length === 0) {
+      DOM.teamListContainer.innerHTML = '<div style="color:var(--text-dim); font-size:0.85rem; padding:16px; text-align:center;">No teams configured.</div>';
       return;
     }
-    tiles.push(val);
-    DOM.newTileInput.value = '';
-    renderTiles();
-    renderBoardPreview();
-  });
 
-  DOM.newTileInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') DOM.addTileBtn.click();
-  });
-
-  document.querySelectorAll('.preset-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const preset = btn.dataset.preset;
-      if (preset === 'clear') {
-        tiles = [];
-      } else if (preset === 'random') {
-        tiles.sort(() => Math.random() - 0.5);
-      } else if (preset === 'alphabetical') {
-        tiles.sort((a, b) => a.localeCompare(b));
-      } else if (preset === 'reverse') {
-        tiles.sort((a, b) => b.localeCompare(a));
-      } else if (preset === 'grouped') {
-        tiles.sort((a, b) => a.length - b.length);
-      }
-      renderTiles();
-      renderBoardPreview();
+    const frag = document.createDocumentFragment();
+    keys.forEach(key => {
+      const team = teamsConfig[key];
+      const card = document.createElement('div');
+      card.className = 'team-card';
+      card.innerHTML = `
+        <div class="team-info">
+          <div class="team-color-badge" style="background:${team.color || '#888'};"></div>
+          <div class="team-details">
+            <div class="team-name">${escapeHTML(team.name)}</div>
+            <div class="team-meta">${escapeHTML(key)} • ${team.url ? '✓ Connected' : '✗ No Sheet'}</div>
+          </div>
+        </div>
+        <div>
+          <div class="team-score">${parseInt(team.points, 10) || 0}</div>
+          <div class="team-points">points</div>
+        </div>
+      `;
+      frag.appendChild(card);
     });
-  });
+    DOM.teamListContainer.appendChild(frag);
+  }
 
-  /* ========================= PLAYERS MANAGEMENT ========================= */
-  function renderPlayers() {
-    DOM.playersList.innerHTML = '';
-    DOM.playerCount.innerText = `${players.length} Player${players.length !== 1 ? 's' : ''}`;
+  function renderLeaderboard() {
+    DOM.leaderboardContainer.innerHTML = '';
 
-    players.forEach((player, idx) => {
-      const div = document.createElement('div');
-      div.className = 'player-item';
+    const keys = Object.keys(teamsConfig);
+    if (keys.length === 0) {
+      DOM.leaderboardContainer.innerHTML = '<div style="color:var(--text-dim); font-size:0.85rem; padding:16px; text-align:center;">No team data.</div>';
+      return;
+    }
 
-      const format = Array.from(DOM.eventFormat).find(r => r.checked)?.value || 'blackout';
-      const teamColumn = format === 'clan' ? `
-        <select id="team-select-${idx}" style="margin-bottom: 0;">
-          <option value="">Select Team...</option>
-          <option value="team1">Team 1</option>
-          <option value="team2">Team 2</option>
-          <option value="team3">Team 3</option>
-          <option value="team4">Team 4</option>
-        </select>` : '';
+    // Sort by points descending
+    const sorted = keys.map(k => ({ key: k, ...teamsConfig[k] }))
+      .sort((a, b) => (parseInt(b.points, 10) || 0) - (parseInt(a.points, 10) || 0));
 
-      div.innerHTML = `
-        <input type="text" placeholder="Player Name" value="${escapeHTML(player.name || '')}" readonly>
-        ${teamColumn}
-        <button class="remove-player-btn">Remove</button>`;
-
-      div.querySelector('.remove-player-btn').addEventListener('click', () => {
-        players.splice(idx, 1);
-        renderPlayers();
-      });
-
-      if (format === 'clan') {
-        const select = div.querySelector(`#team-select-${idx}`);
-        select.value = player.team || '';
-        select.addEventListener('change', (e) => {
-          players[idx].team = e.target.value;
-        });
-      }
-
-      DOM.playersList.appendChild(div);
+    const frag = document.createDocumentFragment();
+    sorted.forEach((team, idx) => {
+      const entry = document.createElement('div');
+      entry.className = 'leaderboard-entry';
+      const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}.`;
+      entry.innerHTML = `
+        <div class="leaderboard-rank">${medal}</div>
+        <div class="leaderboard-info">
+          <div class="leaderboard-name">${escapeHTML(team.name)}</div>
+          <div class="leaderboard-detail">${escapeHTML(team.key)}</div>
+        </div>
+        <div class="leaderboard-score">${parseInt(team.points, 10) || 0}</div>
+      `;
+      frag.appendChild(entry);
     });
+    DOM.leaderboardContainer.appendChild(frag);
   }
 
-  DOM.addPlayerBtn.addEventListener('click', () => {
-    const name = prompt('Enter player name:');
-    if (!name) return;
-    players.push({ name: name.trim(), team: '' });
-    renderPlayers();
-  });
+  function renderActivityFeed() {
+    DOM.activityFeedContainer.innerHTML = '';
 
-  /* ========================= BOARD PREVIEW ========================= */
-  function renderBoardPreview() {
-    const size = parseInt(DOM.boardSize.value);
-    DOM.boardPreview.innerHTML = '';
-    DOM.boardPreview.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+    const now = new Date();
+    const activities = [
+      { msg: 'Dashboard initialized', time: now },
+      { msg: `${Object.keys(teamsConfig).length} teams configured`, time: new Date(now - 60000) },
+      { msg: `${tilesConfig.length} tiles ready`, time: new Date(now - 120000) }
+    ];
 
-    for (let i = 0; i < maxTiles; i++) {
-      const tile = document.createElement('div');
-      tile.className = 'board-tile';
-      tile.draggable = true;
-      tile.dataset.boardIndex = i;
-      tile.innerHTML = tiles[i] ? `<span>${escapeHTML(tiles[i].substring(0, 20))}</span>` : `<span style="color: var(--text-dim);">Empty</span>`;
-
-      tile.addEventListener('dragstart', handleBoardDragStart);
-      tile.addEventListener('dragend', handleBoardDragEnd);
-      tile.addEventListener('dragover', (e) => e.preventDefault());
-      tile.addEventListener('drop', handleBoardDrop);
-
-      DOM.boardPreview.appendChild(tile);
-    }
-  }
-
-  let draggedBoardTile = null;
-  function handleBoardDragStart(e) {
-    draggedBoardTile = this;
-    this.classList.add('dragging');
-  }
-  function handleBoardDragEnd(e) {
-    this.classList.remove('dragging');
-    draggedBoardTile = null;
-  }
-  function handleBoardDrop(e) {
-    e.preventDefault();
-    if (!draggedBoardTile) return;
-    const dragIndex = parseInt(draggedBoardTile.dataset.boardIndex);
-    const dropIndex = parseInt(this.dataset.boardIndex);
-    if (dragIndex !== dropIndex) {
-      [tiles[dragIndex], tiles[dropIndex]] = [tiles[dropIndex], tiles[dragIndex]];
-      renderTiles();
-      renderBoardPreview();
-    }
-  }
-
-  document.querySelectorAll('[data-arrangement]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const arr = btn.dataset.arrangement;
-      if (arr === 'sequential') {
-        // Already sequential
-      } else if (arr === 'random') {
-        tiles.sort(() => Math.random() - 0.5);
-      } else if (arr === 'alternating') {
-        const half = Math.ceil(tiles.length / 2);
-        const front = tiles.slice(0, half);
-        const back = tiles.slice(half);
-        tiles = [];
-        for (let i = 0; i < Math.max(front.length, back.length); i++) {
-          if (i < front.length) tiles.push(front[i]);
-          if (i < back.length) tiles.push(back[i]);
-        }
-      }
-      renderTiles();
-      renderBoardPreview();
+    const frag = document.createDocumentFragment();
+    activities.forEach(act => {
+      const item = document.createElement('div');
+      item.className = 'activity-item';
+      item.innerHTML = `
+        <div>${act.msg}</div>
+        <div class="activity-timestamp">${act.time.toLocaleTimeString()}</div>
+      `;
+      frag.appendChild(item);
     });
-  });
-
-  /* ========================= SAVE ========================= */
-  function saveSettings() {
-    eventConfig = {
-      name: DOM.eventName.value || 'Bingo 2026',
-      format: Array.from(DOM.eventFormat).find(r => r.checked)?.value || 'blackout',
-      boardSize: DOM.boardSize.value,
-      codeword: DOM.codeword.value,
-      description: DOM.eventDesc.value,
-      teamName: DOM.teamName.value,
-      tiles: tiles,
-      players: players,
-      arrangement: tileArrangement,
-      lastUpdated: new Date().toISOString(),
-    };
-
-    try {
-      localStorage.setItem(STORAGE_KEYS.eventConfig, JSON.stringify(eventConfig));
-      showStatus('✓ Settings saved successfully!', 'success');
-      setTimeout(() => hideStatus(), 3000);
-    } catch (e) {
-      showStatus('✗ Error saving settings. Check storage limits.', 'error');
-    }
+    DOM.activityFeedContainer.appendChild(frag);
   }
 
-  function showStatus(msg, type) {
-    DOM.saveStatus.innerText = msg;
-    DOM.saveStatus.className = `save-status ${type}`;
-  }
-
-  function hideStatus() {
-    DOM.saveStatus.className = 'save-status';
-  }
-
-  DOM.saveBtns.forEach(btn => {
-    btn.addEventListener('click', saveSettings);
-  });
-
-  /* ========================= UTILS ========================= */
   function escapeHTML(str) {
     const d = document.createElement('div');
     d.appendChild(document.createTextNode(String(str ?? '')));
     return d.innerHTML;
   }
 
-  /* ========================= INIT ========================= */
-  loadSettings();
+  function updateDashboard() {
+    loadConfig();
+    renderEventStats();
+    renderTeamStandings();
+    renderLeaderboard();
+    renderActivityFeed();
+  }
+
+  function startAutoRefresh() {
+    updateDashboard();
+    syncIntervalId = setInterval(updateDashboard, 5000);
+  }
+
+  function init() {
+    startAutoRefresh();
+    DOM.refreshBtn.addEventListener('click', () => {
+      updateDashboard();
+      DOM.refreshBtn.textContent = '✓ Refreshed';
+      setTimeout(() => { DOM.refreshBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78l-2.58 2.58h6v-6l-2.57 2.57z"/></svg> Refresh'; }, 1500);
+    });
+
+    // Listen for storage changes from settings.html
+    window.addEventListener('storage', (e) => {
+      if (e.key && STORAGE_KEYS[Object.keys(STORAGE_KEYS).find(k => STORAGE_KEYS[k] === e.key)]) {
+        updateDashboard();
+      }
+    });
+  }
+
+  init();
 })();
   </script>
 </body>
