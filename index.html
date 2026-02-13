@@ -1317,36 +1317,61 @@
       tiles = Array(MAX_TILES).fill(null);
       resetMinimaps();
 
-      const rows = raw.split('\n').slice(1);
+      const TEAM_COLUMNS = {
+        'Warriors': { itemsCol: 4, currentCol: 5, goalCol: 6 },
+        'Legends': { itemsCol: 7, currentCol: 8, goalCol: 9 },
+        'Nexus': { itemsCol: 10, currentCol: 11, goalCol: 12 },
+        'Phoenix': { itemsCol: 13, currentCol: 14, goalCol: 15 },
+        'Titans': { itemsCol: 16, currentCol: 17, goalCol: 18 },
+        'Vanguard': { itemsCol: 19, currentCol: 20, goalCol: 21 },
+        'Zenith': { itemsCol: 22, currentCol: 23, goalCol: 24 },
+        'Apex': { itemsCol: 25, currentCol: 26, goalCol: 27 }
+      };
+
+      const rows = raw.split('\n').slice(1); // Skip header
       let count = 0;
+
       for (const line of rows) {
         if (count >= MAX_TILES) break;
         if (!line || !line.trim()) continue;
+        
         const cols = parseCSVRow(line.trim());
         if (cols.length < 4) continue;
+        
         const id = count + 1;
         const img = safeImgSrc(cols[0] || '');
         const title = cols[1] || `Tile ${id}`;
-        const current = Math.max(0, parseInt(cols[4], 10) || 0);
-        const goal = Math.max(1, parseInt(cols[5], 10) || 1);
-        const items = cols[6] ? cols[6].split(',').map(s => s.trim()).filter(Boolean) : [];
         const description = cols[2] || '';
         const points = cols[3] || '0';
+        
+        // Get this team's data from the unified CSV
+        const teamConfig = TEAM_COLUMNS[currentTeamKey];
+        if (!teamConfig) {
+          count++;
+          tiles[count - 1] = { id, title, img, percent: 0, barColor: getProgressColor(0), checklistHtml: '', description, isCompleted: false, points, noData: true };
+          continue;
+        }
+        
+        const items = cols[teamConfig.itemsCol] ? cols[teamConfig.itemsCol].split(',').map(s => s.trim()).filter(Boolean) : [];
+        const current = Math.max(0, parseInt(cols[teamConfig.currentCol], 10) || 0);
+        const goal = Math.max(1, parseInt(cols[teamConfig.goalCol], 10) || 1);
         const percent = Math.min((current / goal) * 100, 100);
         const isCompleted = percent === 100;
+        
         completion[count] = isCompleted;
         setMinimapComplete(id, isCompleted);
+        
         const checklistHtml = items.map(it =>
           `<div class="check-item"><span class="check-mark"></span> ${escapeHTML(it)}</div>`
         ).join('');
+        
         tiles[count] = { id, title, img, percent, barColor: getProgressColor(percent), checklistHtml, description, isCompleted, points, noData: false };
         count++;
       }
 
-      for (let i = 0; i < MAX_TILES; i++) {
-        if (!tiles[i]) {
-          tiles[i] = { id: i + 1, title: 'No Data', img: '', percent: 0, barColor: getProgressColor(0), checklistHtml: '', description: '', isCompleted: false, points: '0', noData: true };
-        }
+      // Fill remaining tiles with no-data
+      for (let i = count; i < MAX_TILES; i++) {
+        tiles[i] = { id: i + 1, title: 'No Data', img: '', percent: 0, barColor: getProgressColor(0), checklistHtml: '', description: '', isCompleted: false, points: '0', noData: true };
       }
       renderGrid();
       updateCompletedStat();

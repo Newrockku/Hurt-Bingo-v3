@@ -291,10 +291,6 @@
             <div class="stat-label">Teams</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value" id="total-tiles">0</div>
-            <div class="stat-label">Tiles</div>
-          </div>
-          <div class="stat-card">
             <div class="stat-value" id="avg-completion">0%</div>
             <div class="stat-label">Avg Completion</div>
           </div>
@@ -349,9 +345,16 @@
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
     teams: 'bingo-teams-config',
-    tiles: 'bingo-tiles-config',
-    customVars: 'bingo-custom-vars'
+    completion: 'bingo-completion',
+    theme: 'bingo-theme'
+    // REMOVED: tiles: 'bingo-tiles-config'
   };
+
+  function loadSharedConfig() {
+    try { eventConfig = load(STORAGE_KEYS.eventConfig) || { boardSize: 5, name: 'Bingo 2026' }; } catch {}
+    try { TEAM_MAP = load(STORAGE_KEYS.teams) || DEFAULT_TEAMS; } catch {}
+    // REMOVED tile loading — tiles now come from CSV only
+  }
 
   let eventConfig = {};
   let teamsConfig = {};

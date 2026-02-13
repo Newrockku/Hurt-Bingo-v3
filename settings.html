@@ -413,65 +413,18 @@
       </div>
     </div>
 
-    <!-- ===== TILE MANAGEMENT ===== -->
-    <div class="settings-card">
-      <div class="card-header" tabindex="0" data-section="tiles" role="button" aria-expanded="false">
-        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-        <span class="card-title">Tile Management</span>
-        <span class="tile-count-badge" id="tile-count-badge">0 Tiles</span>
-        <span class="card-toggle">▼</span>
-      </div>
-      <div class="card-body" id="section-tiles">
-        <div class="form-hint" style="margin-bottom:14px;">
-          Define the tiles that will appear on the board. Ensure you have at least as many tiles as your board size (e.g., 25 tiles for a 5×5 board).
-        </div>
-        <div class="tile-editor-wrapper">
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="new-tile-image">Image <span class="form-required">*</span></label>
-              <div class="form-hint">Filename (e.g., tile.png) or full URL</div>
-              <input type="text" id="new-tile-image" class="form-input medium" placeholder="tile-image.png">
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="new-tile-title">Title <span class="form-required">*</span></label>
-              <input type="text" id="new-tile-title" class="form-input medium" placeholder="Tile Name" maxlength="50">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="new-tile-desc">Description</label>
-            <div class="form-hint">Shown in tile modal when clicked</div>
-            <textarea id="new-tile-desc" class="form-textarea" placeholder="What is this tile about?" style="min-height:60px;"></textarea>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="new-tile-points">Point Value <span class="form-required">*</span></label>
-              <input type="number" id="new-tile-points" class="form-input short" value="100" min="0">
-            </div>
-          </div>
-          <div class="form-actions">
-            <button class="btn btn-secondary" id="add-tile-btn">+ Add Tile</button>
-          </div>
-        </div>
-
-        <div id="tile-list" style="margin-top:20px;"></div>
-
-        <div class="form-actions" style="margin-top:16px;">
-          <button class="btn btn-primary" id="save-tiles-btn">Save All Tiles</button>
-        </div>
-      </div>
-    </div>
-
     <!-- ===== TEAM MANAGEMENT ===== -->
     <div class="settings-card">
       <div class="card-header" tabindex="0" data-section="teams" role="button" aria-expanded="false">
         <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-        <span class="card-title">Team Management</span>
+        <span class="card-title">Team Configuration</span>
         <span class="team-count-badge" id="team-count-badge">0 Teams</span>
         <span class="card-toggle">▼</span>
       </div>
       <div class="card-body" id="section-teams">
         <div class="form-hint" style="margin-bottom:14px;">
-          Configure up to 8 teams. Each team needs a unique key, display name, and a published Google Sheets CSV URL.
+          Configure up to 8 teams. Each team needs a unique key, display name, color, and their own published Google Sheets CSV URL 
+          (different tab/sheet that contains their tile data with columns: Image, Title, Current, Goal, Items, Description, Points).
           Click a team row to expand its settings.
         </div>
         <div class="team-list" id="team-list"></div>
@@ -479,6 +432,31 @@
           <button class="btn btn-secondary" id="add-team-btn">+ Add New Team</button>
           <button class="btn btn-primary" id="save-teams-btn">Save All Teams</button>
         </div>
+      </div>
+    </div>
+
+    <!-- ===== BOARD TILES (SHARED) ===== -->
+    <div class="settings-card">
+      <div class="card-header" tabindex="0" data-section="board" role="button" aria-expanded="false">
+        <svg viewBox="0 0 24 24"><path d="M3 13h2v8H3zm4-8h2v16H7zm4-2h2v18h-2zm4 4h2v14h-2zm4-2h2v16h-2z"/></svg>
+        <span class="card-title">Shared Board Configuration</span>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body" id="section-board">
+        <div class="form-hint" style="margin-bottom:14px;">
+          The board tiles are pulled from each team's published Google Sheet. This section shows the expected CSV structure.
+        </div>
+        <table class="var-table">
+          <thead>
+            <tr>
+              <th>Column</th>
+              <th>Variable</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody id="board-structure-body"></tbody>
+        </table>
       </div>
     </div>
 
@@ -572,55 +550,31 @@
 (() => {
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
-    teams: 'bingo-teams-config',
-    customVars: 'bingo-custom-vars',
-    tiles: 'bingo-tiles-config'
+    teams: 'bingo-teams-config'
+    // REMOVED: tiles: 'bingo-tiles-config'
   };
 
-  const MAX_TEAMS = 8;
-
-  const DEFAULT_EVENT = {
-    name: 'Bingo 2026',
-    boardSize: 5,
-    startDate: '',
-    endDate: '',
-    description: '',
-    boardPage: 'index.html',
-    syncInterval: 30000,
-    showCodewords: true,
-    showPoints: true,
-    allowThemes: true
-  };
-
-  const DEFAULT_TEAMS = {
-    Warriors: {
-      name: "The Spreadsheet Warriors",
-      url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
-      color: "#e94560",
-      codeword: "BINGO_BLITZ",
-      points: 1250
-    }
-  };
-
-  const DEFAULT_TILES = [
-    { image: 'tile-1.png', title: 'Sample Tile 1', description: 'This is a sample tile', points: 100 },
-    { image: 'tile-2.png', title: 'Sample Tile 2', description: 'This is another sample tile', points: 150 }
-  ];
-
-  const SHEET_COLUMNS = [
-    { col: 'A', key: 'image',       type: 'url',     desc: 'Image filename or URL for tile artwork' },
-    { col: 'B', key: 'title',       type: 'string',  desc: 'Display name for the tile' },
-    { col: 'C', key: 'current',     type: 'number',  desc: 'Current progress value' },
-    { col: 'D', key: 'goal',        type: 'number',  desc: 'Target goal value (tile completes when current ≥ goal)' },
-    { col: 'E', key: 'items',       type: 'string',  desc: 'Comma-separated checklist items' },
-    { col: 'F', key: 'description', type: 'string',  desc: 'Tile description shown in modal' },
-    { col: 'G', key: 'points',      type: 'number',  desc: 'Point value for completing this tile' }
-  ];
-
-  let eventConfig = { ...DEFAULT_EVENT };
+  let eventConfig = {};
   let teamsConfig = {};
-  let tilesConfig = [];
-  let customVars = [];
+  // REMOVED: let tilesConfig = [];
+
+  function loadConfig() {
+    eventConfig = load(STORAGE_KEYS.eventConfig) || {};
+    teamsConfig = load(STORAGE_KEYS.teams) || {};
+    // REMOVED: tilesConfig = load(STORAGE_KEYS.tiles) || [];
+  }
+
+  function renderEventStats() {
+    const teamCount = Object.keys(teamsConfig).length;
+    // REMOVED tileCount reference
+    const totalTeamPoints = Object.values(teamsConfig).reduce((sum, t) => sum + (parseInt(t.points, 10) || 0), 0);
+
+    DOM.totalTeams.textContent = teamCount;
+    // DOM.totalTiles.textContent = tileCount;  // REMOVE THIS LINE
+    DOM.totalPoints.textContent = totalTeamPoints.toLocaleString();
+
+    DOM.avgCompletion.textContent = '0%';
+  }
 
   /* --- DOM --- */
   const $ = id => document.getElementById(id);
@@ -638,22 +592,14 @@
     allowThemes:   $('cfg-allow-themes'),
     saveEventBtn:  $('save-event-btn'),
     resetEventBtn: $('reset-event-btn'),
-    // Tiles
-    tileList:       $('tile-list'),
-    tileCountBadge: $('tile-count-badge'),
-    newTileImage:   $('new-tile-image'),
-    newTileTitle:   $('new-tile-title'),
-    newTileDesc:    $('new-tile-desc'),
-    newTilePoints:  $('new-tile-points'),
-    addTileBtn:     $('add-tile-btn'),
-    saveTilesBtn:   $('save-tiles-btn'),
     // Teams
     teamList:       $('team-list'),
     teamCountBadge: $('team-count-badge'),
     addTeamBtn:     $('add-team-btn'),
     saveTeamsBtn:   $('save-teams-btn'),
+    // Board structure
+    boardStructureBody: $('board-structure-body'),
     // Variables
-    varTableBody:   $('var-table-body'),
     customVarList:  $('custom-var-list'),
     addCustomVar:   $('add-custom-var-btn'),
     // I/O
@@ -663,7 +609,6 @@
     ioArea:     $('io-area'),
     // Danger
     clearTeamsBtn: $('clear-teams-btn'),
-    clearTilesBtn: $('clear-tiles-btn'),
     clearAllBtn:   $('clear-all-data-btn'),
     // Toast
     toast: $('toast')
@@ -757,81 +702,6 @@
 
     save(STORAGE_KEYS.eventConfig, eventConfig);
     toast('Event settings saved!');
-  }
-
-  /* ========================= TILE MANAGEMENT ========================= */
-  function loadTiles() {
-    const saved = load(STORAGE_KEYS.tiles);
-    tilesConfig = saved || [];
-    renderTileList();
-  }
-
-  function renderTileList() {
-    const count = tilesConfig.length;
-    DOM.tileCountBadge.textContent = `${count} Tile${count !== 1 ? 's' : ''}`;
-    DOM.tileList.innerHTML = '';
-
-    if (count === 0) {
-      DOM.tileList.innerHTML = '<div style="color:var(--text-dim); font-size:0.85rem; padding:8px 0;">No tiles configured.</div>';
-      return;
-    }
-
-    const frag = document.createDocumentFragment();
-    tilesConfig.forEach((tile, idx) => {
-      const item = document.createElement('div');
-      item.className = 'tile-item-card';
-      item.style.cssText = `display:grid; grid-template-columns:60px 1fr auto; gap:12px; align-items:start;`;
-      item.innerHTML = `
-        <img src="${escapeHTML(tile.image)}" alt="${escapeHTML(tile.title)}" style="width:60px; height:60px; object-fit:contain; border-radius:3px; background:var(--bg-body); border:1px solid var(--border-main);" onerror="this.style.display='none';">
-        <div>
-          <div style="font-weight:bold; color:var(--text-bright); margin-bottom:2px;">${escapeHTML(tile.title)} (${tile.points} pts)</div>
-          <div style="font-size:0.75rem; color:var(--text-dim); margin-bottom:4px;">IMG: ${escapeHTML(tile.image)}</div>
-          <div style="font-size:0.8rem; color:var(--text-bright); line-height:1.4;">${escapeHTML(tile.description || '(no description)')}</div>
-        </div>
-        <button class="btn btn-danger btn-sm delete-tile-btn" data-idx="${idx}" style="padding:4px 8px; height:fit-content;">Delete</button>
-      `;
-      frag.appendChild(item);
-    });
-    DOM.tileList.appendChild(frag);
-
-    // Wire delete buttons
-    DOM.tileList.querySelectorAll('.delete-tile-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = parseInt(btn.dataset.idx, 10);
-        if (confirm(`Delete "${tilesConfig[idx].title}"? This won't be saved until you click Save.`)) {
-          tilesConfig.splice(idx, 1);
-          renderTileList();
-        }
-      });
-    });
-  }
-
-  function addNewTile() {
-    const image = DOM.newTileImage.value.trim();
-    const title = DOM.newTileTitle.value.trim();
-    const description = DOM.newTileDesc.value.trim();
-    const points = parseInt(DOM.newTilePoints.value, 10) || 0;
-
-    if (!image) { toast('Image is required', 'error'); DOM.newTileImage.focus(); return; }
-    if (!title) { toast('Title is required', 'error'); DOM.newTileTitle.focus(); return; }
-
-    tilesConfig.push({ image, title, description, points });
-    DOM.newTileImage.value = '';
-    DOM.newTileTitle.value = '';
-    DOM.newTileDesc.value = '';
-    DOM.newTilePoints.value = '100';
-    renderTileList();
-    DOM.newTileImage.focus();
-    toast('Tile added');
-  }
-
-  function saveTiles() {
-    if (tilesConfig.length === 0) {
-      toast('Add at least one tile before saving', 'warning');
-      return;
-    }
-    save(STORAGE_KEYS.tiles, tilesConfig);
-    toast(`${tilesConfig.length} tile(s) saved!`);
   }
 
   /* ========================= TEAM MANAGEMENT ========================= */
@@ -1038,7 +908,7 @@
     DOM.varTableBody.innerHTML = '';
     const frag = document.createDocumentFragment();
 
-    SHEET_COLUMNS.forEach(col => {
+    BOARD_COLUMNS.forEach(col => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td style="font-weight:bold; color:var(--text-bright);">${col.col}</td>
@@ -1250,20 +1120,13 @@
   function init() {
     initCards();
     loadEventConfig();
-    loadTiles();
     loadTeams();
     loadCustomVars();
+    renderBoardStructure();  // ADD THIS
 
     // Event settings
     DOM.saveEventBtn.addEventListener('click', saveEventConfig);
     DOM.resetEventBtn.addEventListener('click', resetEventDefaults);
-
-    // Tiles
-    DOM.addTileBtn.addEventListener('click', addNewTile);
-    DOM.saveTilesBtn.addEventListener('click', saveTiles);
-    DOM.newTileTitle.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') DOM.addTileBtn.click();
-    });
 
     // Teams
     DOM.addTeamBtn.addEventListener('click', addNewTeam);
@@ -1283,7 +1146,6 @@
 
     // Danger zone
     DOM.clearTeamsBtn.addEventListener('click', clearAllTeams);
-    DOM.clearTilesBtn.addEventListener('click', clearAllTiles);
     DOM.clearAllBtn.addEventListener('click', clearAllData);
 
     // Warn before leaving with unsaved changes
@@ -1303,7 +1165,6 @@
     // Clear dirty flag on save
     const clearDirty = () => { formDirty = false; };
     DOM.saveEventBtn.addEventListener('click', clearDirty);
-    DOM.saveTilesBtn.addEventListener('click', clearDirty);
     DOM.saveTeamsBtn.addEventListener('click', clearDirty);
   }
 
