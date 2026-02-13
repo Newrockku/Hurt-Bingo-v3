@@ -56,7 +56,7 @@
     .page-header-left { display: flex; flex-direction: column; gap: 2px; }
     .page-title {
       font-size: 1.8rem; margin: 0; font-weight: bold;
-      color: var(--accent); text-transform: uppercase;
+      color: var(--text-bright); text-transform: uppercase;
       letter-spacing: 2px; text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
     }
     .page-subtitle { font-size: 0.85rem; color: var(--text-dim); margin: 0; }
@@ -84,7 +84,7 @@
       background: var(--bg-card); border: 2px solid var(--border-main);
       overflow: hidden; transition: border-color 0.2s ease;
     }
-    .settings-card:hover { border-color: #3a4a6c; }
+    .settings-card:hover { border-color: #7d705a; }
 
     .card-header {
       padding: 14px 20px; background: var(--bg-well);
@@ -93,7 +93,7 @@
       cursor: pointer; user-select: none;
       transition: background 0.2s ease;
     }
-    .card-header:hover { background: rgba(233,69,96,0.05); }
+    .card-header:hover { background: rgba(255,172,0,0.04); }
     .card-header:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
     .card-header svg { width: 20px; height: 20px; fill: var(--accent); flex-shrink: 0; }
 
@@ -102,7 +102,7 @@
       text-transform: uppercase; letter-spacing: 1px; flex: 1;
     }
     .card-badge {
-      font-size: 0.65rem; background: var(--accent); color: #fff;
+      font-size: 0.65rem; background: var(--accent); color: var(--bg-body);
       padding: 2px 8px; border-radius: 10px; font-weight: bold;
     }
     .card-toggle {
@@ -168,9 +168,9 @@
 
     .btn-primary {
       background: var(--accent); border-color: var(--accent);
-      color: #fff; font-weight: bold;
+      color: var(--bg-body); font-weight: bold;
     }
-    .btn-primary:hover { background: #c23152; border-color: #c23152; }
+    .btn-primary:hover { background: #e09800; border-color: #e09800; }
 
     .btn-secondary {
       background: var(--bg-well); border-color: var(--border-main); color: var(--text-main);
@@ -200,7 +200,7 @@
       display: flex; justify-content: space-between; align-items: center;
       padding: 10px 16px; cursor: pointer; transition: background 0.2s ease;
     }
-    .team-item-header:hover { background: rgba(233,69,96,0.04); }
+    .team-item-header:hover { background: rgba(255,172,0,0.04); }
 
     .team-item-name {
       font-weight: bold; color: var(--text-bright);
@@ -208,7 +208,7 @@
     }
     .team-dot {
       width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.15);
     }
     .team-item-meta {
       font-size: 0.7rem; color: var(--text-dim);
@@ -223,7 +223,7 @@
     }
 
     .team-count-badge {
-      font-size: 0.7rem; background: var(--bg-body);
+      font-size: 0.7rem; background: var(--bg-well);
       color: var(--text-dim); padding: 2px 8px; border-radius: 10px;
       border: 1px solid var(--border-main);
     }
@@ -241,7 +241,7 @@
       font-size: 0.85rem; vertical-align: top;
     }
     .var-table tr:last-child td { border-bottom: none; }
-    .var-table tr:hover td { background: rgba(233,69,96,0.03); }
+    .var-table tr:hover td { background: rgba(255,172,0,0.03); }
 
     .var-key { font-weight: bold; color: var(--accent); font-family: monospace; font-size: 0.8rem; }
     .var-val { color: var(--text-bright); word-break: break-all; }
@@ -250,10 +250,10 @@
       font-size: 0.6rem; text-transform: uppercase; font-weight: bold;
       padding: 1px 6px; border-radius: 3px; display: inline-block;
     }
-    .var-type.string { background: rgba(15,155,142,0.15); color: var(--accent-secondary); }
-    .var-type.number { background: rgba(233,69,96,0.15); color: var(--accent); }
-    .var-type.boolean { background: rgba(255,193,7,0.15); color: var(--warning); }
-    .var-type.url { background: rgba(100,130,200,0.15); color: #8090cc; }
+    .var-type.string { background: rgba(200,155,60,0.12); color: var(--accent-secondary); }
+    .var-type.number { background: rgba(255,172,0,0.12); color: var(--accent); }
+    .var-type.boolean { background: rgba(255,204,51,0.12); color: var(--warning); }
+    .var-type.url { background: rgba(133,132,118,0.15); color: #b0a890; }
 
     /* --- Import / Export --- */
     .io-area {
@@ -277,6 +277,7 @@
     }
     .toast.error { border-color: var(--danger); color: var(--danger); }
     .toast.warning { border-color: var(--warning); color: var(--warning); }
+
     .toast.show { opacity: 1; }
 
     /* --- Page Footer --- */
