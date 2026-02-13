@@ -1095,42 +1095,39 @@
 
   /* ========================= RENDER ========================= */
   const renderGrid = () => {
-    DOM.grid.innerHTML = '';
-    const frag = document.createDocumentFragment();
-    for (let i = 0; i < MAX_TILES; i++) {
-      const t = tiles[i];
-      const done = !!t.isCompleted;
-      const tile = document.createElement('div');
-      tile.className = `tile${done ? ' completed' : ''}${t.noData ? ' no-data' : ''}`;
-      tile.dataset.tileIndex = String(i);
-      tile.setAttribute('role', 'button');
-      tile.tabIndex = t.noData ? -1 : 0;
-      tile.setAttribute('aria-label',
-        t.noData ? `Tile ${t.id}: No data` :
-        `Tile ${t.id}: ${t.title} - ${done ? 'Complete' : Math.round(t.percent) + '% complete'}`
-      );
-      const safeTitle = escapeHTML(t.title);
-      const safePts = escapeHTML(t.points);
-      tile.innerHTML = `
-        <div class="header-box"><div class="header-content">${t.id} | ${safeTitle}</div></div>
-        <div class="img-container"><img alt="${safeTitle}"></div>
-        <div class="progress-container"><div class="progress-bg"><div class="progress-fill"></div></div></div>
-        <div class="checklist-box">${t.checklistHtml}</div>
-        <div class="point-badge">${safePts} PTS</div>
+    const container = $('grid');
+    if (!container) return;
+    container.innerHTML = '';
+
+    for (let i = 0; i < tiles.length; i++) {
+      const tile = tiles[i];
+      const cell = document.createElement('div');
+      cell.className = 'grid-item' + (tile.isCompleted ? ' completed' : '');
+      cell.id = 'tile-' + tile.id;
+      cell.setAttribute('role', 'button');
+      cell.setAttribute('tabindex', '0');
+
+      cell.innerHTML = `
+        <div class="grid-item-inner">
+          <img lazy src="${escapeHTML(tile.img)}" alt="${escapeHTML(tile.title)}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3C/svg%3E';">
+          <div class="grid-item-overlay">
+            <div class="grid-item-title">${escapeHTML(tile.title)}</div>
+            <div class="grid-item-progress" style="width:${tile.percent}%;"></div>
+          </div>
+        </div>
       `;
-      const img = tile.querySelector('img');
-      if (t.img) {
-        img.style.visibility = 'visible';
-        img.addEventListener('error', () => handleImgError(img), { once: true });
-        img.src = t.img;
-      } else { handleImgError(img); }
-      const fill = tile.querySelector('.progress-fill');
-      fill.style.width = t.percent + '%';
-      fill.style.backgroundColor = t.barColor;
-      if (done) tile.querySelector('.progress-container').style.display = 'none';
-      frag.appendChild(tile);
+
+      cell.addEventListener('click', () => openModal(tile));
+      cell.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(tile); } });
+
+      container.appendChild(cell);
     }
-    DOM.grid.appendChild(frag);
+  };
+
+  const openModal = (tile) => {
+    if (tile.noData) return;
+    modalOpen = true;
+    // ... rest of modal code
   };
 
   const buildBigMap = () => {

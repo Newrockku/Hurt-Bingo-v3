@@ -345,112 +345,25 @@
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
     teams: 'bingo-teams-config',
-    completion: 'bingo-completion',
-    theme: 'bingo-theme'
+    csvUrl: 'bingo-csv-url',
+    completion: 'bingo-completion'
   };
+
+  let eventConfig = {};
+  let teamsConfig = {};
+  let csvUrl = '';
+  let completion = {};
+
+  const $ = id => document.getElementById(id);
+
+  const save = (key, val) => { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} };
+  const load = (key) => { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; } };
 
   function loadConfig() {
     eventConfig = load(STORAGE_KEYS.eventConfig) || {};
     teamsConfig = load(STORAGE_KEYS.teams) || {};
-    // Removed: tilesConfig = load(STORAGE_KEYS.tiles) || [];
-  }
-
-  function renderEventStats() {
-    const teamCount = Object.keys(teamsConfig).length;
-    // Removed: const tileCount = tilesConfig.length;
-    const totalTeamPoints = Object.values(teamsConfig).reduce((sum, t) => sum + (parseInt(t.points, 10) || 0), 0);
-
-    DOM.totalTeams.textContent = teamCount;
-    // Removed: DOM.totalTiles.textContent = tileCount;
-    DOM.totalPoints.textContent = totalTeamPoints.toLocaleString();
-
-    DOM.avgCompletion.textContent = '0%';
-  }
-
-  function renderTeamStandings() {
-    DOM.teamListContainer.innerHTML = '';
-
-    const keys = Object.keys(teamsConfig);
-    if (keys.length === 0) {
-      DOM.teamListContainer.innerHTML = '<div style="color:var(--text-dim); font-size:0.85rem; padding:16px; text-align:center;">No teams configured.</div>';
-      return;
-    }
-
-    const frag = document.createDocumentFragment();
-    keys.forEach(key => {
-      const team = teamsConfig[key];
-      const card = document.createElement('div');
-      card.className = 'team-card';
-      card.innerHTML = `
-        <div class="team-info">
-          <div class="team-color-badge" style="background:${team.color || '#888'};"></div>
-          <div class="team-details">
-            <div class="team-name">${escapeHTML(team.name)}</div>
-            <div class="team-meta">${escapeHTML(key)} • ${team.url ? '✓ Connected' : '✗ No Sheet'}</div>
-          </div>
-        </div>
-        <div>
-          <div class="team-score">${parseInt(team.points, 10) || 0}</div>
-          <div class="team-points">points</div>
-        </div>
-      `;
-      frag.appendChild(card);
-    });
-    DOM.teamListContainer.appendChild(frag);
-  }
-
-  function renderLeaderboard() {
-    DOM.leaderboardContainer.innerHTML = '';
-
-    const keys = Object.keys(teamsConfig);
-    if (keys.length === 0) {
-      DOM.leaderboardContainer.innerHTML = '<div style="color:var(--text-dim); font-size:0.85rem; padding:16px; text-align:center;">No team data.</div>';
-      return;
-    }
-
-    // Sort by points descending
-    const sorted = keys.map(k => ({ key: k, ...teamsConfig[k] }))
-      .sort((a, b) => (parseInt(b.points, 10) || 0) - (parseInt(a.points, 10) || 0));
-
-    const frag = document.createDocumentFragment();
-    sorted.forEach((team, idx) => {
-      const entry = document.createElement('div');
-      entry.className = 'leaderboard-entry';
-      const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}.`;
-      entry.innerHTML = `
-        <div class="leaderboard-rank">${medal}</div>
-        <div class="leaderboard-info">
-          <div class="leaderboard-name">${escapeHTML(team.name)}</div>
-          <div class="leaderboard-detail">${escapeHTML(team.key)}</div>
-        </div>
-        <div class="leaderboard-score">${parseInt(team.points, 10) || 0}</div>
-      `;
-      frag.appendChild(entry);
-    });
-    DOM.leaderboardContainer.appendChild(frag);
-  }
-
-  function renderActivityFeed() {
-    DOM.activityFeedContainer.innerHTML = '';
-
-    const now = new Date();
-    const activities = [
-      { msg: 'Dashboard initialized', time: now },
-      { msg: `${Object.keys(teamsConfig).length} teams configured`, time: new Date(now - 60000) },
-      { msg: `${tilesConfig.length} tiles ready`, time: new Date(now - 120000) }
-    ];
-
-    const frag = document.createDocumentFragment();
-    activities.forEach(act => {
-      const item = document.createElement('div');
-      item.className = 'activity-item';
-      item.innerHTML = `
-        <div>${act.msg}</div>
-        <div class="activity-timestamp">${act.time.toLocaleTimeString()}</div>
-      `;
-      frag.appendChild(item);
-    });
-    DOM.activityFeedContainer.appendChild(frag);
+    csvUrl = load(STORAGE_KEYS.csvUrl) || '';
+    completion = load(STORAGE_KEYS.completion) || {};
   }
 
   function escapeHTML(str) {
@@ -459,33 +372,92 @@
     return d.innerHTML;
   }
 
+  function renderEventStats() {
+    const teamCount = Object.keys(teamsConfig).length;
+    const totalTeamPoints = Object.values(teamsConfig).reduce((sum, t) => sum + (parseInt(t.points, 10) || 0), 0);
+
+    const statsHtml = `
+      <div class="stat-card">
+        <div class="stat-value">${escapeHTML(eventConfig.name || 'Untitled')}</div>
+        <div class="stat-label">Event</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${teamCount}</div>
+        <div class="stat-label">Teams</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${totalTeamPoints.toLocaleString()}</div>
+        <div class="stat-label">Total Points</div>
+      </div>
+    `;
+
+    const gridHtml = $('event-stats-grid');
+    if (gridHtml) gridHtml.innerHTML = statsHtml;
+  }
+
+  function renderTeamStandings() {
+    const keys = Object.keys(teamsConfig);
+    const teamHtml = keys.map(key => {
+      const team = teamsConfig[key];
+      return `
+        <div class="team-card">
+          <div class="team-info">
+            <div class="team-color-badge" style="background:${escapeHTML(team.color || '#888')};"></div>
+            <div class="team-details">
+              <div class="team-name">${escapeHTML(team.name || key)}</div>
+              <div class="team-meta">${escapeHTML(key)}</div>
+            </div>
+          </div>
+          <div class="team-score">
+            <div class="team-points">${team.points || 0} pts</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const container = $('team-standings');
+    if (container) container.innerHTML = teamHtml || '<p style="color:var(--text-dim);">No teams configured. <a href="settings.html">Configure teams</a></p>';
+  }
+
+  function renderLeaderboard() {
+    const entries = Object.entries(teamsConfig)
+      .map(([key, team]) => ({ key, ...team }))
+      .sort((a, b) => (b.points || 0) - (a.points || 0));
+
+    const leaderboardHtml = entries.map((team, idx) => `
+      <div class="leaderboard-entry">
+        <div class="leaderboard-rank" style="background:${team.color || '#888'};">${idx + 1}</div>
+        <div class="leaderboard-info">
+          <div class="leaderboard-name">${escapeHTML(team.name || team.key)}</div>
+          <div class="leaderboard-detail">${team.key}</div>
+        </div>
+        <div class="leaderboard-score">${team.points || 0}</div>
+      </div>
+    `).join('');
+
+    const container = $('leaderboard-list');
+    if (container) container.innerHTML = leaderboardHtml || '<p style="color:var(--text-dim);">No teams yet.</p>';
+  }
+
   function updateDashboard() {
     loadConfig();
     renderEventStats();
     renderTeamStandings();
     renderLeaderboard();
-    renderActivityFeed();
   }
 
   function startAutoRefresh() {
     updateDashboard();
-    syncIntervalId = setInterval(updateDashboard, 5000);
+    let syncInterval = (eventConfig.syncInterval || 30000);
+    setInterval(updateDashboard, syncInterval);
   }
 
   function init() {
+    updateDashboard();
     startAutoRefresh();
-    DOM.refreshBtn.addEventListener('click', () => {
-      updateDashboard();
-      DOM.refreshBtn.textContent = '✓ Refreshed';
-      setTimeout(() => { DOM.refreshBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78l-2.58 2.58h6v-6l-2.57 2.57z"/></svg> Refresh'; }, 1500);
-    });
 
-    // Listen for storage changes from settings.html
-    window.addEventListener('storage', (e) => {
-      if (e.key && STORAGE_KEYS[Object.keys(STORAGE_KEYS).find(k => STORAGE_KEYS[k] === e.key)]) {
-        updateDashboard();
-      }
-    });
+    const settingsBtn = $('settings-btn');
+    if (settingsBtn) settingsBtn.addEventListener('click', () => window.location.href = 'settings.html');
   }
 
   init();
