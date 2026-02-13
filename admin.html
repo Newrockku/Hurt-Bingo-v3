@@ -347,53 +347,23 @@
     teams: 'bingo-teams-config',
     completion: 'bingo-completion',
     theme: 'bingo-theme'
-    // REMOVED: tiles: 'bingo-tiles-config'
-  };
-
-  function loadSharedConfig() {
-    try { eventConfig = load(STORAGE_KEYS.eventConfig) || { boardSize: 5, name: 'Bingo 2026' }; } catch {}
-    try { TEAM_MAP = load(STORAGE_KEYS.teams) || DEFAULT_TEAMS; } catch {}
-    // REMOVED tile loading — tiles now come from CSV only
-  }
-
-  let eventConfig = {};
-  let teamsConfig = {};
-  let tilesConfig = [];
-  let syncIntervalId = null;
-
-  const $ = (id) => document.getElementById(id);
-  const DOM = {
-    totalTeams: $('total-teams'),
-    totalTiles: $('total-tiles'),
-    avgCompletion: $('avg-completion'),
-    totalPoints: $('total-points'),
-    teamListContainer: $('team-list-container'),
-    leaderboardContainer: $('leaderboard-container'),
-    activityFeedContainer: $('activity-feed-container'),
-    refreshBtn: $('refresh-btn')
-  };
-
-  /* --- Helpers --- */
-  const load = (key) => {
-    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; }
   };
 
   function loadConfig() {
     eventConfig = load(STORAGE_KEYS.eventConfig) || {};
     teamsConfig = load(STORAGE_KEYS.teams) || {};
-    tilesConfig = load(STORAGE_KEYS.tiles) || [];
+    // Removed: tilesConfig = load(STORAGE_KEYS.tiles) || [];
   }
 
   function renderEventStats() {
     const teamCount = Object.keys(teamsConfig).length;
-    const tileCount = tilesConfig.length;
+    // Removed: const tileCount = tilesConfig.length;
     const totalTeamPoints = Object.values(teamsConfig).reduce((sum, t) => sum + (parseInt(t.points, 10) || 0), 0);
 
     DOM.totalTeams.textContent = teamCount;
-    DOM.totalTiles.textContent = tileCount;
+    // Removed: DOM.totalTiles.textContent = tileCount;
     DOM.totalPoints.textContent = totalTeamPoints.toLocaleString();
 
-    // Placeholder for average completion (would come from live data)
     DOM.avgCompletion.textContent = '0%';
   }
 
