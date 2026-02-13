@@ -1261,6 +1261,22 @@
     codewordSecret = t.codeword || '';
   };
 
+  const renderEventDescription = () => {
+    if (!eventConfig.description || !eventConfig.description.trim()) {
+      DOM.descBar.style.display = 'none';
+      return;
+    }
+    
+    const dismissed = sessionStorage.getItem('bingo-desc-dismissed');
+    if (dismissed === '1') {
+      DOM.descBar.style.display = 'none';
+      return;
+    }
+    
+    DOM.descBarText.textContent = eventConfig.description;
+    DOM.descBar.style.display = 'flex';
+  };
+
   async function fetchData(manual = false) {
     // Guard: no team configured
     if (!currentTeamKey || !TEAM_MAP[currentTeamKey]) {
@@ -1718,9 +1734,7 @@
     setCodewordVisible(storageLoad(STORAGE_KEYS.codewordVisible, '0') === '1');
 
     // Event description
-    if (typeof renderEventDescription === 'function') {
-      renderEventDescription();
-    }
+    renderEventDescription();
     if (DOM.descBarClose) {
       DOM.descBarClose.addEventListener('click', () => {
         DOM.descBar.style.display = 'none';
@@ -1817,6 +1831,23 @@
         restartInterval();
         fetchData(false);
       }
+    });
+
+    // Grid clicks
+    DOM.grid.addEventListener('click', (e) => {
+      const tile = e.target.closest('.tile');
+      if (!tile || tile.classList.contains('no-data')) return;
+      const idx = parseInt(tile.dataset.tileIndex, 10);
+      openTileModalByIndex(idx, tile);
+    });
+
+    DOM.grid.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const tile = e.target.closest('.tile');
+      if (!tile || tile.classList.contains('no-data')) return;
+      e.preventDefault();
+      const idx = parseInt(tile.dataset.tileIndex, 10);
+      openTileModalByIndex(idx, tile);
     });
 
     fetchData(false);
