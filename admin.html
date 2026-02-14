@@ -378,14 +378,14 @@
   </div>
 
   <footer class="page-footer">
-    <span>v3.313</span>
+    <span>v3.314</span>
     <span>&middot;</span>
     <span>Bingo Board Admin</span>
   </footer>
 
   <script>
 (() => {
-  const APP_VERSION = '3.313';
+  const APP_VERSION = '3.314';
 
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
@@ -735,10 +735,7 @@
 
       row.innerHTML = `
         <div class="leaderboard-rank">${medal || idx + 1}</div>
-        <div class="leaderboard-name">
-          ${team.name}
-          <span style="font-size:0.75rem; color:var(--text-dim); margin-left:6px;">(${team.bingos} Bingos)</span>
-        </div>
+        <div class="leaderboard-name">${team.name}</div>
         <div class="leaderboard-points">${team.points}</div>
       `;
 
