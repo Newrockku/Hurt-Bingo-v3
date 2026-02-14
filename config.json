@@ -1,0 +1,61 @@
+{
+  "eventConfig": {
+    "name": "Bingo Title",
+    "codeword": "CODEWORD",
+    "description": "Test Description",
+    "syncInterval": 30000,
+    "format": "Blackout",
+    "boardSize": "7 x 7",
+    "teamCount": "5"
+  },
+  "teams": {
+    "Team1": {
+      "name": "Hurt",
+      "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
+      "points": 0,
+      "teamNumber": 1
+    },
+    "Team2": {
+      "name": "Squatchers",
+      "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
+      "points": 0,
+      "teamNumber": 2
+    },
+    "Team3": {
+      "name": "Team 3",
+      "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
+      "points": 0,
+      "teamNumber": 3
+    },
+    "Team4": {
+      "name": "Team 4",
+      "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
+      "points": 0,
+      "teamNumber": 4
+    },
+    "Team5": {
+      "name": "Team 5",
+      "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
+      "points": 0,
+      "teamNumber": 5
+    },
+    "Team6": {
+      "name": "Team 6",
+      "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
+      "points": 0,
+      "teamNumber": 6
+    },
+    "Team7": {
+      "name": "Team 7",
+      "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
+      "points": 0,
+      "teamNumber": 7
+    },
+    "Team8": {
+      "name": "Team 8",
+      "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
+      "points": 0,
+      "teamNumber": 8
+    }
+  }
+}
