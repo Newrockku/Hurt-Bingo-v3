@@ -324,6 +324,16 @@
 
     </div>
 
+    <!-- Global Config Export -->
+    <div class="settings-section">
+      <h2 class="settings-section-title">🌍 Share Settings</h2>
+      <p style="font-size:0.9rem; color:var(--text-dim); margin-bottom:12px;">
+        To apply these settings (including Board Size & CSV URL) to all players, download this file and upload it to your website's root folder as <code>config.json</code>.
+      </p>
+      <div class="form-actions" style="margin-top:0; padding-top:0; border:none;">
+        <button class="btn" id="download-config-btn">⬇️ Download config.json</button>
+      </div>
+    </div>
   </div>
 
   <footer class="page-footer">
@@ -673,6 +683,23 @@
     } catch (e) { showToast('❌ Import failed: ' + e.message); }
   };
 
+  const downloadConfig = () => {
+    const data = {
+      eventConfig,
+      teams: teamsConfig
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'config.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('✓ config.json downloaded!');
+  };
+
   const renderEventForm = () => {
     $('event-name').value = eventConfig.name || '';
     $('event-codeword').value = eventConfig.codeword || '';
@@ -703,6 +730,7 @@
     renderEventForm();
 
     $('import-csv-btn').addEventListener('click', importFromCSV);
+    $('download-config-btn').addEventListener('click', downloadConfig);
   };
 
   init();

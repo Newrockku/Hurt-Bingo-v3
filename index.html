@@ -959,6 +959,11 @@
       } catch {}
     }
 
+    // Safety: If TEAM_MAP is empty (e.g. bad config or empty local storage), force defaults
+    if (Object.keys(TEAM_MAP).length === 0) {
+      TEAM_MAP = { ...DEFAULT_TEAMS };
+    }
+
     // Ensure defaults if missing
     if (!eventConfig.name) {
       eventConfig = {
