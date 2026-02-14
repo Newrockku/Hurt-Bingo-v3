@@ -615,7 +615,74 @@
   let refreshIntervalId = null;
 
   const $ = id => document.getElementById(id);
-  const { escapeHTML, normalizeNL, parseCSVRow, simpleHash, storageLoad, storageSave } = window.BingoUtils;
+  const utils = window.BingoUtils || (() => {
+    const fallbackStorageLoad = (key, fallback) => {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch {
+        return fallback;
+      }
+    };
+    const fallbackStorageSave = (key, value) => {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+      } catch {
+        return false;
+      }
+    };
+    const fallbackNormalizeNL = (value) => String(value).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    const fallbackSimpleHash = (value) => {
+      let hash = 0;
+      for (let i = 0; i < value.length; i++) {
+        hash = ((hash << 5) - hash) + value.charCodeAt(i);
+        hash |= 0;
+      }
+      return hash;
+    };
+    const fallbackEscapeHTML = (value) => {
+      const node = document.createElement("div");
+      node.appendChild(document.createTextNode(String(value ?? "")));
+      return node.innerHTML;
+    };
+    const fallbackParseCSVRow = (row) => {
+      const cols = [];
+      let cur = "";
+      let inQ = false;
+      for (let i = 0; i < row.length; i++) {
+        const ch = row[i];
+        if (inQ) {
+          if (ch === "\"" && row[i + 1] === "\"") {
+            cur += "\"";
+            i++;
+          } else if (ch === "\"") {
+            inQ = false;
+          } else {
+            cur += ch;
+          }
+        } else if (ch === "\"") {
+          inQ = true;
+        } else if (ch === ",") {
+          cols.push(cur.trim());
+          cur = "";
+        } else {
+          cur += ch;
+        }
+      }
+      cols.push(cur.trim());
+      return cols;
+    };
+    return {
+      escapeHTML: fallbackEscapeHTML,
+      normalizeNL: fallbackNormalizeNL,
+      parseCSVRow: fallbackParseCSVRow,
+      simpleHash: fallbackSimpleHash,
+      storageLoad: fallbackStorageLoad,
+      storageSave: fallbackStorageSave
+    };
+  })();
+  const { escapeHTML, normalizeNL, parseCSVRow, simpleHash, storageLoad, storageSave } = utils;
 
   const applyTheme = (name) => {
     const root = document.documentElement;
