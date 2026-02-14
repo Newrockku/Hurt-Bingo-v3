@@ -420,7 +420,7 @@
     storageSave(STORAGE_KEYS.eventConfig, eventConfig);  // Save event config first
     storageSave(STORAGE_KEYS.teams, teamsConfig);         // Then save teams with CSV URL
 
-    showToast('✓ Saved locally! Export config.json to share.');
+    showToast('✓ Saved locally! Don\'t forget to download & commit config.json.');
   };
 
   const saveTeamsConfig = () => {
@@ -439,7 +439,7 @@
     });
 
     storageSave(STORAGE_KEYS.teams, teamsConfig);
-    showToast('✓ Saved locally! Export config.json to share.');
+    showToast('✓ Saved locally! Don\'t forget to download & commit config.json.');
   };
 
   const downloadConfig = () => {

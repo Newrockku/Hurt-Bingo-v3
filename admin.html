@@ -286,7 +286,7 @@
 
   <script>
 (() => {
-  const APP_VERSION = '3.100';
+  const APP_VERSION = '3.110';
 
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
@@ -338,15 +338,25 @@
     } catch {}
   };
 
-  const loadConfig = () => {
+  const loadConfig = async () => {
+    // 1. Try to load from config.json (Primary Source for shared settings)
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.eventConfig);
-      if (saved) eventConfig = JSON.parse(saved);
+      const res = await fetch('config.json?t=' + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        if (data.eventConfig) eventConfig = data.eventConfig;
+        if (data.teams) teamsConfig = data.teams;
+        return; // Config loaded successfully
+      }
     } catch {}
 
+        // 2. Fallback to LocalStorage
+
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.teams);
-      teamsConfig = saved ? JSON.parse(saved) : { ...DEFAULT_TEAMS };
+      const savedEvent = localStorage.getItem(STORAGE_KEYS.eventConfig);
+      if (savedEvent) eventConfig = JSON.parse(savedEvent);
+      const savedTeams = localStorage.getItem(STORAGE_KEYS.teams);
+      teamsConfig = savedTeams ? JSON.parse(savedTeams) : { ...DEFAULT_TEAMS };
     } catch {
       teamsConfig = { ...DEFAULT_TEAMS };
     }
