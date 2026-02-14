@@ -353,6 +353,16 @@
     @keyframes flash-sync { 0% { color: var(--accent); } 100% { color: var(--border-main); } }
     .sync-error { color: var(--danger); }
 
+    .toast {
+      position: fixed; bottom: 20px; right: 20px;
+      background: var(--accent); color: #000;
+      padding: 12px 20px; border-radius: 0;
+      font-weight: bold; z-index: 3000;
+      opacity: 0; transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+
     /* --- Custom Theme Editor --- */
     .theme-editor-toggle { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
     .theme-editor-btn {
@@ -575,7 +585,7 @@
   <main class="grid-container" id="grid" role="grid" aria-label="Bingo board"></main>
 
   <footer class="page-footer">
-    <span>v3.314</span>
+    <span>v3.315</span>
     <span>&middot;</span>
     <span id="last-sync-text" aria-live="polite">Last Sync: Never</span>
     <span class="sync-btn" id="sync-now" role="button" tabindex="0">[Sync Now]</span>
@@ -733,9 +743,11 @@
     </div>
   </div>
 
+  <div id="toast" class="toast"></div>
+
   <script>
 (() => {
-  const APP_VERSION = '3.314';
+  const APP_VERSION = '3.315';
   let maxTiles = 49;
   let gridCols = 7;
   let gridRows = 7;
@@ -1020,6 +1032,7 @@
     // Get team from URL parameter
     const params = new URLSearchParams(window.location.search);
     const adminMode = params.get('admin') === 'true';
+    const fromAdmin = params.get('fromAdmin') === 'true';
     
     const teamKeys = Object.keys(TEAM_MAP);
 
@@ -1033,6 +1046,37 @@
       }
     } else if (adminMode && teamKeys.length > 0) {
       // Admin mode: show team selector
+      currentTeamKey = teamKeys[0];
+    } else if (teamKeys.length > 0) {
+      // Non-admin: default to first team (shouldn't happen in production)
+      currentTeamKey = teamKeys[0];
+    } else {
+      currentTeamKey = '';
+    }
+
+    // Team Locking Logic
+    const allowSwitching = !!eventConfig.allowTeamSwitching;
+    const storedTeam = localStorage.getItem('bingo-my-team');
+
+    if (!allowSwitching && !adminMode && !fromAdmin) {
+      if (storedTeam && TEAM_MAP[storedTeam]) {
+        if (currentTeamKey && currentTeamKey !== storedTeam) {
+          // User trying to switch - deny
+          currentTeamKey = storedTeam;
+          const newUrl = new URL(window.location);
+          newUrl.searchParams.set('team', storedTeam);
+          window.history.replaceState({}, '', newUrl);
+          window._showLockToast = true;
+        }
+      } else if (currentTeamKey && TEAM_MAP[currentTeamKey]) {
+        // No lock yet, set it
+        localStorage.setItem('bingo-my-team', currentTeamKey);
+      }
+    }
+  }
+
+  const $ = (id) => document.getElementById(id);
+  const DOM = {
       currentTeamKey = teamKeys[0];
     } else if (teamKeys.length > 0) {
       // Non-admin: default to first team (shouldn't happen in production)
@@ -1087,6 +1131,7 @@
     descBar: $('event-desc-bar'),
     descBarText: $('event-desc-bar-text'),
     descBarClose: $('event-desc-bar-close'),
+    toast: $('toast')
   };
 
   let miniNodes = [];
@@ -1168,6 +1213,12 @@
   const syncError = (msg) => {
     DOM.lastSync.classList.add('sync-error');
     DOM.lastSync.innerText = `Sync failed: ${msg}`;
+  };
+  const showToast = (msg, duration = 3000) => {
+    const toast = DOM.toast;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), duration);
   };
 
   const calculateBingos = (grid, cols, rows) => {
@@ -2039,6 +2090,8 @@
   async function init() {
     // Load shared config FIRST
     await loadSharedConfig();
+
+    if (window._showLockToast) showToast("Team switching is disabled by admin.");
 
     // Check if we came from admin page
     const params = new URLSearchParams(window.location.search);

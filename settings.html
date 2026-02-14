@@ -306,6 +306,15 @@
         <div class="form-hint-text">Defined in CSV (Tile Description of first tile if used as meta, or custom logic)</div>
       </div>
 
+      <div class="form-group">
+        <label class="form-label">Security</label>
+        <div class="settings-row" style="justify-content: flex-start; gap: 10px;">
+          <input type="checkbox" id="event-allow-switching" style="width:18px; height:18px; cursor:pointer;">
+          <label for="event-allow-switching" class="settings-row-label" style="cursor:pointer;">Allow Team Switching via URL</label>
+        </div>
+        <div class="form-hint-text">If unchecked, players are locked to the first team they visit.</div>
+      </div>
+
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Format</label>
@@ -336,7 +345,7 @@
   </div>
 
   <footer class="page-footer">
-    <span>v3.314</span>
+    <span>v3.315</span>
     <span>&middot;</span>
     <span>Bingo Board Settings</span>
   </footer>
@@ -345,7 +354,7 @@
 
   <script>
 (() => {
-  const APP_VERSION = '3.314';
+  const APP_VERSION = '3.315';
 
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
@@ -376,7 +385,8 @@
     syncInterval: 30000,
     format: '',
     boardSize: '',
-    teamCount: ''
+    teamCount: '',
+    allowTeamSwitching: false
   };
 
   const THEME_VARS = [
@@ -713,6 +723,7 @@
     $('event-format').value = eventConfig.format || '';
     $('event-boardsize').value = eventConfig.boardSize || '';
     $('event-teamcount').value = eventConfig.teamCount || '';
+    $('event-allow-switching').checked = !!eventConfig.allowTeamSwitching;
     
     // CSV URL is same for all teams
     const csvUrl = teamsConfig.Team1?.url || '';
@@ -737,6 +748,11 @@
 
     $('import-csv-btn').addEventListener('click', importFromCSV);
     $('download-config-btn').addEventListener('click', downloadConfig);
+    
+    $('event-allow-switching').addEventListener('change', (e) => {
+      eventConfig.allowTeamSwitching = e.target.checked;
+      storageSave(STORAGE_KEYS.eventConfig, eventConfig);
+    });
   };
 
   init();
