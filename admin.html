@@ -472,16 +472,16 @@
     container.appendChild(frag);
   };
 
-  const refresh = () => {
-    loadConfig();
+  const refresh = async () => {
+    await loadConfig();
     renderEventOverview();
     renderTeamStandings();
     renderLeaderboard();
     renderTeamLinks();
   };
 
-  const init = () => {
-    refresh();
+  const init = async () => {
+    await refresh();
 
     // Auto-refresh every 5 seconds
     setInterval(refresh, 5000);

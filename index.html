@@ -929,23 +929,33 @@
   let lastTriggerEl = null;
   let ghostEl = null;
 
-  function loadSharedConfig() {
+  async function loadSharedConfig() {
+    let loadedRemote = false;
+    try {
+      const res = await fetch('config.json?t=' + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        if (data.teams) TEAM_MAP = data.teams;
+        if (data.eventConfig) eventConfig = data.eventConfig;
+        loadedRemote = true;
+      }
+    } catch {}
+
+    if (!loadedRemote) {
+      // Fallback to localStorage
     try {
       const savedTeams = localStorage.getItem(STORAGE_KEYS.teams);
       TEAM_MAP = savedTeams ? JSON.parse(savedTeams) : { ...DEFAULT_TEAMS };
-    } catch {
-      TEAM_MAP = { ...DEFAULT_TEAMS };
-    }
+      } catch { TEAM_MAP = { ...DEFAULT_TEAMS }; }
 
     try {
       const savedEvent = localStorage.getItem(STORAGE_KEYS.eventConfig);
-      eventConfig = savedEvent ? JSON.parse(savedEvent) : {
-        name: 'Bingo 2026',
-        codeword: '',
-        description: '',
-        syncInterval: 30000
-      };
-    } catch {
+        if (savedEvent) eventConfig = JSON.parse(savedEvent);
+      } catch {}
+    }
+
+    // Ensure defaults if missing
+    if (!eventConfig.name) {
       eventConfig = {
         name: 'Bingo 2026',
         codeword: '',
@@ -1799,9 +1809,9 @@
     syncIntervalId = setInterval(() => fetchData(false), syncMs);
   }
 
-  function init() {
+  async function init() {
     // Load shared config FIRST
-    loadSharedConfig();
+    await loadSharedConfig();
 
     const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
     applyTheme(savedTheme);
@@ -1911,7 +1921,7 @@
         if (syncIntervalId) clearInterval(syncIntervalId);
         syncIntervalId = null;
       } else {
-        loadSharedConfig();
+        await loadSharedConfig();
         fetchGlobal();
         restartInterval();
         fetchData(false);

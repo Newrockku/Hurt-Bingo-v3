@@ -279,6 +279,17 @@
         <button class="btn" id="save-teams-btn">💾 Save Teams</button>
       </div>
     </div>
+
+    <!-- Global Persistence Section -->
+    <div class="settings-section">
+      <h2 class="settings-section-title">🌍 Global Persistence</h2>
+      <p style="font-size:0.9rem; color:var(--text-dim); margin-bottom:12px;">
+        To share these settings across all browsers and devices, download the configuration file and upload it to your website's root folder as <code>config.json</code>.
+      </p>
+      <div class="form-actions" style="margin-top:0; padding-top:0; border:none;">
+        <button class="btn" id="download-config-btn">⬇️ Download config.json</button>
+      </div>
+    </div>
   </div>
 
   <footer class="page-footer">
@@ -351,9 +362,20 @@
     setTimeout(() => toast.classList.remove('show'), duration);
   };
 
-  const loadConfig = () => {
+  const loadConfig = async () => {
+    // 1. Load from LocalStorage (fallback)
     eventConfig = storageLoad(STORAGE_KEYS.eventConfig, { ...DEFAULT_EVENT });
     teamsConfig = storageLoad(STORAGE_KEYS.teams, { ...DEFAULT_TEAMS });
+
+    // 2. Try to load from config.json (Override)
+    try {
+      const res = await fetch('config.json?t=' + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        if (data.eventConfig) eventConfig = { ...eventConfig, ...data.eventConfig };
+        if (data.teams) teamsConfig = data.teams;
+      }
+    } catch (e) { /* Ignore if file missing */ }
   };
 
   const saveEventConfig = () => {
@@ -374,7 +396,7 @@
     storageSave(STORAGE_KEYS.eventConfig, eventConfig);  // Save event config first
     storageSave(STORAGE_KEYS.teams, teamsConfig);         // Then save teams with CSV URL
 
-    showToast('✓ Event configuration saved!');
+    showToast('✓ Saved locally! Export config.json to share.');
   };
 
   const saveTeamsConfig = () => {
@@ -393,7 +415,24 @@
     });
 
     storageSave(STORAGE_KEYS.teams, teamsConfig);
-    showToast('✓ Teams configuration saved!');
+    showToast('✓ Saved locally! Export config.json to share.');
+  };
+
+  const downloadConfig = () => {
+    const data = {
+      eventConfig,
+      teams: teamsConfig
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'config.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('✓ config.json downloaded!');
   };
 
   const renderEventForm = () => {
@@ -437,13 +476,14 @@
     grid.appendChild(frag);
   };
 
-  const init = () => {
-    loadConfig();
+  const init = async () => {
+    await loadConfig();
     renderEventForm();
     renderTeamsGrid();
 
     $('save-event-btn').addEventListener('click', saveEventConfig);
     $('save-teams-btn').addEventListener('click', saveTeamsConfig);
+    $('download-config-btn').addEventListener('click', downloadConfig);
   };
 
   init();
