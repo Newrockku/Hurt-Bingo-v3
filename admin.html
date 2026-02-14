@@ -928,11 +928,11 @@
         }
         if (metaCols[4]) eventConfig.teamCount = metaCols[4];
 
-        // Parse Bonuses from Col 10 in Rows 2, 3, 4 (Indices 2, 3, 4)
+        // Parse Bonuses from Col 10 in Rows 1, 2, 3 (Indices 1, 2, 3)
         let rowBonus = 0, colBonus = 0, diagBonus = 0;
-        if (rows[2]) { const c = parseCSVRow(rows[2]); rowBonus = parseInt(c[10]) || 0; }
-        if (rows[3]) { const c = parseCSVRow(rows[3]); colBonus = parseInt(c[10]) || 0; }
-        if (rows[4]) { const c = parseCSVRow(rows[4]); diagBonus = parseInt(c[10]) || 0; }
+        if (rows[1]) { const c = parseCSVRow(rows[1]); rowBonus = parseInt(c[10]) || 0; }
+        if (rows[2]) { const c = parseCSVRow(rows[2]); colBonus = parseInt(c[10]) || 0; }
+        if (rows[3]) { const c = parseCSVRow(rows[3]); diagBonus = parseInt(c[10]) || 0; }
         eventConfig.bonuses = { row: rowBonus, col: colBonus, diag: diagBonus };
 
         // Update Teams from vertical column 5 (index 5) in rows 1..N
