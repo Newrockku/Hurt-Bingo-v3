@@ -516,6 +516,9 @@
       <div class="minimap-container" id="minimap" aria-hidden="true"></div>
     </aside>
 
+    <a href="admin.html" class="settings-btn" id="admin-back-btn" style="display:none; margin-right:8px; text-decoration:none;" aria-label="Back to Admin">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </a>
     <button class="settings-btn" id="settings-trigger" aria-label="Open settings">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.611 3.611 0 0112 15.6z"/>
@@ -540,7 +543,7 @@
   <main class="grid-container" id="grid" role="grid" aria-label="Bingo board"></main>
 
   <footer class="page-footer">
-    <span>v3.140</span>
+    <span>v3.150</span>
     <span>&middot;</span>
     <span id="last-sync-text" aria-live="polite">Last Sync: Never</span>
     <span class="sync-btn" id="sync-now" role="button" tabindex="0">[Sync Now]</span>
@@ -693,14 +696,14 @@
           </div>
         </div>
 
-        <div class="settings-version">Bingo Board &middot; v3.140</div>
+        <div class="settings-version">Bingo Board &middot; v3.150</div>
       </div>
     </div>
   </div>
 
   <script>
 (() => {
-  const APP_VERSION = '3.140';
+  const APP_VERSION = '3.150';
   let maxTiles = 49;
   let gridCols = 7;
   let gridRows = 7;
@@ -1914,6 +1917,13 @@
   async function init() {
     // Load shared config FIRST
     await loadSharedConfig();
+
+    // Check if we came from admin page
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('fromAdmin') === 'true') {
+      const backBtn = $('admin-back-btn');
+      if (backBtn) backBtn.style.display = 'flex';
+    }
 
     const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
     applyTheme(savedTheme);

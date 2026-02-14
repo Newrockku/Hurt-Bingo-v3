@@ -334,14 +334,14 @@
   </div>
 
   <footer class="page-footer">
-    <span>v3.140</span>
+    <span>v3.150</span>
     <span>&middot;</span>
     <span>Bingo Board Admin</span>
   </footer>
 
   <script>
 (() => {
-  const APP_VERSION = '3.140';
+  const APP_VERSION = '3.150';
 
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
@@ -711,7 +711,7 @@
 
     teams.forEach(([key, team]) => {
       const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
-      const teamUrl = `${baseUrl}?team=${key}`;
+      const teamUrl = `${baseUrl}?team=${key}&fromAdmin=true`;
       
       const card = document.createElement('a');
       card.className = 'team-board-card';
