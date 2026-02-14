@@ -969,6 +969,11 @@
       };
     }
 
+    // Apply board size if present in config
+    if (eventConfig.boardSize) {
+      updateBoardSize(eventConfig.boardSize);
+    }
+
     // Get team from URL parameter
     const params = new URLSearchParams(window.location.search);
     const adminMode = params.get('admin') === 'true';

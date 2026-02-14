@@ -563,6 +563,8 @@
       teamsConfig = savedTeams ? JSON.parse(savedTeams) : { ...DEFAULT_TEAMS };
       const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
       applyTheme(savedTheme);
+      
+      if (eventConfig.boardSize) updateBoardSize(eventConfig.boardSize);
     } catch {
       teamsConfig = { ...DEFAULT_TEAMS };
     }
