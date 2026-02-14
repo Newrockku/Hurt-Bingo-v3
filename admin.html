@@ -561,7 +561,7 @@
       if (savedEvent) eventConfig = JSON.parse(savedEvent);
       const savedTeams = localStorage.getItem(STORAGE_KEYS.teams);
       teamsConfig = savedTeams ? JSON.parse(savedTeams) : { ...DEFAULT_TEAMS };
-      const savedTheme = localStorage.getItem(STORAGE_KEYS.theme) || 'osrs';
+      const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
       applyTheme(savedTheme);
     } catch {
       teamsConfig = { ...DEFAULT_TEAMS };

@@ -1044,8 +1044,15 @@
   let miniNodes = [];
 
   /* ========================= UTILS ========================= */
-  const storageSave = (k, v) => { try { localStorage.setItem(k, String(v)); } catch {} };
-  const storageLoad = (k, fb) => { try { const v = localStorage.getItem(k); return v ?? fb; } catch { return fb; } };
+  const storageSave = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+  const storageLoad = (k, fb) => {
+    try {
+      const v = localStorage.getItem(k);
+      return v ? JSON.parse(v) : fb;
+    } catch {
+      return fb;
+    }
+  };
   const normalizeNL = (s) => String(s).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const simpleHash = (str) => {
     let h = 0;
@@ -2007,6 +2014,8 @@
         syncIntervalId = null;
       } else {
         await loadSharedConfig();
+        const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
+        applyTheme(savedTheme);
         fetchGlobal();
         restartInterval();
         fetchData(false);
