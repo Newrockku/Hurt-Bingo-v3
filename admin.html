@@ -7,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: http: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https:; script-src 'self' 'unsafe-inline';">
 
   <style>
     :root {
@@ -384,7 +383,6 @@
     <span>Bingo Board Admin</span>
   </footer>
 
-  <script src="js/bingo-utils.js"></script>
   <script>
 (() => {
   const APP_VERSION = '3.314';
@@ -612,77 +610,30 @@
   let candidateHash = null;
   let stabilityCount = 0;
   let fetchController = null;
-  let refreshIntervalId = null;
 
   const $ = id => document.getElementById(id);
-  const utils = window.BingoUtils || (() => {
-    const fallbackStorageLoad = (key, fallback) => {
-      try {
-        const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : fallback;
-      } catch {
-        return fallback;
-      }
-    };
-    const fallbackStorageSave = (key, value) => {
-      try {
-        localStorage.setItem(key, JSON.stringify(value));
-        return true;
-      } catch {
-        return false;
-      }
-    };
-    const fallbackNormalizeNL = (value) => String(value).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-    const fallbackSimpleHash = (value) => {
-      let hash = 0;
-      for (let i = 0; i < value.length; i++) {
-        hash = ((hash << 5) - hash) + value.charCodeAt(i);
-        hash |= 0;
-      }
-      return hash;
-    };
-    const fallbackEscapeHTML = (value) => {
-      const node = document.createElement("div");
-      node.appendChild(document.createTextNode(String(value ?? "")));
-      return node.innerHTML;
-    };
-    const fallbackParseCSVRow = (row) => {
-      const cols = [];
-      let cur = "";
-      let inQ = false;
-      for (let i = 0; i < row.length; i++) {
-        const ch = row[i];
-        if (inQ) {
-          if (ch === "\"" && row[i + 1] === "\"") {
-            cur += "\"";
-            i++;
-          } else if (ch === "\"") {
-            inQ = false;
-          } else {
-            cur += ch;
-          }
-        } else if (ch === "\"") {
-          inQ = true;
-        } else if (ch === ",") {
-          cols.push(cur.trim());
-          cur = "";
-        } else {
-          cur += ch;
-        }
-      }
-      cols.push(cur.trim());
-      return cols;
-    };
-    return {
-      escapeHTML: fallbackEscapeHTML,
-      normalizeNL: fallbackNormalizeNL,
-      parseCSVRow: fallbackParseCSVRow,
-      simpleHash: fallbackSimpleHash,
-      storageLoad: fallbackStorageLoad,
-      storageSave: fallbackStorageSave
-    };
-  })();
-  const { escapeHTML, normalizeNL, parseCSVRow, simpleHash, storageLoad, storageSave } = utils;
+
+  const storageLoad = (k, fb) => {
+    try {
+      const v = localStorage.getItem(k);
+      return v ? JSON.parse(v) : fb;
+    } catch {
+      return fb;
+    }
+  };
+
+  const storageSave = (k, v) => {
+    try {
+      localStorage.setItem(k, JSON.stringify(v));
+    } catch {}
+  };
+
+  const normalizeNL = (s) => String(s).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const simpleHash = (str) => {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; }
+    return h;
+  };
 
   const applyTheme = (name) => {
     const root = document.documentElement;
@@ -697,8 +648,10 @@
     // Load from LocalStorage (Populated by index.html or settings.html fetching CSV)
 
     try {
-      eventConfig = storageLoad(STORAGE_KEYS.eventConfig, eventConfig);
-      teamsConfig = storageLoad(STORAGE_KEYS.teams, { ...DEFAULT_TEAMS });
+      const savedEvent = localStorage.getItem(STORAGE_KEYS.eventConfig);
+      if (savedEvent) eventConfig = JSON.parse(savedEvent);
+      const savedTeams = localStorage.getItem(STORAGE_KEYS.teams);
+      teamsConfig = savedTeams ? JSON.parse(savedTeams) : { ...DEFAULT_TEAMS };
       const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
       applyTheme(savedTheme);
       
@@ -706,6 +659,24 @@
     } catch {
       teamsConfig = { ...DEFAULT_TEAMS };
     }
+  };
+
+  const parseCSVRow = (row) => {
+    const cols = []; let cur = '', inQ = false;
+    for (let i = 0; i < row.length; i++) {
+      const ch = row[i];
+      if (inQ) {
+        if (ch === '"' && row[i + 1] === '"') { cur += '"'; i++; }
+        else if (ch === '"') inQ = false;
+        else cur += ch;
+      } else {
+        if (ch === '"') inQ = true;
+        else if (ch === ',') { cols.push(cur.trim()); cur = ''; }
+        else cur += ch;
+      }
+    }
+    cols.push(cur.trim());
+    return cols;
   };
 
   const renderEventOverview = () => {
@@ -764,7 +735,7 @@
 
       row.innerHTML = `
         <div class="leaderboard-rank">${medal || idx + 1}</div>
-        <div class="leaderboard-name">${escapeHTML(team.name)}</div>
+        <div class="leaderboard-name">${team.name}</div>
         <div class="leaderboard-points">${team.points}</div>
       `;
 
@@ -821,7 +792,7 @@
 
     const createRow = (t) => `
       <div class="stat-list-item">
-        <span style="color:var(--text-bright);">${t.id}. ${escapeHTML(t.title)}</span>
+        <span style="color:var(--text-bright);">${t.id}. ${t.title}</span>
         <span style="font-weight:bold; color:${t.count > 0 ? 'var(--accent)' : 'var(--text-dim)'};">${t.count}/${totalTeams}</span>
       </div>`;
 
@@ -881,7 +852,7 @@
 
       card.innerHTML = `
         <div class="board-header">
-          <div class="board-name">${escapeHTML(team.name || key)}</div>
+          <div class="board-name">${team.name || key}</div>
           <div class="board-points">${team.points || 0} PTS</div>
         </div>
         <div class="mini-grid-wrapper">${gridHtml}</div>
@@ -1047,19 +1018,6 @@
     sel.addEventListener('change', () => applyTheme(sel.value));
   };
 
-  const stopRefreshLoop = () => {
-    if (refreshIntervalId) {
-      clearInterval(refreshIntervalId);
-      refreshIntervalId = null;
-    }
-    if (fetchController) fetchController.abort();
-  };
-
-  const startRefreshLoop = () => {
-    stopRefreshLoop();
-    refreshIntervalId = setInterval(refresh, 15000);
-  };
-
   const init = async () => {
     await loadConfig();
     renderEventOverview();
@@ -1067,17 +1025,9 @@
 
     await refresh();
     setupThemeDropdown();
-    startRefreshLoop();
 
-    document.addEventListener('visibilitychange', async () => {
-      if (document.hidden) {
-        stopRefreshLoop();
-      } else {
-        await loadConfig();
-        await refresh();
-        startRefreshLoop();
-      }
-    });
+    // Auto-refresh every 5 seconds
+    setInterval(refresh, 15000);
   };
 
   init();

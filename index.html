@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -732,7 +733,6 @@
     </div>
   </div>
 
-  <script src="js/bingo-utils.js"></script>
   <script>
 (() => {
   const APP_VERSION = '3.314';
@@ -1101,7 +1101,35 @@
       return fb;
     }
   };
-  const { escapeHTML, normalizeNL, parseCSVRow, simpleHash } = window.BingoUtils;
+  const normalizeNL = (s) => String(s).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const simpleHash = (str) => {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; }
+    return h;
+  };
+  const escapeHTML = (str) => {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(String(str ?? '')));
+    return d.innerHTML;
+  };
+
+  const parseCSVRow = (row) => {
+    const cols = []; let cur = '', inQ = false;
+    for (let i = 0; i < row.length; i++) {
+      const ch = row[i];
+      if (inQ) {
+        if (ch === '"' && row[i + 1] === '"') { cur += '"'; i++; }
+        else if (ch === '"') inQ = false;
+        else cur += ch;
+      } else {
+        if (ch === '"') inQ = true;
+        else if (ch === ',') { cols.push(cur.trim()); cur = ''; }
+        else cur += ch;
+      }
+    }
+    cols.push(cur.trim());
+    return cols;
+  };
 
   const getProgressColor = (pct) => {
     if (pct >= 100) return 'var(--text-completed)';
@@ -1573,6 +1601,8 @@
       const itemsCol = 11 + ((teamNumber - 1) * 3);
       const currentCol = 12 + ((teamNumber - 1) * 3);
       const goalCol = 13 + ((teamNumber - 1) * 3);
+
+      console.log(`Team: ${currentTeamKey} (Team${teamNumber}), Columns: Items=${itemsCol}, Current=${currentCol}, Goal=${goalCol}`);
 
       const rows = lines.slice(1);
       let count = 0;

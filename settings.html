@@ -7,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: http: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https:; script-src 'self' 'unsafe-inline';">
 
   <style>
     :root {
@@ -344,7 +343,6 @@
 
   <div id="toast" class="toast"></div>
 
-  <script src="js/bingo-utils.js"></script>
   <script>
 (() => {
   const APP_VERSION = '3.314';
@@ -570,11 +568,23 @@
   let teamsConfig = {};
 
   const $ = id => document.getElementById(id);
-  const { parseCSVRow, storageLoad, storageSave: baseStorageSave } = window.BingoUtils;
+
+  const storageLoad = (k, fb) => {
+    try {
+      const v = localStorage.getItem(k);
+      return v ? JSON.parse(v) : fb;
+    } catch {
+      return fb;
+    }
+  };
 
   const storageSave = (k, v) => {
-    if (!baseStorageSave(k, v)) {
-      showToast('Failed to save. Storage may be full.');
+    try {
+      localStorage.setItem(k, JSON.stringify(v));
+      console.log('Saved to localStorage:', k);  // Debug log
+    } catch (e) {
+      console.error('Failed to save:', k, e);
+      showToast('❌ Failed to save! Storage may be full.');
     }
   };
 
@@ -602,6 +612,24 @@
     applyTheme(savedTheme);
   };
 
+  const parseCSVRow = (row) => {
+    const cols = []; let cur = '', inQ = false;
+    for (let i = 0; i < row.length; i++) {
+      const ch = row[i];
+      if (inQ) {
+        if (ch === '"' && row[i + 1] === '"') { cur += '"'; i++; }
+        else if (ch === '"') inQ = false;
+        else cur += ch;
+      } else {
+        if (ch === '"') inQ = true;
+        else if (ch === ',') { cols.push(cur.trim()); cur = ''; }
+        else cur += ch;
+      }
+    }
+    cols.push(cur.trim());
+    return cols;
+  };
+
   const importFromCSV = async () => {
     const url = $('csv-url').value.trim();
     if (!url) { showToast('❌ Enter CSV URL first'); return; }
@@ -616,9 +644,6 @@
       
       // Parse first data row (index 1, assuming index 0 is header)
       const dataRow = parseCSVRow(rows[1]);
-      if (dataRow.length < 5) throw new Error('CSV metadata row must include at least 5 columns');
-      if (dataRow[3] && !/^\d+\s*x\s*\d+$/i.test(dataRow[3])) throw new Error('Board size must be in NxN format (example: 7x7)');
-      if (dataRow[4] && Number.isNaN(parseInt(dataRow[4], 10))) throw new Error('Team count must be a number');
       
       // 0:BingoTitle, 1:Codeword, 2:Format, 3:BoardSize, 4:TeamCount, 5:TeamNames
       if (dataRow[0]) $('event-name').value = dataRow[0];
@@ -711,6 +736,30 @@
     renderEventForm();
 
     $('import-csv-btn').addEventListener('click', importFromCSV);
+    $('download-config-btn').addEventListener('click', downloadConfig);
+  };
+
+  init();
+})();
+  </script>
+</body>
+</html>import-csv-btn').addEventListener('click', importFromCSV);
+    $('download-config-btn').addEventListener('click', downloadConfig);
+  };
+
+  init();
+})();
+  </script>
+</body>
+</html>import-csv-btn').addEventListener('click', importFromCSV);
+    $('download-config-btn').addEventListener('click', downloadConfig);
+  };
+
+  init();
+})();
+  </script>
+</body>
+</html>import-csv-btn').addEventListener('click', importFromCSV);
     $('download-config-btn').addEventListener('click', downloadConfig);
   };
 
