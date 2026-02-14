@@ -223,9 +223,10 @@
     }
 
     .page-footer {
-      text-align: center; margin-top: 40px;
+      width: 100%; max-width: 1400px; margin: 40px auto 0 auto;
+      padding: 20px 0; border-top: 1px solid var(--border-main);
       font-size: 0.7rem; color: var(--border-main);
-      padding-top: 20px; border-top: 1px solid var(--border-main);
+      display: flex; justify-content: center; align-items: center; gap: 6px;
     }
 
     .version-badge {
@@ -250,7 +251,6 @@
       <p class="admin-header-subtitle">Event Management & Team Monitoring</p>
     </div>
     <div class="admin-header-right">
-      <span class="version-badge">v3.130</span>
       <select id="theme-select" class="nav-btn" style="padding: 6px; border-radius: 4px;">
         <optgroup label="Classic">
           <option value="osrs">OSRS (Original)</option>
@@ -334,7 +334,9 @@
   </div>
 
   <footer class="page-footer">
-    <div>Bingo Board Admin • v3.130</div>
+    <span>v3.130</span>
+    <span>&middot;</span>
+    <span>Bingo Board Admin</span>
   </footer>
 
   <script>
@@ -640,7 +642,7 @@
     if (countEl) countEl.textContent = eventConfig.teamCount || '-';
 
     const titleEl = $('admin-event-title');
-    if (titleEl) titleEl.textContent = `${eventConfig.name || 'Bingo 2026'} Admin`;
+    if (titleEl) titleEl.textContent = `${eventConfig.name || 'Bingo 2026'} | Admin`;
   };
 
   const renderLeaderboard = () => {
