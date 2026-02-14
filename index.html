@@ -1916,7 +1916,7 @@
     });
 
     // Visibility
-    document.addEventListener('visibilitychange', () => {
+    document.addEventListener('visibilitychange', async () => {
       if (document.hidden) {
         if (syncIntervalId) clearInterval(syncIntervalId);
         syncIntervalId = null;
