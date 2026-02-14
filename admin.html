@@ -335,14 +335,14 @@
   </div>
 
   <footer class="page-footer">
-    <span>v3.200</span>
+    <span>v3.210</span>
     <span>&middot;</span>
     <span>Bingo Board Admin</span>
   </footer>
 
   <script>
 (() => {
-  const APP_VERSION = '3.200';
+  const APP_VERSION = '3.210';
 
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
@@ -773,6 +773,8 @@
       const res = await fetch(url + '&t=' + Date.now(), { signal: fetchController.signal });
       if (!res.ok) return;
       const text = normalizeNL(await res.text());
+
+      if (fetchController.signal.aborted) return;
       
       const h = simpleHash(text);
       if (lastSeenHash === h) return;
@@ -781,8 +783,32 @@
       const rows = text.split('\n').map(r => r.trim()).filter(r => r);
       
       if (rows.length > 1) {
-        const meta = parseCSVRow(rows[1]);
-        if (meta[3]) updateBoardSize(meta[3]);
+        const metaCols = parseCSVRow(rows[1]);
+        // Parse Metadata: 0:Name, 1:Codeword, 2:Format, 3:Size, 4:Count, 5:Names
+        if (metaCols[0]) eventConfig.name = metaCols[0];
+        if (metaCols[1]) eventConfig.codeword = metaCols[1];
+        if (metaCols[2]) eventConfig.format = metaCols[2];
+        if (metaCols[3]) {
+          eventConfig.boardSize = metaCols[3];
+          updateBoardSize(metaCols[3]);
+        }
+        if (metaCols[4]) eventConfig.teamCount = metaCols[4];
+
+        // Update Teams if names provided
+        if (metaCols[5]) {
+          const names = metaCols[5].split(',').map(s => s.trim());
+          Object.keys(teamsConfig).forEach((key, idx) => {
+            if (names[idx]) teamsConfig[key].name = names[idx];
+          });
+        }
+
+        // Persist updates to storage so loadConfig() doesn't revert them next cycle
+        storageSave(STORAGE_KEYS.eventConfig, eventConfig);
+        storageSave(STORAGE_KEYS.teams, teamsConfig);
+        
+        // Update UI components that depend on metadata
+        renderEventOverview();
+        renderLeaderboard();
       }
 
       // Data rows start at index 1 (metadata row) but tile data logic usually skips it
