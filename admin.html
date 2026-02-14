@@ -149,7 +149,7 @@
 
     /* Boards Grid */
     .boards-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      display: grid; grid-template-columns: repeat(4, 1fr);
       gap: 30px; grid-column: 1 / -1;
     }
 
@@ -335,14 +335,14 @@
   </div>
 
   <footer class="page-footer">
-    <span>v3.304</span>
+    <span>v3.305</span>
     <span>&middot;</span>
     <span>Bingo Board Admin</span>
   </footer>
 
   <script>
 (() => {
-  const APP_VERSION = '3.304';
+  const APP_VERSION = '3.305';
 
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
@@ -645,7 +645,7 @@
     const countEl = $('event-teamcount-display');
 
     if (nameEl) nameEl.textContent = eventConfig.name || 'Bingo 2026';
-    if (codewordEl) codewordEl.textContent = eventConfig.codeword ? '••••••' : '(Not set)';
+    if (codewordEl) codewordEl.textContent = eventConfig.codeword || '(Not set)';
     if (csvEl) csvEl.textContent = teamsConfig.Team1?.url
       ? teamsConfig.Team1.url
       : 'Not configured';
