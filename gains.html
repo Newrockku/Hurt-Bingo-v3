@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gains - Bingo Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-body: #342e25; --bg-tile: #494034; --bg-well: #342e25;
+      --bg-completed: #1e3a1e; --bg-completed-well: #162a16;
+      --border-main: #6d604e; --border-completed: #4caf50;
+      --accent: #ffac00; --text-main: #ffac00; --text-bright: #ffee00;
+      --text-dim: #858476; --text-completed: #4caf50; --danger: #ff6d6d;
+    }
+    * { box-sizing: border-box; }
+    html { scrollbar-gutter: stable; overflow-y: scroll; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-well); }
+    ::-webkit-scrollbar-thumb { background: var(--bg-tile); border: 2px solid var(--bg-well); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border-main); }
+    body {
+      background-color: var(--bg-body); color: var(--text-main);
+      font-family: 'Cabin Condensed', sans-serif; margin: 0; padding: 20px;
+      min-height: 100vh;
+    }
+    .gains-header {
+      background: var(--bg-tile); border: 2px solid var(--border-main);
+      padding: 20px; margin: 0 auto 30px auto; max-width: 95%;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+    .gains-header h1 {
+      margin: 0; font-size: 2rem; text-transform: uppercase;
+      letter-spacing: 1px; text-shadow: 2px 2px 4px black;
+    }
+    .nav-btn {
+      background: var(--bg-well); border: 2px solid var(--border-main);
+      color: var(--text-dim); padding: 8px 16px;
+      font-family: 'Cabin Condensed'; font-size: 0.95rem;
+      cursor: pointer; border-radius: 0;
+      transition: all 0.2s ease; text-decoration: none; display: inline-block;
+    }
+    .nav-btn:hover {
+      border-color: var(--accent); color: var(--accent); background: var(--bg-tile);
+    }
+    .gains-container { max-width: 95%; margin: 0 auto; }
+    .table-wrapper {
+      background: var(--bg-tile); border: 2px solid var(--border-main);
+      padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      overflow-x: auto;
+    }
+    table {
+      width: 100%; border-collapse: collapse; font-size: 0.9rem;
+    }
+    th, td {
+      padding: 8px 12px; border: 1px solid var(--border-main);
+      text-align: left; white-space: nowrap;
+    }
+    thead {
+      background-color: var(--bg-well);
+    }
+    th {
+      font-weight: bold; color: var(--text-bright);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      cursor: pointer; user-select: none;
+    }
+    th:hover { background-color: var(--bg-body); color: var(--accent); }
+    th .sort-arrow {
+      display: inline-block; width: 0; height: 0;
+      border-left: 4px solid transparent; border-right: 4px solid transparent;
+      margin-left: 6px; vertical-align: middle; opacity: 0.5;
+    }
+    th.asc .sort-arrow { border-bottom: 5px solid var(--accent); opacity: 1; }
+    th.desc .sort-arrow { border-top: 5px solid var(--accent); opacity: 1; }
+    tbody tr:nth-child(even) { background-color: var(--bg-well); }
+    tbody tr:hover { background-color: var(--bg-body); }
+    td { color: var(--text-bright); }
+    td.player-name { font-weight: bold; color: var(--accent); }
+    td.zero { color: var(--text-dim); }
+    .page-footer {
+      margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-main);
+      font-size: 0.7rem; color: var(--border-main);
+      display: flex; justify-content: center; align-items: center; gap: 6px;
+    }
+    .loader {
+      text-align: center; padding: 40px; font-size: 1.2rem;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="gains-header" role="banner">
+    <h1>📊 Gains Tracker</h1>
+    <a href="admin.html" class="nav-btn">← Back to Admin</a>
+  </header>
+
+  <div class="gains-container">
+    <div class="table-wrapper" id="table-wrapper">
+      <div class="loader" id="loader">Loading gains data...</div>
+      <table id="gains-table" style="display:none;">
+        <thead id="gains-table-head"></thead>
+        <tbody id="gains-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <span>v3.324</span>
+    <span>&middot;</span>
+    <span>Bingo Gains Tracker</span>
+  </footer>
+
+  <script>
+  (() => {
+    const APP_VERSION = '3.324';
+    const SNAPSHOT_1_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=138917819&single=true&output=csv';
+    const SNAPSHOT_2_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=2084936163&single=true&output=csv';
+
+    const HEADERS = [
+      'Player','Total','Attack','Defence','Strength','Hitpoints','Ranged','Prayer','Magic','Cooking','Woodcutting','Fletching','Fishing','Firemaking','Crafting','Smithing','Mining','Herblore','Agility','Thieving','Slayer','Farming','Runecraft','Hunter','Construction','Sailing','Abyssal Sire','Alchemical Hydra','Amoxilatl','Araxxor','Artio','Barrows Chests','Bryophyta','Callisto','Calvar\'ion','Cerberus','Chambers of Xeric','Chambers of Xeric: CM','Chaos Elemental','Chaos Fanatic','Commander Zilyana','Corporeal Beast','Crazy Archaeologist','Dagannoth Prime','Dagannoth Rex','Dagannoth Supreme','Deranged Archaeologist','Doom of Mokhaiotl','Duke Sucellus','General Graardor','Giant Mole','Grotesque Guardians','Hespori','Kalphite Queen','King Black Dragon','Kraken','Kree\'Arra','K\'ril Tsutsaroth','Lunar Chests','Mimic','Nex','Nightmare','Phosani\'s Nightmare','Obor','Phantom Muspah','Sarachnis','Scorpia','Scurrius','Shellbane Griffin','Skotizo','Sol Heredit','Spindel','Tempoross','The Gauntlet','The Corrupted Gauntlet','The Hueycoatl','The Leviathan','The Royal Titans','The Whisperer','Theatre of Blood','Theatre of Blood: HM','Thermonuclear Smoke Devil','Tombs of Amascut: Normal','Tombs of Amascut: Expert','TzKal-Zuk','TzTok-Jad','Vardorvis','Venenatis','Vet\'ion','Vorkath','Wintertodt','Yama','Zalcano','Zulrah'
+    ];
+    
+    const SKILL_HEADERS = HEADERS.slice(2, 26);
+    const BOSS_HEADERS = HEADERS.slice(26);
+
+    let gainsData = [];
+    let sortState = { column: 'Total', order: 'desc' };
+
+    const $ = id => document.getElementById(id);
+
+    const storageLoad = (k, fb) => {
+      try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fb; } catch { return fb; }
+    };
+    const storageSave = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+    const applyTheme = (name) => {
+      const THEMES = {
+        osrs: null, midnight: {'--bg-body':'#000000','--bg-tile':'#0e0e0e','--bg-well':'#060606','--bg-completed':'#1a1a1a','--bg-completed-well':'#0d0d0d','--border-main':'#2a2a2a','--border-completed':'#e0e0e0','--accent':'#ffffff','--text-main':'#d4d4d4','--text-bright':'#ffffff','--text-dim':'#4a4a4a','--text-completed':'#e0e0e0'},
+        parchment: {'--bg-body':'#2c2416','--bg-tile':'#3d3322','--bg-well':'#241e12','--bg-completed':'#2a3a1e','--bg-completed-well':'#1e2c14','--border-main':'#6b5b3e','--border-completed':'#8aba5a','--accent':'#d4a843','--text-main':'#d4a843','--text-bright':'#f0dca0','--text-dim':'#7a6b50','--text-completed':'#8aba5a'},
+        spring: {'--bg-body':'#1e2e1e','--bg-tile':'#2a402a','--bg-well':'#162416','--bg-completed':'#3d2a4d','--bg-completed-well':'#2a1c36','--border-main':'#5a8a5a','--border-completed':'#c77dff','--accent':'#7dffb3','--text-main':'#7dffb3','--text-bright':'#d0ffe0','--text-dim':'#6a8a6a','--text-completed':'#c77dff'},
+        summer: {'--bg-body':'#0f2a3a','--bg-tile':'#1a4058','--bg-well':'#0a1f2d','--bg-completed':'#5a4010','--bg-completed-well':'#3d2b0a','--border-main':'#3a7ea8','--border-completed':'#ffc833','--accent':'#00e5ff','--text-main':'#00e5ff','--text-bright':'#b3f5ff','--text-dim':'#4a7a8f','--text-completed':'#ffc833'},
+        autumn: {'--bg-body':'#261410','--bg-tile':'#3d2218','--bg-well':'#1a0e0a','--bg-completed':'#1a3040','--bg-completed-well':'#0f1f2a','--border-main':'#8a5040','--border-completed':'#4a9ac4','--accent':'#ff8533','--text-main':'#ff8533','--text-bright':'#ffc599','--text-dim':'#8a6a5a','--text-completed':'#4a9ac4'},
+        winter: {'--bg-body':'#141a22','--bg-tile':'#222e3a','--bg-well':'#0e1419','--bg-completed':'#3a2228','--bg-completed-well':'#261418','--border-main':'#4a6a82','--border-completed':'#ff7a7a','--accent':'#8ad4ff','--text-main':'#8ad4ff','--text-bright':'#d6efff','--text-dim':'#5a6e7e','--text-completed':'#ff7a7a'},
+        abyssal: {'--bg-body':'#030810','--bg-tile':'#081428','--bg-well':'#020508','--bg-completed':'#003838','--bg-completed-well':'#001f1f','--border-main':'#0e2040','--border-completed':'#50ffd0','--accent':'#50ffd0','--text-main':'#50ffd0','--text-bright':'#b0d8e8','--text-dim':'#3a5070','--text-completed':'#50ffd0'},
+        volcanic: {'--bg-body':'#100808','--bg-tile':'#1e1010','--bg-well':'#080404','--bg-completed':'#401500','--bg-completed-well':'#280e00','--border-main':'#4a2020','--border-completed':'#ff5500','--accent':'#ff5500','--text-main':'#ff6a20','--text-bright':'#ffb380','--text-dim':'#6a4040','--text-completed':'#ff5500'},
+        cyberpunk: {'--bg-body':'#0a0118','--bg-tile':'#1a0a30','--bg-well':'#06010e','--bg-completed':'#80002a','--bg-completed-well':'#500018','--border-main':'#4a1a6a','--border-completed':'#00e8c8','--accent':'#ffe030','--text-main':'#ff1a60','--text-bright':'#ff80a0','--text-dim':'#6a4070','--text-completed':'#00e8c8'},
+        bloodlust: {'--bg-body':'#140404','--bg-tile':'#220808','--bg-well':'#0e0202','--bg-completed':'#400808','--bg-completed-well':'#280404','--border-main':'#4a1414','--border-completed':'#ff4040','--accent':'#ff4040','--text-main':'#e02020','--text-bright':'#ff8080','--text-dim':'#5a3030','--text-completed':'#ff4040'},
+        royal: {'--bg-body':'#160a24','--bg-tile':'#2e1650','--bg-well':'#0e0618','--bg-completed':'#4a3800','--bg-completed-well':'#302400','--border-main':'#4a2870','--border-completed':'#ffd700','--accent':'#ffc830','--text-main':'#c8a030','--text-bright':'#ffe899','--text-dim':'#6a4890','--text-completed':'#ffd700'},
+        emerald: {'--bg-body':'#04160c','--bg-tile':'#0a2e18','--bg-well':'#020e08','--bg-completed':'#104828','--bg-completed-well':'#0a3018','--border-main':'#1a5030','--border-completed':'#30d868','--accent':'#50e880','--text-main':'#50e880','--text-bright':'#a0ffc0','--text-dim':'#2a5a3a','--text-completed':'#30d868'},
+        solar: {'--bg-body':'#2a1e14','--bg-tile':'#44301e','--bg-well':'#1e140e','--bg-completed':'#6a4a08','--bg-completed-well':'#483208','--border-main':'#6a4a30','--border-completed':'#f0c020','--accent':'#ffcc33','--text-main':'#e8b020','--text-bright':'#fff0b0','--text-dim':'#7a6040','--text-completed':'#f0c020'},
+        vaporwave: {'--bg-body':'#0a0240','--bg-tile':'#1a0830','--bg-well':'#06012a','--bg-completed':'#a0408a','--bg-completed-well':'#6a2860','--border-main':'#3020a0','--border-completed':'#00d8f0','--accent':'#00d8f0','--text-main':'#b070ff','--text-bright':'#e0b0ff','--text-dim':'#5a3880','--text-completed':'#00d8f0'},
+        tox: {'--bg-body':'#100010','--bg-tile':'#200020','--bg-well':'#0a000a','--bg-completed':'#0a200a','--bg-completed-well':'#061406','--border-main':'#400040','--border-completed':'#30ff18','--accent':'#d0ff10','--text-main':'#d0ff10','--text-bright':'#e8ff88','--text-dim':'#604060','--text-completed':'#30ff18'},
+        ocean: {'--bg-body':'#040e1a','--bg-tile':'#0a1e30','--bg-well':'#02080f','--bg-completed':'#004048','--bg-completed-well':'#002830','--border-main':'#10304a','--border-completed':'#00c8a0','--accent':'#0090d0','--text-main':'#40b8e8','--text-bright':'#90e0ff','--text-dim':'#2a5068','--text-completed':'#00c8a0'},
+        frost: {'--bg-body':'#0c1420','--bg-tile':'#162030','--bg-well':'#080e18','--bg-completed':'#183048','--bg-completed-well':'#102038','--border-main':'#304868','--border-completed':'#90d8ff','--accent':'#b0e8ff','--text-main':'#80c8f0','--text-bright':'#d8f0ff','--text-dim':'#406080','--text-completed':'#90d8ff'},
+        sandstorm: {'--bg-body':'#1e1810','--bg-tile':'#302818','--bg-well':'#14100a','--bg-completed':'#484020','--bg-completed-well':'#302a14','--border-main':'#5a4a2a','--border-completed':'#d8b840','--accent':'#e8c848','--text-main':'#d0a830','--text-bright':'#f0dea0','--text-dim':'#6a5a38','--text-completed':'#d8b840'},
+        nebula: {'--bg-body':'#0a0414','--bg-tile':'#140a24','--bg-well':'#06020e','--bg-completed':'#1a1040','--bg-completed-well':'#100a28','--border-main':'#281848','--border-completed':'#c080ff','--accent':'#a060ff','--text-main':'#9070e0','--text-bright':'#d0b8ff','--text-dim':'#443060','--text-completed':'#c080ff'},
+        forest: {'--bg-body':'#0a120a','--bg-tile':'#142014','--bg-well':'#060e06','--bg-completed':'#183818','--bg-completed-well':'#102810','--border-main':'#2a4a2a','--border-completed':'#68d068','--accent':'#88e088','--text-main':'#60c060','--text-bright':'#b0f0b0','--text-dim':'#3a5a3a','--text-completed':'#68d068'},
+        noir: {'--bg-body':'#0e0e0e','--bg-tile':'#1a1a1a','--bg-well':'#080808','--bg-completed':'#2a2a1e','--bg-completed-well':'#1a1a14','--border-main':'#333333','--border-completed':'#c8b870','--accent':'#c8b870','--text-main':'#a0a0a0','--text-bright':'#d8d8d0','--text-dim':'#505050','--text-completed':'#c8b870'},
+        sakura: {'--bg-body':'#1a0e14','--bg-tile':'#2a1824','--bg-well':'#12080e','--bg-completed':'#3a1830','--bg-completed-well':'#281020','--border-main':'#4a2840','--border-completed':'#ff88b8','--accent':'#ff88b8','--text-main':'#e870a0','--text-bright':'#ffc0d8','--text-dim':'#5a3850','--text-completed':'#ff88b8'},
+        copper: {'--bg-body':'#10120e','--bg-tile':'#1e201a','--bg-well':'#0a0c08','--bg-completed':'#2a3028','--bg-completed-well':'#1e2418','--border-main':'#3a4030','--border-completed':'#60b8a0','--accent':'#d08850','--text-main':'#c08048','--text-bright':'#e8c0a0','--text-dim':'#505840','--text-completed':'#60b8a0'},
+        arctic: {'--bg-body':'#060c14','--bg-tile':'#0e1824','--bg-well':'#04080e','--bg-completed':'#0a2030','--bg-completed-well':'#061420','--border-main':'#1a3048','--border-completed':'#30e8a0','--accent':'#40d0a0','--text-main':'#50b8d0','--text-bright':'#a0e8f0','--text-dim':'#2a4860','--text-completed':'#30e8a0'},
+        obsidian: {'--bg-body':'#080808','--bg-tile':'#141410','--bg-well':'#040404','--bg-completed':'#282010','--bg-completed-well':'#1a1408','--border-main':'#2a2820','--border-completed':'#d8a830','--accent':'#d8a830','--text-main':'#c09828','--text-bright':'#f0d888','--text-dim':'#484030','--text-completed':'#d8a830'}
+      };
+      const root = document.documentElement;
+      const THEME_VARS = ['--bg-body','--bg-tile','--bg-well','--bg-completed','--bg-completed-well','--border-main','--border-completed','--accent','--text-main','--text-bright','--text-dim','--text-completed'];
+      for (const k of THEME_VARS) root.style.setProperty(k, '');
+      const t = THEMES[name];
+      if (t) for (const [k, v] of Object.entries(t)) root.style.setProperty(k, v);
+      storageSave('bingo-theme', name);
+    };
+
+    const parseCSV = (text) => {
+      const data = {};
+      const rows = text.replace(/\r/g, '').split('\n').slice(1); // Skip header
+      for (const row of rows) {
+        if (!row.trim()) continue;
+        const cols = row.split(',');
+        const playerName = cols[0].trim();
+        if (!playerName) continue;
+        
+        data[playerName] = {};
+        for (let i = 1; i < HEADERS.length; i++) {
+          const header = HEADERS[i];
+          const value = cols[i] ? cols[i].trim() : '0';
+          data[playerName][header] = (value === 'Not Found' || value === '-1') ? 0 : parseInt(value, 10) || 0;
+        }
+      }
+      return data;
+    };
+
+    const fetchAndParseCSV = async (url) => {
+      const res = await fetch(url + '&t=' + Date.now());
+      if (!res.ok) throw new Error(`Failed to fetch ${url}`);
+      const text = await res.text();
+      return parseCSV(text);
+    };
+
+    const calculateGains = (snap1, snap2) => {
+      const gains = [];
+      for (const player in snap2) {
+        if (snap1[player]) {
+          const playerGains = { Player: player };
+          let totalBossKc = 0;
+          for (const header of HEADERS.slice(1)) {
+            const gain = (snap2[player][header] || 0) - (snap1[player][header] || 0);
+            playerGains[header] = gain;
+            if (BOSS_HEADERS.includes(header)) {
+              totalBossKc += gain;
+            }
+          }
+          playerGains['Total Boss KC'] = totalBossKc;
+          gains.push(playerGains);
+        }
+      }
+      return gains;
+    };
+
+    const renderTable = () => {
+      const tableHead = $('gains-table-head');
+      const tableBody = $('gains-table-body');
+      
+      // Sort data
+      gainsData.sort((a, b) => {
+        const valA = a[sortState.column];
+        const valB = b[sortState.column];
+        const order = sortState.order === 'asc' ? 1 : -1;
+        return (valA - valB) * order;
+      });
+
+      // Render Header
+      if (!tableHead.innerHTML) {
+        const displayHeaders = ['Player', 'Total', 'Total Boss KC', ...SKILL_HEADERS, ...BOSS_HEADERS];
+        let headHTML = '<tr>';
+        for (const header of displayHeaders) {
+          const isSortCol = sortState.column === header;
+          const sortClass = isSortCol ? sortState.order : '';
+          headHTML += `<th data-col="${header}" class="${sortClass}">${header}<span class="sort-arrow"></span></th>`;
+        }
+        headHTML += '</tr>';
+        tableHead.innerHTML = headHTML;
+      }
+
+      // Render Body
+      let bodyHTML = '';
+      for (const player of gainsData) {
+        bodyHTML += '<tr>';
+        const displayHeaders = ['Player', 'Total', 'Total Boss KC', ...SKILL_HEADERS, ...BOSS_HEADERS];
+        for (const header of displayHeaders) {
+          const value = player[header];
+          if (header === 'Player') {
+            bodyHTML += `<td class="player-name">${value}</td>`;
+          } else {
+            bodyHTML += `<td class="${value === 0 ? 'zero' : ''}">${value.toLocaleString()}</td>`;
+          }
+        }
+        bodyHTML += '</tr>';
+      }
+      tableBody.innerHTML = bodyHTML;
+      
+      // Update sort arrows
+      tableHead.querySelectorAll('th').forEach(th => {
+        const col = th.dataset.col;
+        th.classList.remove('asc', 'desc');
+        if (col === sortState.column) {
+          th.classList.add(sortState.order);
+        }
+      });
+    };
+    
+    const handleSort = (e) => {
+      const col = e.target.dataset.col;
+      if (!col) return;
+      
+      if (sortState.column === col) {
+        sortState.order = sortState.order === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortState.column = col;
+        sortState.order = 'desc';
+      }
+      renderTable();
+    };
+
+    const init = async () => {
+      const savedTheme = storageLoad('bingo-theme', 'osrs');
+      applyTheme(savedTheme);
+
+      try {
+        const [snap1, snap2] = await Promise.all([
+          fetchAndParseCSV(SNAPSHOT_1_URL),
+          fetchAndParseCSV(SNAPSHOT_2_URL)
+        ]);
+        
+        gainsData = calculateGains(snap1, snap2);
+        
+        $('loader').style.display = 'none';
+        $('gains-table').style.display = '';
+        
+        renderTable();
+        
+        $('gains-table-head').addEventListener('click', handleSort);
+
+      } catch (error) {
+        console.error("Failed to load gains data:", error);
+        $('loader').innerText = `Error loading data: ${error.message}. Please check the console.`;
+      }
+    };
+
+    init();
+  })();
+  </script>
+</body>
+</html>
