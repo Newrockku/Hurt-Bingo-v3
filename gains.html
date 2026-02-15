@@ -46,6 +46,15 @@
     .nav-btn:hover {
       border-color: var(--accent); color: var(--accent); background: var(--bg-tile);
     }
+    #admin-back-btn {
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: bold;
+    }
+    #admin-back-btn:hover {
+      background: var(--accent);
+      color: var(--bg-body);
+    }
     .gains-container { max-width: 95%; margin: 0 auto; }
     .table-wrapper {
       background: var(--bg-tile); border: 2px solid var(--border-main);
@@ -148,7 +157,7 @@
           <option value="obsidian">Obsidian Gold</option>
         </optgroup>
       </select>
-      <a href="admin.html" class="nav-btn">← Back to Admin</a>
+      <a href="admin.html" id="admin-back-btn" class="nav-btn" style="display:none;">← Admin</a>
     </div>
   </header>
 
@@ -163,14 +172,14 @@
   </div>
 
   <footer class="page-footer">
-    <span>v3.328</span>
+    <span>v3.329</span>
     <span>&middot;</span>
     <span>Bingo Gains Tracker</span>
   </footer>
 
   <script>
   (() => {
-    const APP_VERSION = '3.328';
+    const APP_VERSION = '3.329';
     const SNAPSHOT_1_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=138917819&single=true&output=csv';
     const SNAPSHOT_2_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=2084936163&single=true&output=csv';
 
@@ -356,6 +365,12 @@
     };
 
     const init = async () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('fromAdmin') === 'true') {
+        const btn = $('admin-back-btn');
+        if (btn) btn.style.display = 'inline-block';
+      }
+
       const savedTheme = storageLoad('bingo-theme', 'osrs');
       applyTheme(savedTheme);
       
