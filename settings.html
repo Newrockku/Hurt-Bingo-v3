@@ -306,13 +306,10 @@
         <div class="form-hint-text">Defined in CSV (Tile Description of first tile if used as meta, or custom logic)</div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Security</label>
-        <div class="settings-row" style="justify-content: flex-start; gap: 10px;">
-          <input type="checkbox" id="event-allow-switching" style="width:18px; height:18px; cursor:pointer;">
-          <label for="event-allow-switching" class="settings-row-label" style="cursor:pointer;">Allow Team Switching via URL</label>
-        </div>
-        <div class="form-hint-text">If unchecked, players are locked to the first team they visit.</div>
+      <!-- Team Passcodes Section -->
+      <div class="settings-section" style="margin-top: 20px; box-shadow: none; border: none; padding: 0; background: none;">
+        <h3 class="settings-section-title" style="border: none; color: var(--text-bright);">🔒 Team Passcodes</h3>
+        <div id="team-passcodes-list"></div>
       </div>
 
       <div class="form-row">
@@ -345,7 +342,7 @@
   </div>
 
   <footer class="page-footer">
-    <span>v3.316</span>
+    <span>v3.317</span>
     <span>&middot;</span>
     <span>Bingo Board Settings</span>
   </footer>
@@ -354,7 +351,7 @@
 
   <script>
 (() => {
-  const APP_VERSION = '3.316';
+  const APP_VERSION = '3.317';
 
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
@@ -385,8 +382,7 @@
     syncInterval: 30000,
     format: '',
     boardSize: '',
-    teamCount: '',
-    allowTeamSwitching: false
+    teamCount: ''
   };
 
   const THEME_VARS = [
@@ -614,6 +610,37 @@
     if ($('settings-theme-dropdown')) $('settings-theme-dropdown').value = name;
   };
 
+  const renderTeamPasscodes = () => {
+    const container = $('team-passcodes-list');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    Object.keys(teamsConfig).sort((a,b) => {
+        return (teamsConfig[a].teamNumber || 0) - (teamsConfig[b].teamNumber || 0);
+    }).forEach(key => {
+      const team = teamsConfig[key];
+      const div = document.createElement('div');
+      div.className = 'settings-row';
+      div.style.justifyContent = 'flex-start';
+      div.style.gap = '10px';
+      div.innerHTML = `
+        <label class="settings-row-label" style="width: 150px;">${escapeHTML(team.name)}</label>
+        <input type="text" class="form-input team-passcode-input" data-key="${key}" value="${escapeHTML(team.passcode || '')}" placeholder="Passcode (optional)" style="flex:1;">
+      `;
+      container.appendChild(div);
+    });
+
+    container.querySelectorAll('.team-passcode-input').forEach(input => {
+      input.addEventListener('change', (e) => {
+        const k = e.target.dataset.key;
+        if (teamsConfig[k]) {
+          teamsConfig[k].passcode = e.target.value.trim();
+          storageSave(STORAGE_KEYS.teams, teamsConfig);
+        }
+      });
+    });
+  };
+
   const loadConfig = async () => {
     // 1. Load from LocalStorage (fallback)
     eventConfig = storageLoad(STORAGE_KEYS.eventConfig, { ...DEFAULT_EVENT });
@@ -685,7 +712,8 @@
           name: tName,
           url: url,
           points: teamsConfig[key]?.points || 0,
-          teamNumber: i
+          teamNumber: i,
+          passcode: teamsConfig[key]?.passcode || ''
         };
       }
       teamsConfig = newTeams;
@@ -694,6 +722,7 @@
       // Save everything
       storageSave(STORAGE_KEYS.eventConfig, eventConfig);
       storageSave(STORAGE_KEYS.teams, teamsConfig);
+      renderTeamPasscodes();
 
       showToast('✓ Settings loaded from CSV!');
     } catch (e) { showToast('❌ Import failed: ' + e.message); }
@@ -723,7 +752,6 @@
     $('event-format').value = eventConfig.format || '';
     $('event-boardsize').value = eventConfig.boardSize || '';
     $('event-teamcount').value = eventConfig.teamCount || '';
-    $('event-allow-switching').checked = !!eventConfig.allowTeamSwitching;
     
     // CSV URL is same for all teams
     const csvUrl = teamsConfig.Team1?.url || '';
@@ -745,14 +773,10 @@
     await loadConfig();
     setupThemeDropdown();
     renderEventForm();
+    renderTeamPasscodes();
 
     $('import-csv-btn').addEventListener('click', importFromCSV);
     $('download-config-btn').addEventListener('click', downloadConfig);
-    
-    $('event-allow-switching').addEventListener('change', (e) => {
-      eventConfig.allowTeamSwitching = e.target.checked;
-      storageSave(STORAGE_KEYS.eventConfig, eventConfig);
-    });
   };
 
   init();

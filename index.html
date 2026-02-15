@@ -743,11 +743,21 @@
     </div>
   </div>
 
+  <div id="passcode-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 4000; backdrop-filter: blur(5px);">
+    <div class="modal-content active" style="max-width: 350px; height: auto; text-align: center; pointer-events: auto; transform: none; opacity: 1; top: auto; left: auto; position: relative;">
+      <div class="modal-header">🔒 Locked</div>
+      <p style="margin-bottom: 15px; color: var(--text-bright);">Enter passcode for<br><strong id="passcode-team-name" style="color: var(--accent); font-size: 1.2rem;"></strong></p>
+      <input type="password" id="passcode-input" class="settings-select" style="width: 100%; margin-bottom: 15px; text-align: center;" placeholder="Passcode">
+      <button id="passcode-submit-btn" class="theme-editor-btn" style="width: 100%; padding: 10px; justify-content: center;">Unlock</button>
+      <p id="passcode-error" style="color: var(--danger); margin-top: 10px; display: none; font-weight: bold;">Incorrect passcode</p>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
 
   <script>
 (() => {
-  const APP_VERSION = '3.316';
+  const APP_VERSION = '3.317';
   let maxTiles = 49;
   let gridCols = 7;
   let gridRows = 7;
@@ -1052,26 +1062,6 @@
       currentTeamKey = teamKeys[0];
     } else {
       currentTeamKey = '';
-    }
-
-    // Team Locking Logic
-    const allowSwitching = !!eventConfig.allowTeamSwitching;
-    const storedTeam = localStorage.getItem('bingo-my-team');
-
-    if (!allowSwitching && !adminMode && !fromAdmin) {
-      if (storedTeam && TEAM_MAP[storedTeam]) {
-        if (currentTeamKey && currentTeamKey !== storedTeam) {
-          // User trying to switch - deny
-          currentTeamKey = storedTeam;
-          const newUrl = new URL(window.location);
-          newUrl.searchParams.set('team', storedTeam);
-          window.history.replaceState({}, '', newUrl);
-          window._showLockToast = true;
-        }
-      } else if (currentTeamKey && TEAM_MAP[currentTeamKey]) {
-        // No lock yet, set it
-        localStorage.setItem('bingo-my-team', currentTeamKey);
-      }
     }
   }
 
@@ -2076,14 +2066,32 @@
     syncIntervalId = setInterval(() => fetchData(false), syncMs);
   }
 
+  const checkPasscode = (adminMode, fromAdmin) => {
+    const team = TEAM_MAP[currentTeamKey];
+    // If no team selected, or admin mode, or no passcode set -> allow
+    if (!team || !team.passcode || adminMode || fromAdmin) return true;
+
+    const saved = localStorage.getItem(`bingo-passcode-${currentTeamKey}`);
+    if (saved === team.passcode) return true;
+
+    // Show modal
+    $('passcode-team-name').innerText = team.name || currentTeamKey;
+    $('passcode-overlay').style.display = 'flex';
+    $('passcode-input').value = '';
+    $('passcode-input').focus();
+    
+    return false;
+  };
+
   async function init() {
     // Load shared config FIRST
     await loadSharedConfig();
 
-    if (window._showLockToast) showToast("Team switching is disabled by admin.");
-
     // Check if we came from admin page
     const params = new URLSearchParams(window.location.search);
+    const adminMode = params.get('admin') === 'true';
+    const fromAdmin = params.get('fromAdmin') === 'true';
+
     if (params.get('fromAdmin') === 'true') {
       const backBtn = $('admin-back-btn');
       if (backBtn) backBtn.style.display = 'flex';
@@ -2206,6 +2214,23 @@
         fetchData(false);
       }
     });
+
+    if (!checkPasscode(adminMode, fromAdmin)) {
+       // Wait for user input
+       $('passcode-submit-btn').onclick = () => {
+         const val = $('passcode-input').value.trim();
+         if (val === TEAM_MAP[currentTeamKey].passcode) {
+           localStorage.setItem(`bingo-passcode-${currentTeamKey}`, val);
+           $('passcode-overlay').style.display = 'none';
+           fetchData(false);
+           restartInterval();
+         } else {
+           $('passcode-error').style.display = 'block';
+         }
+       };
+       $('passcode-input').onkeydown = (e) => { if (e.key === 'Enter') $('passcode-submit-btn').click(); };
+       return; // Stop init flow, wait for unlock
+    }
 
     fetchData(false);
     restartInterval();
