@@ -351,7 +351,7 @@
   </div>
 
   <footer class="page-footer">
-    <span>v3.318</span>
+    <span>v3.319</span>
     <span>&middot;</span>
     <span>Bingo Board Settings</span>
   </footer>
@@ -360,7 +360,7 @@
 
   <script>
 (() => {
-  const APP_VERSION = '3.318';
+  const APP_VERSION = '3.319';
 
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
@@ -584,6 +584,12 @@
   let teamsConfig = {};
 
   const $ = id => document.getElementById(id);
+
+  const escapeHTML = (str) => {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(String(str ?? '')));
+    return d.innerHTML;
+  };
 
   const storageLoad = (k, fb) => {
     try {
