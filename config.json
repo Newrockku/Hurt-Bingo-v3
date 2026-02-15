@@ -12,7 +12,7 @@
       "col": 15,
       "diag": 20
     },
-    "allowTeamSwitching": false
+    "allowTeamSwitching": true
   },
   "teams": {
     "Team1": {
