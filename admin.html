@@ -318,8 +318,14 @@
           <option value="obsidian">Obsidian Gold</option>
         </optgroup>
       </select>
-      <a href="settings.html" class="nav-btn">⚙️ Settings</a>
-      <a href="gains.html?fromAdmin=true" class="nav-btn">📊 Gains</a>
+      <a href="settings.html" class="nav-btn" style="display:inline-flex; align-items:center; gap: 8px;">
+        <svg style="width:18px; height:18px; fill:currentColor;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59-.24-1.13-.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36 2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.611 3.611 0 0112 15.6z"/></svg>
+        Settings
+      </a>
+      <a href="gains.html?fromAdmin=true" class="nav-btn" style="display:inline-flex; align-items:center; gap: 8px;">
+        <svg style="width:18px; height:18px; fill:currentColor;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5 9.2h3V19H5zM10.6 5h3v14h-3zm5.6 8h3v6h-3z"/></svg>
+        Gains
+      </a>
     </div>
   </header>
 
@@ -327,7 +333,10 @@
     <!-- Collapsible Settings Overview -->
     <div class="collapsible" id="overview-collapsible">
       <div class="collapsible-header" onclick="document.getElementById('overview-collapsible').classList.toggle('open')">
-        <span>⚙️ Event Settings & Overview</span>
+        <span style="display:flex; align-items:center; gap: 8px;">
+            <svg style="width:18px; height:18px; fill:currentColor;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59-.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36 2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.611 3.611 0 0112 15.6z"/></svg>
+            Event Settings & Overview
+        </span>
         <span class="arrow">▼</span>
       </div>
       <div class="collapsible-content">
@@ -348,7 +357,7 @@
 
     <!-- Leaderboard Card -->
     <div class="card">
-      <h2 class="card-title">📈 Points Leaderboard</h2>
+      <h2 class="card-title"><svg style="width:1em; height:1em; fill:currentColor; vertical-align: -0.15em; margin-right: 8px;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>Points Leaderboard</h2>
       <div id="leaderboard-list" style="display:flex; flex-direction:column;">
         <div style="color:var(--text-dim); text-align:center;">Loading leaderboard...</div>
       </div>
@@ -356,7 +365,7 @@
 
     <!-- Tile Statistics -->
     <div class="card">
-      <h2 class="card-title">📊 Tile Statistics</h2>
+      <h2 class="card-title"><svg style="width:1em; height:1em; fill:currentColor; vertical-align: -0.15em; margin-right: 8px;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5 9.2h3V19H5zM10.6 5h3v14h-3zm5.6 8h3v6h-3z"/></svg>Tile Statistics</h2>
       <div class="stats-grid">
         <div>
           <h3 style="font-size:1rem; color:var(--text-dim); border-bottom:1px solid var(--border-main); padding-bottom:5px; margin-top:0;">Easiest Tiles (Most Completed)</h3>

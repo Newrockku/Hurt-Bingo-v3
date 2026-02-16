@@ -201,6 +201,7 @@
       opacity: 0; transition: opacity 0.3s ease;
       pointer-events: none;
     }
+    .toast { display: flex; align-items: center; }
 
     .toast.show {
       opacity: 1;
@@ -235,7 +236,7 @@
 <body>
 
   <header class="settings-header" role="banner">
-    <h1>⚙️ Settings</h1>
+    <h1><svg style="width:1em; height:1em; fill:currentColor; vertical-align: -0.15em; margin-right: 10px;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59-.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36 2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.611 3.611 0 0112 15.6z"/></svg>Settings</h1>
     <div class="settings-header-right">
       <select id="settings-theme-dropdown" class="nav-btn" style="padding: 6px; border-radius: 0;">
         <optgroup label="Classic">
@@ -275,14 +276,17 @@
           <option value="obsidian">Obsidian Gold</option>
         </optgroup>
       </select>
-      <a href="admin.html" id="admin-back-btn" class="nav-btn">← Admin</a>
+      <a href="admin.html" id="admin-back-btn" class="nav-btn" style="display:inline-flex; align-items:center; gap: 6px;">
+        <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        <span>Admin</span>
+      </a>
     </div>
   </header>
 
   <div class="settings-container">
     <!-- Event Configuration Section -->
     <div class="settings-section">
-      <h2 class="settings-section-title">📋 Event Details</h2>
+      <h2 class="settings-section-title"><svg style="width:1em; height:1em; fill:currentColor; vertical-align: -0.15em; margin-right: 8px;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Event Details</h2>
 
       <div class="form-group">
         <label class="form-label">Event Name</label>
@@ -320,20 +324,23 @@
 
     <!-- Data Source Section -->
     <div class="settings-section">
-      <h2 class="settings-section-title">💾 Data Source</h2>
+      <h2 class="settings-section-title"><svg style="width:1em; height:1em; fill:currentColor; vertical-align: -0.15em; margin-right: 8px;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>Data Source</h2>
       <div class="form-group">
         <label class="form-label">CSV Data URL</label>
         <textarea id="csv-url" class="form-textarea" placeholder="https://docs.google.com/spreadsheets/export?..."></textarea>
         <div class="form-hint-text">Google Sheets or spreadsheet export URL (same for all teams)</div>
       </div>
       <div class="form-actions" style="margin-top: 0; padding-top: 0; border-top: none;">
-        <button class="btn" id="import-csv-btn">🔄 Load Settings from CSV</button>
+        <button class="btn" id="import-csv-btn" style="display:inline-flex; align-items:center; gap: 8px;">
+          <svg style="width:18px; height:18px; fill:currentColor;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+          Load Settings from CSV
+        </button>
       </div>
     </div>
 
     <!-- Security Section -->
     <div class="settings-section">
-      <h2 class="settings-section-title">🔒 Security</h2>
+      <h2 class="settings-section-title"><svg style="width:1em; height:1em; fill:currentColor; vertical-align: -0.15em; margin-right: 8px;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>Security</h2>
       <div class="form-group">
         <div class="settings-row" style="justify-content: flex-start; gap: 10px; align-items: center;">
           <input type="checkbox" id="event-require-passcodes" style="width:18px; height:18px; cursor:pointer; margin: 0;">
@@ -348,12 +355,15 @@
 
     <!-- Global Config Export -->
     <div class="settings-section">
-      <h2 class="settings-section-title">🌍 Share Settings</h2>
+      <h2 class="settings-section-title"><svg style="width:1em; height:1em; fill:currentColor; vertical-align: -0.15em; margin-right: 8px;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>Share Settings</h2>
       <p style="font-size:0.9rem; color:var(--text-dim); margin-bottom:12px;">
         To apply these settings (including Board Size & CSV URL) to all players, download this file and upload it to your website's root folder as <code>config.json</code>.
       </p>
       <div class="form-actions" style="margin-top:0; padding-top:0; border:none;">
-        <button class="btn" id="download-config-btn">⬇️ Download config.json</button>
+        <button class="btn" id="download-config-btn" style="display:inline-flex; align-items:center; gap: 8px;">
+          <svg style="width:18px; height:18px; fill:currentColor;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          Download config.json
+        </button>
       </div>
     </div>
   </div>
@@ -620,7 +630,18 @@
 
   const showToast = (msg, duration = 3000) => {
     const toast = $('toast');
-    toast.textContent = msg;
+
+    let icon = '';
+    if (msg.startsWith('✓')) {
+        icon = '<svg style="width:1.2em; height:1.2em; fill:currentColor; vertical-align: -0.2em; margin-right: 8px;" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+    } else if (msg.startsWith('❌')) {
+        icon = '<svg style="width:1.2em; height:1.2em; fill:currentColor; vertical-align: -0.2em; margin-right: 8px;" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+    } else if (msg.startsWith('⏳')) {
+        icon = '<svg style="width:1.2em; height:1.2em; fill:currentColor; vertical-align: -0.2em; margin-right: 8px;" viewBox="0 0 24 24"><path d="M6 2v6h.01L6 8.01 10 12l-4 4 .01.01H6V22h12v-5.99h-.01L18 16l-4-4 4-3.99-.01-.01H18V2H6zm10 14.5V20H8v-3.5l4-4 4 4zm-4-5l-4-4V4h8v3.5l-4 4z"/></svg>';
+    }
+
+    toast.innerHTML = `${icon} ${msg.substring(icon ? 2 : 0)}`;
+
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), duration);
   };
