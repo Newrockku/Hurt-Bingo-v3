@@ -843,8 +843,8 @@
 
       // Calculate completion
       const teamNum = team.teamNumber || 1;
-      const currentCol = 12 + ((teamNum - 1) * 3);
-      const goalCol = 13 + ((teamNum - 1) * 3);
+      const currentCol = 13 + ((teamNum - 1) * 3);
+      const goalCol = 14 + ((teamNum - 1) * 3);
       
       let gridHtml = '';
       for(let i=0; i<maxTiles; i++) {
@@ -925,30 +925,30 @@
       
       if (rows.length > 1) {
         const metaCols = parseCSVRow(rows[1]);
-        // Parse Metadata: 0:Name, 1:Codeword, 2:Format, 3:Size, 4:Count, 5:Names
+        // Parse Metadata: 0:Name, 1:Description, 2:Codeword, 3:Format, 4:Size, 5:Count, 6:Names
         if (metaCols[0]) eventConfig.name = metaCols[0];
-        if (metaCols[1]) eventConfig.codeword = metaCols[1];
-        if (metaCols[2]) eventConfig.format = metaCols[2];
-        if (metaCols[3]) {
-          eventConfig.boardSize = metaCols[3];
-          updateBoardSize(metaCols[3]);
+        if (metaCols[1]) eventConfig.description = metaCols[1];
+        if (metaCols[2]) eventConfig.codeword = metaCols[2];
+        if (metaCols[3]) eventConfig.format = metaCols[3];
+        if (metaCols[4]) {
+          eventConfig.boardSize = metaCols[4];
+          updateBoardSize(metaCols[4]);
         }
-        if (metaCols[4]) eventConfig.teamCount = metaCols[4];
-        if (metaCols[8]) eventConfig.description = metaCols[8];
+        if (metaCols[5]) eventConfig.teamCount = metaCols[5];
 
-        // Parse Bonuses from Col 10 in Rows 1, 2, 3 (Indices 1, 2, 3)
+        // Parse Bonuses from Col 11 in Rows 1, 2, 3 (Indices 1, 2, 3)
         let rowBonus = 0, colBonus = 0, diagBonus = 0;
-        if (rows[1]) { const c = parseCSVRow(rows[1]); rowBonus = parseInt(c[10]) || 0; }
-        if (rows[2]) { const c = parseCSVRow(rows[2]); colBonus = parseInt(c[10]) || 0; }
-        if (rows[3]) { const c = parseCSVRow(rows[3]); diagBonus = parseInt(c[10]) || 0; }
+        if (rows[1]) { const c = parseCSVRow(rows[1]); rowBonus = parseInt(c[11]) || 0; }
+        if (rows[2]) { const c = parseCSVRow(rows[2]); colBonus = parseInt(c[11]) || 0; }
+        if (rows[3]) { const c = parseCSVRow(rows[3]); diagBonus = parseInt(c[11]) || 0; }
         eventConfig.bonuses = { row: rowBonus, col: colBonus, diag: diagBonus };
 
-        // Update Teams from vertical column 5 (index 5) in rows 1..N
+        // Update Teams from vertical column 6 (index 6) in rows 1..N
         Object.values(teamsConfig).forEach(team => {
           const tNum = team.teamNumber;
           if (tNum && rows[tNum]) {
              const rCols = parseCSVRow(rows[tNum]);
-             if (rCols[5]) team.name = rCols[5];
+             if (rCols[6]) team.name = rCols[6];
           }
         });
 
@@ -965,17 +965,17 @@
         dataRows.forEach((row, rIndex) => {
           if (rIndex >= maxTiles) return;
           const cols = parseCSVRow(row);
-          if (cols.length < 10) return;
+          if (cols.length < 11) return;
           
           // Tile Title for Stats
-          if (cols[7]) tileStats[rIndex].title = cols[7];
+          if (cols[8]) tileStats[rIndex].title = cols[8];
 
-          const points = parseInt(cols[9], 10) || 0;
+          const points = parseInt(cols[10], 10) || 0;
 
           Object.entries(teamsConfig).forEach(([key, team]) => {
             const tNum = team.teamNumber;
-            const curCol = 12 + ((tNum - 1) * 3);
-            const goalCol = 13 + ((tNum - 1) * 3);
+            const curCol = 13 + ((tNum - 1) * 3);
+            const goalCol = 14 + ((tNum - 1) * 3);
             const cur = parseInt(cols[curCol], 10) || 0;
             const goal = parseInt(cols[goalCol], 10) || 1;
             if (cur >= goal) {

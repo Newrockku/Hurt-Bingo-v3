@@ -303,7 +303,7 @@
       <div class="form-group">
         <label class="form-label">Event Description (optional)</label>
         <textarea id="event-description" class="form-textarea" placeholder="Brief description shown to all teams..."></textarea>
-        <div class="form-hint-text">Defined in CSV (Tile Description of first tile if used as meta, or custom logic)</div>
+        <div class="form-hint-text">Defined in CSV Column 2</div>
       </div>
 
       <div class="form-row">
@@ -735,19 +735,21 @@
       // Parse first data row (index 1, assuming index 0 is header)
       const dataRow = parseCSVRow(rows[1]);
       
-      // 0:BingoTitle, 1:Codeword, 2:Format, 3:BoardSize, 4:TeamCount, 5:TeamNames
+      // 0:BingoTitle, 1:Description, 2:Codeword, 3:Format, 4:BoardSize, 5:TeamCount, 6:TeamNames
       if (dataRow[0]) $('event-name').value = dataRow[0];
-      if (dataRow[1]) $('event-codeword').value = dataRow[1];
-      if (dataRow[2]) $('event-format').value = dataRow[2];
-      if (dataRow[3]) $('event-boardsize').value = dataRow[3];
-      if (dataRow[4]) $('event-teamcount').value = dataRow[4];
+      if (dataRow[1]) $('event-description').value = dataRow[1];
+      if (dataRow[2]) $('event-codeword').value = dataRow[2];
+      if (dataRow[3]) $('event-format').value = dataRow[3];
+      if (dataRow[4]) $('event-boardsize').value = dataRow[4];
+      if (dataRow[5]) $('event-teamcount').value = dataRow[5];
       
       // Update Event Config Object
       eventConfig.name = dataRow[0] || eventConfig.name;
-      eventConfig.codeword = dataRow[1] || eventConfig.codeword;
-      eventConfig.format = dataRow[2] || eventConfig.format;
-      eventConfig.boardSize = dataRow[3] || eventConfig.boardSize;
-      eventConfig.teamCount = dataRow[4] || eventConfig.teamCount;
+      eventConfig.description = dataRow[1] || eventConfig.description;
+      eventConfig.codeword = dataRow[2] || eventConfig.codeword;
+      eventConfig.format = dataRow[3] || eventConfig.format;
+      eventConfig.boardSize = dataRow[4] || eventConfig.boardSize;
+      eventConfig.teamCount = dataRow[5] || eventConfig.teamCount;
 
       // Rebuild Teams based on Count
       const count = parseInt(eventConfig.teamCount, 10) || 8;
@@ -758,7 +760,7 @@
         let tName = `Team ${i}`;
         if (rows[i]) {
            const rCols = parseCSVRow(rows[i]);
-           if (rCols[5]) tName = rCols[5];
+           if (rCols[6]) tName = rCols[6];
         }
 
         newTeams[key] = {
