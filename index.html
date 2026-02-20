@@ -1115,6 +1115,18 @@
     descBarClose: $('event-desc-bar-close'),
   };
 
+  const updateThemeDropdownVisuals = () => {
+    if (!DOM.themeSel) return;
+    const defaultStyle = { '--bg-tile': '#494034', '--text-main': '#ffac00' };
+    Array.from(DOM.themeSel.options).forEach(opt => {
+      const t = THEMES[opt.value] || defaultStyle;
+      if (t) {
+        opt.style.backgroundColor = t['--bg-tile'] || t['--bg-body'];
+        opt.style.color = t['--text-main'];
+      }
+    });
+  };
+
   let miniNodes = [];
 
   /* ========================= UTILS ========================= */
@@ -1975,6 +1987,7 @@
         DOM.customOptgroup.appendChild(opt);
       }
       DOM.customOptgroup.style.display = slugs.length ? '' : 'none';
+      updateThemeDropdownVisuals();
     };
 
     const refreshCustomList = () => {
@@ -2136,6 +2149,7 @@
 
     // Settings
     DOM.settingsTrigger.addEventListener('click', () => openSettingsModal(DOM.settingsTrigger));
+    updateThemeDropdownVisuals();
 
     // Theme dropdown change
     DOM.themeSel.addEventListener('change', () => {

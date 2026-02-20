@@ -1061,6 +1061,16 @@
     if (!sel) return;
     sel.value = storageLoad(STORAGE_KEYS.theme, 'osrs');
     sel.addEventListener('change', () => applyTheme(sel.value));
+
+    // Visuals
+    const defaultStyle = { '--bg-tile': '#494034', '--text-main': '#ffac00' };
+    Array.from(sel.options).forEach(opt => {
+      const t = THEMES[opt.value] || defaultStyle;
+      if (t) {
+        opt.style.backgroundColor = t['--bg-tile'] || t['--bg-body'];
+        opt.style.color = t['--text-main'];
+      }
+    });
   };
 
   const init = async () => {
