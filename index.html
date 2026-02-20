@@ -643,6 +643,7 @@
                   <option value="osrs">OSRS (Original)</option>
                   <option value="midnight">Midnight OLED</option>
                   <option value="parchment">Parchment</option>
+                  <option value="high_contrast">High Contrast</option>
                 </optgroup>
                 <optgroup label="Seasons">
                   <option value="spring">Spring</option>
@@ -650,30 +651,35 @@
                   <option value="autumn">Autumn</option>
                   <option value="winter">Winter</option>
                 </optgroup>
-                <optgroup label="Aesthetic">
-                  <option value="abyssal">Abyssal</option>
-                  <option value="volcanic">Volcanic</option>
-                  <option value="cyberpunk">Cyberpunk</option>
-                  <option value="bloodlust">Bloodlust</option>
-                  <option value="royal">Royal</option>
-                  <option value="emerald">Emerald</option>
-                  <option value="solar">Solar</option>
-                  <option value="vaporwave">Vaporwave</option>
-                  <option value="tox">Toxic</option>
-                </optgroup>
                 <optgroup label="Elements">
                   <option value="ocean">Ocean Depths</option>
-                  <option value="frost">Frost</option>
+                  <option value="forest">Enchanted Forest</option>
+                  <option value="volcanic">Volcanic</option>
                   <option value="sandstorm">Sandstorm</option>
                   <option value="nebula">Nebula</option>
-                  <option value="forest">Enchanted Forest</option>
+                </optgroup>
+                <optgroup label="Materials">
+                  <option value="obsidian">Obsidian Gold</option>
+                  <option value="copper">Copper Patina</option>
+                  <option value="emerald">Emerald</option>
+                </optgroup>
+                <optgroup label="Aesthetic">
+                  <option value="cyberpunk">Cyberpunk</option>
+                  <option value="vaporwave">Vaporwave</option>
+                  <option value="dracula">Dracula</option>
+                  <option value="nord">Nordic</option>
                 </optgroup>
                 <optgroup label="Moods">
+                  <option value="abyssal">Abyssal</option>
                   <option value="noir">Film Noir</option>
                   <option value="sakura">Sakura</option>
-                  <option value="copper">Copper Patina</option>
-                  <option value="arctic">Arctic Aurora</option>
-                  <option value="obsidian">Obsidian Gold</option>
+                  <option value="tox">Toxic</option>
+                  <option value="bloodlust">Bloodlust</option>
+                  <option value="royal">Royal</option>
+                  <option value="solar">Solar</option>
+                  <option value="coffee">Coffee Shop</option>
+                  <option value="lavender">Lavender</option>
+                  <option value="mint">Mint Fresh</option>
                 </optgroup>
                 <optgroup id="custom-theme-optgroup" label="Custom Themes"></optgroup>
               </select>
@@ -774,6 +780,13 @@
       '--accent':'#d4a843','--text-main':'#d4a843','--text-bright':'#f0dca0',
       '--text-dim':'#7a6b50','--text-completed':'#8aba5a'
     },
+    high_contrast: {
+      '--bg-body':'#000000','--bg-tile':'#000000','--bg-well':'#000000',
+      '--bg-completed':'#000000','--bg-completed-well':'#000000',
+      '--border-main':'#ffffff','--border-completed':'#ffff00',
+      '--accent':'#ffff00','--text-main':'#ffffff','--text-bright':'#ffffff',
+      '--text-dim':'#d0d0d0','--text-completed':'#ffff00'
+    },
     spring: {
       '--bg-body':'#1e2e1e','--bg-tile':'#2a402a','--bg-well':'#162416',
       '--bg-completed':'#3d2a4d','--bg-completed-well':'#2a1c36',
@@ -872,13 +885,6 @@
       '--accent':'#0090d0','--text-main':'#40b8e8','--text-bright':'#90e0ff',
       '--text-dim':'#2a5068','--text-completed':'#00c8a0'
     },
-    frost: {
-      '--bg-body':'#0c1420','--bg-tile':'#162030','--bg-well':'#080e18',
-      '--bg-completed':'#183048','--bg-completed-well':'#102038',
-      '--border-main':'#304868','--border-completed':'#90d8ff',
-      '--accent':'#b0e8ff','--text-main':'#80c8f0','--text-bright':'#d8f0ff',
-      '--text-dim':'#406080','--text-completed':'#90d8ff'
-    },
     sandstorm: {
       '--bg-body':'#1e1810','--bg-tile':'#302818','--bg-well':'#14100a',
       '--bg-completed':'#484020','--bg-completed-well':'#302a14',
@@ -921,19 +927,47 @@
       '--accent':'#d08850','--text-main':'#c08048','--text-bright':'#e8c0a0',
       '--text-dim':'#505840','--text-completed':'#60b8a0'
     },
-    arctic: {
-      '--bg-body':'#060c14','--bg-tile':'#0e1824','--bg-well':'#04080e',
-      '--bg-completed':'#0a2030','--bg-completed-well':'#061420',
-      '--border-main':'#1a3048','--border-completed':'#30e8a0',
-      '--accent':'#40d0a0','--text-main':'#50b8d0','--text-bright':'#a0e8f0',
-      '--text-dim':'#2a4860','--text-completed':'#30e8a0'
-    },
     obsidian: {
       '--bg-body':'#080808','--bg-tile':'#141410','--bg-well':'#040404',
       '--bg-completed':'#282010','--bg-completed-well':'#1a1408',
       '--border-main':'#2a2820','--border-completed':'#d8a830',
       '--accent':'#d8a830','--text-main':'#c09828','--text-bright':'#f0d888',
       '--text-dim':'#484030','--text-completed':'#d8a830'
+    },
+    lavender: {
+      '--bg-body':'#181020','--bg-tile':'#241830','--bg-well':'#100a18',
+      '--bg-completed':'#2a1838','--bg-completed-well':'#1a0e24',
+      '--border-main':'#4a3060','--border-completed':'#d0a0ff',
+      '--accent':'#a080ff','--text-main':'#c0a0ff','--text-bright':'#e0d0ff',
+      '--text-dim':'#604880','--text-completed':'#d0a0ff'
+    },
+    mint: {
+      '--bg-body':'#102018','--bg-tile':'#183024','--bg-well':'#0a1410',
+      '--bg-completed':'#183828','--bg-completed-well':'#0e2418',
+      '--border-main':'#285038','--border-completed':'#50ffb0',
+      '--accent':'#50ffb0','--text-main':'#50ffb0','--text-bright':'#b0ffe0',
+      '--text-dim':'#306048','--text-completed':'#50ffb0'
+    },
+    dracula: {
+      '--bg-body':'#282a36','--bg-tile':'#44475a','--bg-well':'#21222c',
+      '--bg-completed':'#383a59','--bg-completed-well':'#282a36',
+      '--border-main':'#6272a4','--border-completed':'#50fa7b',
+      '--accent':'#ff79c6','--text-main':'#f8f8f2','--text-bright':'#ffffff',
+      '--text-dim':'#6272a4','--text-completed':'#50fa7b'
+    },
+    nord: {
+      '--bg-body':'#2e3440','--bg-tile':'#3b4252','--bg-well':'#242933',
+      '--bg-completed':'#434c5e','--bg-completed-well':'#2e3440',
+      '--border-main':'#4c566a','--border-completed':'#a3be8c',
+      '--accent':'#88c0d0','--text-main':'#eceff4','--text-bright':'#ffffff',
+      '--text-dim':'#4c566a','--text-completed':'#a3be8c'
+    },
+    coffee: {
+      '--bg-body':'#201814','--bg-tile':'#30241e','--bg-well':'#140e0c',
+      '--bg-completed':'#382820','--bg-completed-well':'#241814',
+      '--border-main':'#503830','--border-completed':'#e0c0a0',
+      '--accent':'#d0a080','--text-main':'#e0c0a0','--text-bright':'#f0e0d0',
+      '--text-dim':'#604840','--text-completed':'#e0c0a0'
     }
   };
 
