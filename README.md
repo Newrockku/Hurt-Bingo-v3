@@ -26,7 +26,7 @@ Clicking on any tile opens a detailed view containing:
 *   **Title & ID**: The specific name and number of the challenge.
 *   **Image**: A visual reference for the item or boss.
 *   **Progress Bar**: A precise bar showing your current count versus the goal.
-*   **Checklist**: A list of specific items or tasks required. As your team collects items, they will be checked off here.
+*   **Checklist**: As your team collects items, they will be checked off here.
 *   **Description**: Additional instructions or rules for the tile.
 
 ## Game Mechanics
