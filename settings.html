@@ -1120,15 +1120,8 @@
     const sel = DOM.themeSel;
     if (!sel) return;
 
-    const optGroup = DOM.customOptgroup;
-
-    // Clear existing options except optgroup
-    Array.from(sel.children).forEach(child => {
-      if (child !== optGroup) sel.removeChild(child);
-    });
-
-    // Ensure optGroup is attached
-    if (optGroup && !sel.contains(optGroup)) sel.appendChild(optGroup);
+    // Clear all options
+    sel.innerHTML = '';
 
     // Populate standard themes
     if (window.BINGO_THEME_METADATA) {
@@ -1136,9 +1129,13 @@
         const opt = document.createElement('option');
         opt.value = meta.value;
         opt.textContent = meta.label;
-        if (optGroup) sel.insertBefore(opt, optGroup);
-        else sel.appendChild(opt); // Fallback if optGroup missing
+        sel.appendChild(opt);
       });
+    }
+
+    // Re-attach custom optgroup
+    if (DOM.customOptgroup) {
+      sel.appendChild(DOM.customOptgroup);
     }
     
     sel.value = storageLoad(STORAGE_KEYS.theme, 'osrs');
