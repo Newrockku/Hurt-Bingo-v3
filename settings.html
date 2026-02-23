@@ -81,8 +81,9 @@
       <div class="form-group">
         <label class="form-label">CSV Data URL (Loaded from config.json)</label>
         <div style="display:flex; gap:10px;">
-          <input type="text" id="csv-url" class="form-input" placeholder="Loading..." readonly />
+          <input type="text" id="csv-url" class="form-input" placeholder="Loading..." />
           <button id="reload-btn" class="btn">Reload Data</button>
+          <button id="export-btn" class="btn">Export Config</button>
         </div>
       </div>
     </div>
@@ -92,28 +93,28 @@
       <div class="grid-2">
         <div class="form-group">
           <label class="form-label">Bingo Title</label>
-          <input type="text" id="bingo-title" class="form-input" readonly />
+          <input type="text" id="bingo-title" class="form-input" />
         </div>
         <div class="form-group">
           <label class="form-label">Codeword</label>
-          <input type="text" id="bingo-codeword" class="form-input" readonly />
+          <input type="text" id="bingo-codeword" class="form-input" />
         </div>
         <div class="form-group">
           <label class="form-label">Format</label>
-          <input type="text" id="bingo-format" class="form-input" readonly />
+          <input type="text" id="bingo-format" class="form-input" />
         </div>
         <div class="form-group">
           <label class="form-label">Board Size</label>
-          <input type="text" id="bingo-size" class="form-input" readonly />
+          <input type="text" id="bingo-size" class="form-input" />
         </div>
         <div class="form-group">
           <label class="form-label">Team Count</label>
-          <input type="text" id="bingo-team-count" class="form-input" readonly />
+          <input type="text" id="bingo-team-count" class="form-input" />
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">Description</label>
-        <textarea id="bingo-desc" class="form-input" rows="3" readonly></textarea>
+        <textarea id="bingo-desc" class="form-input" rows="3"></textarea>
       </div>
     </div>
 
@@ -130,6 +131,7 @@
   <script>
     const { parseCSVRow, normalizeNL, storageLoad, storageSave } = BingoUtils;
     const THEMES = window.BINGO_THEMES;
+    let loadedConfig = {};
 
     const applyTheme = (name) => {
       const root = document.documentElement;
@@ -164,6 +166,7 @@
         const configRes = await fetch('config.json?t=' + Date.now());
         if (!configRes.ok) throw new Error('Failed to load config.json');
         const config = await configRes.json();
+        loadedConfig = JSON.parse(JSON.stringify(config)); // Deep copy
         
         // 2. Get CSV URL (assume Team1 has the master URL)
         const csvUrl = config.teams?.Team1?.url;
@@ -201,7 +204,7 @@
             const teamName = rowCols[6] || `Team ${i}`;
             const div = document.createElement('div');
             div.className = 'form-group';
-            div.innerHTML = `<label class="form-label">Team ${i}</label><input type="text" class="form-input" value="${teamName}" readonly>`;
+            div.innerHTML = `<label class="form-label">Team ${i}</label><input type="text" class="form-input team-name-input" data-team-num="${i}" value="${teamName}">`;
             teamsContainer.appendChild(div);
           }
         }
@@ -212,9 +215,58 @@
       }
     };
 
+    const exportConfig = () => {
+      try {
+        const newConfig = JSON.parse(JSON.stringify(loadedConfig));
+
+        // Update eventConfig from the form
+        newConfig.eventConfig.name = document.getElementById('bingo-title').value;
+        newConfig.eventConfig.description = document.getElementById('bingo-desc').value;
+        newConfig.eventConfig.codeword = document.getElementById('bingo-codeword').value;
+        newConfig.eventConfig.format = document.getElementById('bingo-format').value;
+        newConfig.eventConfig.boardSize = document.getElementById('bingo-size').value;
+        newConfig.eventConfig.teamCount = document.getElementById('bingo-team-count').value;
+
+        // Update teams
+        const teamCount = parseInt(newConfig.eventConfig.teamCount, 10) || 0;
+        const newCsvUrl = document.getElementById('csv-url').value;
+        
+        const newTeams = {};
+
+        for (let i = 1; i <= teamCount; i++) {
+            const teamKey = `Team${i}`;
+            const nameInput = document.querySelector(`.team-name-input[data-team-num="${i}"]`);
+            const teamName = nameInput ? nameInput.value : `Team ${i}`;
+
+            const oldTeamData = newConfig.teams[teamKey] || {};
+            
+            newTeams[teamKey] = {
+                ...oldTeamData,
+                name: teamName,
+                url: newCsvUrl,
+                teamNumber: i
+            };
+        }
+        newConfig.teams = newTeams;
+
+        const blob = new Blob([JSON.stringify(newConfig, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'config.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+      } catch (e) {
+        console.error('Failed to export config:', e);
+        alert('Error exporting config: ' + e.message);
+      }
+    };
+
     setupThemeDropdown();
     loadData();
     document.getElementById('reload-btn').addEventListener('click', loadData);
+    document.getElementById('export-btn').addEventListener('click', exportConfig);
   </script>
 </body>
 </html>
