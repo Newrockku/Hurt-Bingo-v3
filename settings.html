@@ -155,6 +155,17 @@
           sel.appendChild(opt);
         });
       }
+
+      // Visuals
+      const defaultStyle = { '--bg-tile': '#494034', '--text-main': '#ffac00' };
+      Array.from(sel.options).forEach(opt => {
+        const t = THEMES[opt.value] || defaultStyle;
+        if (t) {
+          opt.style.backgroundColor = t['--bg-tile'] || t['--bg-body'];
+          opt.style.color = t['--text-main'];
+        }
+      });
+
       sel.value = storageLoad('bingo-theme', 'osrs');
       sel.addEventListener('change', () => applyTheme(sel.value));
       applyTheme(sel.value);
