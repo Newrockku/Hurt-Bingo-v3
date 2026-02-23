@@ -351,6 +351,7 @@
     tiles: 'bingo-tiles-config',
     completion: 'bingo-completion',
     theme: 'bingo-theme',
+    customThemes: 'bingo-custom-themes',
     syncInterval: 'bingo-sync-interval',
     codewordVisible: 'bingo-codeword-visible'
   };
@@ -393,6 +394,15 @@
     const d = document.createElement('div');
     d.appendChild(document.createTextNode(String(str ?? '')));
     return d.innerHTML;
+  };
+
+  const loadCustomThemes = () => {
+    try {
+      const custom = JSON.parse(localStorage.getItem(STORAGE_KEYS.customThemes) || '{}');
+      for (const [slug, data] of Object.entries(custom)) {
+        THEMES[slug] = data.vars;
+      }
+    } catch {}
   };
 
   const storageLoad = (k, fb) => {
@@ -648,6 +658,17 @@
         sel.appendChild(opt);
       });
     }
+
+    // Populate custom themes
+    try {
+      const custom = JSON.parse(localStorage.getItem(STORAGE_KEYS.customThemes) || '{}');
+      for (const [slug, data] of Object.entries(custom)) {
+        const opt = document.createElement('option');
+        opt.value = slug;
+        opt.textContent = data.name;
+        sel.appendChild(opt);
+      }
+    } catch {}
     
     sel.value = storageLoad(STORAGE_KEYS.theme, 'osrs');
     
@@ -659,6 +680,7 @@
   };
 
   const init = async () => {
+    loadCustomThemes();
     await loadConfig();
     setupThemeDropdown();
     renderEventForm();
