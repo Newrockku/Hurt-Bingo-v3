@@ -339,14 +339,16 @@
   </div>
 
   <footer class="page-footer">
-    <span>v3.3dot;</span>
+    <span>v3.342</span>
+    <span>&middot;</span>
     <span>Bingo Gains Tracker</span>
   </footer>
 
   <script src="js/themes.js"></script>
   <script>
   (() => {
-    const ngle=true&output=csv';
+    const APP_VERSION = '3.342';
+    const SNAPSHOT_1_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=138917819&single=true&output=csv';
     const SNAPSHOT_2_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=2084936163&single=true&output=csv';
 
     const HEADERS = [
@@ -619,7 +621,41 @@
       DOM.modalOverlay.classList.remove('active');
       ThemeEditor.closeEditor(false);
     };
-m.fn =naayer][header] || 0);
+
+    const parseCSV = (text) => {
+      const data = {};
+      const rows = text.replace(/\r/g, '').split('\n').slice(1); // Skip header
+      for (const row of rows) {
+        if (!row.trim()) continue;
+        const cols = row.split(',');
+        const playerName = cols[0].trim();
+        if (!playerName) continue;
+        
+        data[playerName] = {};
+        for (let i = 1; i < HEADERS.length; i++) {
+          const header = HEADERS[i];
+          const value = cols[i] ? cols[i].trim() : '0';
+          data[playerName][header] = (value === 'Not Found' || value === '-1') ? 0 : parseInt(value, 10) || 0;
+        }
+      }
+      return data;
+    };
+
+    const fetchAndParseCSV = async (url) => {
+      const res = await fetch(url + '&t=' + Date.now());
+      if (!res.ok) throw new Error(`Failed to fetch ${url}`);
+      const text = await res.text();
+      return parseCSV(text);
+    };
+
+    const calculateGains = (snap1, snap2) => {
+      const gains = [];
+      for (const player in snap2) {
+        if (snap1[player]) {
+          const playerGains = { Player: player };
+          let totalBossKc = 0;
+          for (const header of HEADERS.slice(1)) {
+            const gain = (snap2[player][header] || 0) - (snap1[player][header] || 0);
             playerGains[header] = gain;
             if (BOSS_HEADERS.includes(header)) {
               totalBossKc += gain;
@@ -628,6 +664,7 @@ m.fn =naayer][header] || 0);
           playerGains['Total Boss KC'] = totalBossKc;
           gains.push(playerGains);
         }
+      }
       return gains;
     };
 
@@ -641,7 +678,9 @@ m.fn =naayer][header] || 0);
         const valB = b[sortState.column];
         const order = sortState.order === 'asc' ? 1 : -1;
         if (typeof valA === 'string') {
-          return valA.localeCompare(valB) * 
+          return valA.localeCompare(valB) * order;
+        }
+        return (valA - valB) * order;
       });
 
       // Calculate Max Values for highlighting
@@ -714,12 +753,11 @@ m.fn =naayer][header] || 0);
     const init = async () => {
       const params = new URLSearchParams(window.location.search);
       if (params.get('fromAdmin') === 'true') {
-        const btn = $('admin-back-i;
+        const btn = $('admin-back-btn');
+        if (btn) btn.style.display = 'inline-flex';
       }
 
       ThemeEditor.init();
-      const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
-      applyTheme(savedTheme);
       
       const themeSel = DOM.themeSel;
       if (themeSel) {
@@ -738,8 +776,6 @@ m.fn =naayer][header] || 0);
           });
         }
 
-        themeSel.value = savedTheme;
-
         // Visuals
         const defaultStyle = { '--bg-tile': '#494034', '--text-main': '#ffac00' };
         Array.from(themeSel.options).forEach(opt => {
@@ -755,6 +791,9 @@ m.fn =naayer][header] || 0);
           ThemeEditor.updateEditButton();
         });
       }
+
+      const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
+      applyTheme(savedTheme);
 
       DOM.settingsTrigger.addEventListener('click', openSettings);
       DOM.modalClose.addEventListener('click', closeSettings);

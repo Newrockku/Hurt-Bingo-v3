@@ -333,7 +333,7 @@
   </div>
 
   <footer class="page-footer">
-    <span>v3.341</span>
+    <span>v3.342</span>
     <span>&middot;</span>
     <span>Bingo Board Settings</span>
   </footer>
@@ -343,7 +343,7 @@
   <script src="js/themes.js"></script>
   <script>
 (() => {
-  const APP_VERSION = '3.341';
+  const APP_VERSION = '3.342';
 
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
@@ -532,8 +532,6 @@
       teamsConfig = { ...DEFAULT_TEAMS };
     }
 
-    const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
-    applyTheme(savedTheme);
   };
 
   const parseCSVRow = (row) => {
@@ -682,8 +680,6 @@
       }
     } catch {}
     
-    sel.value = storageLoad(STORAGE_KEYS.theme, 'osrs');
-    
     sel.addEventListener('change', () => {
       applyTheme(sel.value);
     });
@@ -694,6 +690,8 @@
   const init = async () => {
     loadCustomThemes();
     setupThemeDropdown();
+    const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
+    applyTheme(savedTheme);    
     await loadConfig();
     renderEventForm();
     renderTeamPasscodes();

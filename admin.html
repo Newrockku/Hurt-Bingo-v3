@@ -369,7 +369,7 @@
   </div>
 
   <footer class="page-footer">
-    <span>v3.341</span>
+    <span>v3.342</span>
     <span>&middot;</span>
     <span>Bingo Board Admin</span>
   </footer>
@@ -377,7 +377,7 @@
   <script src="js/themes.js"></script>
   <script>
 (() => {
-  const APP_VERSION = '3.341';
+  const APP_VERSION = '3.342';
 
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
@@ -918,12 +918,12 @@
 
   const init = async () => {
     loadCustomThemes();
+    setupThemeDropdown();
     await loadConfig();
     renderEventOverview();
     renderLeaderboard();
 
     await refresh();
-    setupThemeDropdown();
 
     // Auto-refresh every 5 seconds
     setInterval(refresh, 15000);

@@ -576,7 +576,7 @@
   <main class="grid-container" id="grid" role="grid" aria-label="Bingo board"></main>
 
   <footer class="page-footer">
-    <span>v3.341</span>
+    <span>v3.342</span>
     <span>&middot;</span>
     <span id="last-sync-text" aria-live="polite">Last Sync: Never</span>
     <span class="sync-btn" id="sync-now" role="button" tabindex="0">[Sync Now]</span>
@@ -693,7 +693,7 @@
           </div>
         </div>
 
-        <div class="settings-version">Bingo Board &middot; v3.341</div>
+        <div class="settings-version">Bingo Board &middot; v3.342</div>
       </div>
     </div>
   </div>
@@ -701,7 +701,7 @@
   <script src="js/themes.js"></script>
   <script>
 (() => {
-  const APP_VERSION = '3.341';
+  const APP_VERSION = '3.342';
   let maxTiles = 49;
   let gridCols = 7;
   let gridRows = 7;
@@ -1857,10 +1857,10 @@
       });
     }
 
+    ThemeEditor.init();
+
     const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
     applyTheme(savedTheme);
-
-    ThemeEditor.init();
 
     syncMs = parseInt(storageLoad(STORAGE_KEYS.syncInterval, String(eventConfig.syncInterval || 30000)), 10) || 30000;
     DOM.intervalSel.value = String(syncMs);
