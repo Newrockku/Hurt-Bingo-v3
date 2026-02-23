@@ -3,721 +3,218 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Settings - Bingo Admin</title>
+  <title>Settings - Bingo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
-
   <style>
     :root {
-      --bg-body: #342e25;
-      --bg-tile: #494034;
-      --bg-well: #342e25;
-      --bg-completed: #1e3a1e;
-      --bg-completed-well: #162a16;
-      --border-main: #6d604e;
-      --border-completed: #4caf50;
-      --accent: #ffac00;
-      --text-main: #ffac00;
-      --text-bright: #ffee00;
-      --text-dim: #858476;
-      --text-completed: #4caf50;
-      --danger: #ff6d6d;
+      --bg-body: #342e25; --bg-tile: #494034; --bg-well: #342e25;
+      --bg-completed: #1e3a1e; --bg-completed-well: #162a16;
+      --border-main: #6d604e; --border-completed: #4caf50;
+      --accent: #ffac00; --text-main: #ffac00; --text-bright: #ffee00;
+      --text-dim: #858476; --text-completed: #4caf50; --danger: #ff6d6d;
     }
-
     * { box-sizing: border-box; }
-    html { scrollbar-gutter: stable; overflow-y: scroll; }
-
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: var(--bg-well); }
-    ::-webkit-scrollbar-thumb { background: var(--bg-tile); border: 2px solid var(--bg-well); }
-    ::-webkit-scrollbar-thumb:hover { background: var(--border-main); }
-
     body {
-      background-color: var(--bg-body);
-      color: var(--text-main);
-      font-family: 'Cabin Condensed', sans-serif;
-      margin: 0; padding: 20px;
+      background-color: var(--bg-body); color: var(--text-main);
+      font-family: 'Cabin Condensed', sans-serif; margin: 0; padding: 20px;
       min-height: 100vh;
     }
-
-    .settings-header {
+    .admin-header {
       background: var(--bg-tile); border: 2px solid var(--border-main);
-      padding: 20px; margin: 0 auto 30px auto; max-width: 900px;
+      padding: 20px; margin: 0 auto 30px auto; max-width: 1400px;
       display: flex; justify-content: space-between; align-items: center;
       flex-wrap: wrap; gap: 15px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
-
-    .settings-header h1 {
-      margin: 0; font-size: 2rem; text-transform: uppercase;
-      letter-spacing: 1px; text-shadow: 2px 2px 4px black;
-    }
-
-    .settings-header-right {
-      display: flex; gap: 12px;
-    }
-
+    .admin-header h1 { margin: 0; font-size: 2rem; text-transform: uppercase; letter-spacing: 1px; }
     .nav-btn {
       background: var(--bg-well); border: 2px solid var(--border-main);
       color: var(--text-dim); padding: 8px 16px;
       font-family: 'Cabin Condensed'; font-size: 0.95rem;
-      cursor: pointer; border-radius: 0;
-      transition: all 0.2s ease; text-decoration: none;
-      display: inline-block;
+      cursor: pointer; border-radius: 0; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
     }
-
-    .nav-btn:hover {
-      border-color: var(--accent); color: var(--accent);
-      background: var(--bg-tile);
-    }
-
-    #admin-back-btn {
-      border-color: var(--accent);
-      color: var(--accent);
-      font-weight: bold;
-    }
-    #admin-back-btn:hover {
-      background: var(--accent);
-      color: var(--bg-body);
-    }
-
-    .settings-container {
-      max-width: 900px; margin: 0 auto;
-    }
-
-    .settings-section {
+    .nav-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--bg-tile); }
+    .container { max-width: 1400px; margin: 0 auto; }
+    .card {
       background: var(--bg-tile); border: 2px solid var(--border-main);
-      padding: 20px; margin-bottom: 20px; border-radius: 0;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      padding: 20px; margin-bottom: 20px;
     }
-
-    .settings-section:last-child {
-      margin-bottom: 0;
+    .card-title {
+      font-size: 1.3rem; font-weight: bold; color: var(--text-bright);
+      margin: 0 0 16px 0; border-bottom: 2px solid var(--border-main); padding-bottom: 8px;
     }
-
-    .settings-section-title {
-      font-size: 1.2rem; font-weight: bold;
-      color: var(--text-bright); margin: 0 0 16px 0;
-      text-transform: uppercase; letter-spacing: 1px;
-      padding-bottom: 8px; border-bottom: 2px solid var(--border-main);
+    .form-group { margin-bottom: 15px; }
+    .form-label { display: block; color: var(--text-dim); margin-bottom: 5px; font-size: 0.9rem; }
+    .form-input {
+      width: 100%; background: var(--bg-well); border: 1px solid var(--border-main);
+      color: var(--text-main); padding: 8px; font-family: inherit; font-size: 1rem;
     }
-
-    .form-group {
-      display: flex; flex-direction: column;
-      margin-bottom: 16px;
-    }
-
-    .form-label {
-      font-size: 0.95rem; font-weight: bold;
-      color: var(--text-bright); margin-bottom: 6px;
-      text-transform: uppercase; letter-spacing: 0.5px;
-    }
-
-    .form-hint {
-      font-size: 0.75rem; color: var(--text-dim);
-      margin-bottom: 4px;
-    }
-
-    .form-input, .form-textarea, .form-select {
-      background: var(--bg-well); border: 1px solid var(--border-main);
-      color: var(--text-bright); padding: 10px;
-      font-family: 'Cabin Condensed'; font-size: 0.95rem;
-      border-radius: 0;
-    }
-
-    .form-input[readonly], .form-textarea[readonly] {
-      background: var(--bg-body); color: var(--text-dim);
-      cursor: default; border-color: transparent;
-    }
-
-    .form-input:focus, .form-textarea:focus, .form-select:focus {
-      border-color: var(--accent); outline: none;
-      box-shadow: 0 0 8px rgba(255, 172, 0, 0.3);
-    }
-
-    .form-textarea {
-      min-height: 80px; resize: vertical;
-    }
-
-    .form-hint-text {
-      font-size: 0.75rem; color: var(--text-dim);
-      margin-top: 4px;
-    }
-
-    .team-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 12px; margin-bottom: 16px;
-    }
-
-    .team-card {
-      background: var(--bg-well); border: 2px solid var(--border-main);
-      padding: 12px; border-radius: 0; border-left: 4px solid var(--accent);
-    }
-
-    .team-card-title {
-      font-weight: bold; color: var(--text-bright);
-      margin: 0 0 8px 0; font-size: 0.95rem;
-    }
-
-    .form-row {
-      display: flex; gap: 12px; margin-bottom: 8px;
-    }
-
-    .form-row .form-group {
-      flex: 1; margin-bottom: 0;
-    }
-
+    .form-input:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
     .btn {
       background: var(--bg-well); border: 2px solid var(--border-main);
-      color: var(--text-dim); padding: 10px 20px;
-      font-family: 'Cabin Condensed'; font-size: 0.95rem;
-      cursor: pointer; border-radius: 0;
-      transition: all 0.2s ease;
+      color: var(--text-main); padding: 10px 20px; cursor: pointer;
+      font-family: inherit; font-size: 1rem; text-transform: uppercase; font-weight: bold;
     }
-
-    .btn:hover {
-      border-color: var(--accent); color: var(--accent);
-      background: var(--bg-tile);
-    }
-
-    .btn:focus-visible {
-      outline: 2px solid var(--accent); outline-offset: 2px;
-    }
-
-    .btn-danger {
-      border-color: var(--danger); color: var(--danger);
-    }
-
-    .btn-danger:hover {
-      background: var(--danger); color: #000;
-    }
-
-    .toast {
-      position: fixed; bottom: 20px; right: 20px;
-      background: var(--accent); color: #000;
-      padding: 12px 20px; border-radius: 0;
-      font-weight: bold; z-index: 1000;
-      opacity: 0; transition: opacity 0.3s ease;
-      pointer-events: none;
-    }
-    .toast { display: flex; align-items: center; }
-
-    .toast.show {
-      opacity: 1;
-    }
-
-    .form-actions {
-      display: flex; gap: 12px; margin-top: 20px;
-      padding-top: 20px; border-top: 1px solid var(--border-main);
-    }
-
-    .page-footer {
-      margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-main);
-      font-size: 0.7rem; color: var(--border-main);
-      display: flex; justify-content: center; align-items: center; gap: 6px;
-    }
-
-    .version-badge {
-      background: var(--bg-well); border: 1px solid var(--border-main);
-      padding: 4px 8px; border-radius: 0;
-      font-size: 0.75rem; color: var(--text-dim);
-    }
-
-    @media (max-width: 768px) {
-      body { padding: 12px; }
-      .settings-header { padding: 12px; }
-      .settings-header h1 { font-size: 1.4rem; }
-      .team-grid { grid-template-columns: 1fr; }
-      .form-row { flex-direction: column; }
-    }
+    .btn:hover { background: var(--bg-tile); border-color: var(--accent); color: var(--accent); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-
-  <header class="settings-header" role="banner">
-    <h1><svg style="width:1em; height:1em; fill:currentColor; vertical-align: -0.15em; margin-right: 10px;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.611 3.611 0 0112 15.6z"/></svg>Settings</h1>
-    <div class="settings-header-right">
-      <select id="settings-theme-dropdown" class="nav-btn" style="padding: 6px; border-radius: 0;">
-      </select>
-      <a href="admin.html" id="admin-back-btn" class="nav-btn" style="display:inline-flex; align-items:center; gap: 6px;">
-        <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-        <span>Admin</span>
-      </a>
+  <header class="admin-header">
+    <div style="display:flex; flex-direction:column;">
+      <h1>Bingo Settings</h1>
+      <span style="font-size:0.9rem; color:var(--text-dim);">Configuration & Setup</span>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <select id="theme-select" class="nav-btn" style="padding:6px;"></select>
+      <a href="admin.html" class="nav-btn">Back to Admin</a>
     </div>
   </header>
 
-    <div class="settings-container">
-    <!-- Event Configuration Section -->
-    <div class="settings-section">
-      <h2 class="settings-section-title"><svg style="width:1em; height:1em; fill:currentColor; vertical-align: -0.15em; margin-right: 8px;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Event Details</h2>
-
+  <div class="container">
+    <div class="card">
+      <h2 class="card-title">Data Source</h2>
       <div class="form-group">
-        <label class="form-label">Event Name</label>
-        <input type="text" id="event-name" class="form-input" placeholder="Bingo 2026">
-        <div class="form-hint-text">Defined in CSV Column 1</div>
+        <label class="form-label">CSV Data URL (Loaded from config.json)</label>
+        <div style="display:flex; gap:10px;">
+          <input type="text" id="csv-url" class="form-input" placeholder="Loading..." readonly />
+          <button id="reload-btn" class="btn">Reload Data</button>
+        </div>
       </div>
+    </div>
 
-      <div class="form-group">
-        <label class="form-label">Codeword</label>
-        <input type="text" id="event-codeword" class="form-input" placeholder="e.g., SECRET123">
-        <div class="form-hint-text">Defined in CSV Column 2</div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Event Description (optional)</label>
-        <textarea id="event-description" class="form-textarea" placeholder="Brief description shown to all teams..."></textarea>
-        <div class="form-hint-text">Defined in CSV Column 2</div>
-      </div>
-
-      <div class="form-row">
+    <div class="card">
+      <h2 class="card-title">Event Configuration</h2>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Bingo Title</label>
+          <input type="text" id="bingo-title" class="form-input" readonly />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Codeword</label>
+          <input type="text" id="bingo-codeword" class="form-input" readonly />
+        </div>
         <div class="form-group">
           <label class="form-label">Format</label>
-          <input type="text" id="event-format" class="form-input" placeholder="e.g. Lockout">
+          <input type="text" id="bingo-format" class="form-input" readonly />
         </div>
         <div class="form-group">
           <label class="form-label">Board Size</label>
-          <input type="text" id="event-boardsize" class="form-input" placeholder="e.g. 7x7">
+          <input type="text" id="bingo-size" class="form-input" readonly />
         </div>
         <div class="form-group">
           <label class="form-label">Team Count</label>
-          <input type="text" id="event-teamcount" class="form-input" placeholder="e.g. 2">
+          <input type="text" id="bingo-team-count" class="form-input" readonly />
         </div>
       </div>
-    </div>
-
-    <!-- Data Source Section -->
-    <div class="settings-section">
-      <h2 class="settings-section-title"><svg style="width:1em; height:1em; fill:currentColor; vertical-align: -0.15em; margin-right: 8px;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>Data Source</h2>
       <div class="form-group">
-        <label class="form-label">CSV Data URL</label>
-        <textarea id="csv-url" class="form-textarea" placeholder="https://docs.google.com/spreadsheets/export?..."></textarea>
-        <div class="form-hint-text">Google Sheets or spreadsheet export URL (same for all teams)</div>
-      </div>
-      <div class="form-actions" style="margin-top: 0; padding-top: 0; border-top: none;">
-        <button class="btn" id="import-csv-btn" style="display:inline-flex; align-items:center; gap: 8px;">
-          <svg style="width:18px; height:18px; fill:currentColor;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
-          Load Settings from CSV
-        </button>
+        <label class="form-label">Description</label>
+        <textarea id="bingo-desc" class="form-input" rows="3" readonly></textarea>
       </div>
     </div>
 
-    <!-- Security Section -->
-    <div class="settings-section">
-      <h2 class="settings-section-title"><svg style="width:1em; height:1em; fill:currentColor; vertical-align: -0.15em; margin-right: 8px;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>Security</h2>
-      <div class="form-group">
-        <div class="settings-row" style="justify-content: flex-start; gap: 10px; align-items: center;">
-          <input type="checkbox" id="event-require-passcodes" style="width:18px; height:18px; cursor:pointer; margin: 0;">
-          <label for="event-require-passcodes" class="settings-row-label" style="cursor:pointer; margin: 0;">Require Team Passcodes</label>
-        </div>
-        <div class="form-hint-text">If unchecked, passcodes are ignored and players can switch teams freely.</div>
-      </div>
-
-      <h3 class="settings-section-title" style="border: none; color: var(--text-bright); margin-top: 20px; font-size: 1rem;">Team Passcodes</h3>
-      <div id="team-passcodes-list"></div>
-    </div>
-
-    <!-- Global Config Export -->
-    <div class="settings-section">
-      <h2 class="settings-section-title"><svg style="width:1em; height:1em; fill:currentColor; vertical-align: -0.15em; margin-right: 8px;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>Share Settings</h2>
-      <p style="font-size:0.9rem; color:var(--text-dim); margin-bottom:12px;">
-        To apply these settings (including Board Size & CSV URL) to all players, download this file and upload it to your website's root folder as <code>config.json</code>.
-      </p>
-      <div class="form-actions" style="margin-top:0; padding-top:0; border:none;">
-        <button class="btn" id="download-config-btn" style="display:inline-flex; align-items:center; gap: 8px;">
-          <svg style="width:18px; height:18px; fill:currentColor;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-          Download config.json
-        </button>
+    <div class="card">
+      <h2 class="card-title">Teams</h2>
+      <div id="teams-list" class="grid-2">
+        <div style="color:var(--text-dim);">Loading teams...</div>
       </div>
     </div>
   </div>
 
-  <footer class="page-footer">
-    <span>v3.342</span>
-    <span>&middot;</span>
-    <span>Bingo Board Settings</span>
-  </footer>
-
-  <div id="toast" class="toast"></div>
-
   <script src="js/themes.js"></script>
+  <script src="js/bingo-utils.js"></script>
   <script>
-(() => {
-  const APP_VERSION = '3.342';
+    const { parseCSVRow, normalizeNL, storageLoad, storageSave } = BingoUtils;
+    const THEMES = window.BINGO_THEMES;
 
-  const STORAGE_KEYS = {
-    eventConfig: 'bingo-event-config',
-    teams: 'bingo-teams-config',
-    tiles: 'bingo-tiles-config',
-    completion: 'bingo-completion',
-    theme: 'bingo-theme',
-    customThemes: 'bingo-custom-themes',
-    syncInterval: 'bingo-sync-interval',
-    codewordVisible: 'bingo-codeword-visible'
-  };
-
-  const DEFAULT_TEAMS = {
-    'Team1': { name: "Team 1", url: "", points: 0, teamNumber: 1 },
-    'Team2': { name: "Team 2", url: "", points: 0, teamNumber: 2 },
-    'Team3': { name: "Team 3", url: "", points: 0, teamNumber: 3 },
-    'Team4': { name: "Team 4", url: "", points: 0, teamNumber: 4 },
-    'Team5': { name: "Team 5", url: "", points: 0, teamNumber: 5 },
-    'Team6': { name: "Team 6", url: "", points: 0, teamNumber: 6 },
-    'Team7': { name: "Team 7", url: "", points: 0, teamNumber: 7 },
-    'Team8': { name: "Team 8", url: "", points: 0, teamNumber: 8 }
-  };
-
-  const DEFAULT_EVENT = {
-    name: 'Bingo 2026',
-    codeword: '',
-    description: '',
-    syncInterval: 30000,
-    format: '',
-    boardSize: '',
-    teamCount: '',
-    requirePasscodes: true
-  };
-
-  const THEME_VARS = window.BINGO_THEME_VARS;
-  const THEMES = window.BINGO_THEMES;
-
-  const DOM = {
-    themeSel: $('settings-theme-dropdown')
-  };
-
-  let eventConfig = { ...DEFAULT_EVENT };
-  let teamsConfig = {};
-
-  const $ = id => document.getElementById(id);
-
-  const escapeHTML = (str) => {
-    const d = document.createElement('div');
-    d.appendChild(document.createTextNode(String(str ?? '')));
-    return d.innerHTML;
-  };
-
-  const loadCustomThemes = () => {
-    try {
-      const custom = JSON.parse(localStorage.getItem(STORAGE_KEYS.customThemes) || '{}');
-      for (const [slug, data] of Object.entries(custom)) {
-        THEMES[slug] = data.vars;
-      }
-    } catch {}
-  };
-
-  const storageLoad = (k, fb) => {
-    try {
-      const v = localStorage.getItem(k);
-      return v ? JSON.parse(v) : fb;
-    } catch {
-      return fb;
-    }
-  };
-
-  const storageSave = (k, v) => {
-    try {
-      localStorage.setItem(k, JSON.stringify(v));
-    } catch (e) {
-      console.error('Failed to save:', k, e);
-      showToast('❌ Failed to save! Storage may be full.');
-    }
-  };
-
-  const showToast = (msg, duration = 3000) => {
-    const toast = $('toast');
-
-    let icon = '';
-    if (msg.startsWith('✓')) {
-        icon = '<svg style="width:1.2em; height:1.2em; fill:currentColor; vertical-align: -0.2em; margin-right: 8px;" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
-    } else if (msg.startsWith('❌')) {
-        icon = '<svg style="width:1.2em; height:1.2em; fill:currentColor; vertical-align: -0.2em; margin-right: 8px;" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
-    } else if (msg.startsWith('⏳')) {
-        icon = '<svg style="width:1.2em; height:1.2em; fill:currentColor; vertical-align: -0.2em; margin-right: 8px;" viewBox="0 0 24 24"><path d="M6 2v6h.01L6 8.01 10 12l-4 4 .01.01H6V22h12v-5.99h-.01L18 16l-4-4 4-3.99-.01-.01H18V2H6zm10 14.5V20H8v-3.5l4-4 4 4zm-4-5l-4-4V4h8v3.5l-4 4z"/></svg>';
-    }
-
-    const messageText = msg.substring(icon ? 2 : 0);
-    toast.textContent = messageText;
-    if (icon) {
-      const iconWrap = document.createElement('span');
-      iconWrap.innerHTML = icon;
-      const iconEl = iconWrap.firstElementChild;
-      if (iconEl) toast.prepend(iconEl);
-    }
-
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), duration);
-  };
-
-  const applyTheme = (name) => {
-    const root = document.documentElement;
-    for (const k of THEME_VARS) root.style.setProperty(k, '');
-    const t = THEMES[name];
-    if (t) for (const [k, v] of Object.entries(t)) root.style.setProperty(k, v);
-    storageSave(STORAGE_KEYS.theme, name);
-    if ($('settings-theme-dropdown')) $('settings-theme-dropdown').value = name;
-  };
-
-  const updateThemeDropdownVisuals = () => {
-    if (!DOM.themeSel) return;
-    const defaultStyle = { '--bg-tile': '#494034', '--text-main': '#ffac00' };
-    Array.from(DOM.themeSel.options).forEach(opt => {
-      const t = THEMES[opt.value] || defaultStyle;
-      if (t) {
-        opt.style.backgroundColor = t['--bg-tile'] || t['--bg-body'];
-        opt.style.color = t['--text-main'];
-      }
-    });
-  };
-
-  const renderTeamPasscodes = () => {
-    const container = $('team-passcodes-list');
-    if (!container) return;
-    container.innerHTML = '';
-    
-    Object.keys(teamsConfig).sort((a,b) => {
-        return (teamsConfig[a].teamNumber || 0) - (teamsConfig[b].teamNumber || 0);
-    }).forEach(key => {
-      const team = teamsConfig[key];
-      const div = document.createElement('div');
-      div.className = 'settings-row';
-      div.style.display = 'flex';
-      div.style.alignItems = 'center';
-      div.style.gap = '10px';
-      div.style.justifyContent = 'flex-start';
-      div.innerHTML = `
-        <label class="settings-row-label" style="width: 200px; flex-shrink: 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(team.name)}</label>
-        <input type="text" class="form-input team-passcode-input" data-key="${key}" value="${escapeHTML(team.passcode || '')}" placeholder="Passcode (optional)" style="flex-grow: 1;">
-      `;
-      container.appendChild(div);
-    });
-
-    container.querySelectorAll('.team-passcode-input').forEach(input => {
-      input.addEventListener('change', (e) => {
-        const k = e.target.dataset.key;
-        if (teamsConfig[k]) {
-          teamsConfig[k].passcode = e.target.value.trim();
-          storageSave(STORAGE_KEYS.teams, teamsConfig);
-        }
-      });
-    });
-  };
-
-  const loadConfig = async () => {
-    // 1. Try to load from config.json
-    try {
-      const res = await fetch(withCacheBust('config.json'));
-      if (res.ok) {
-        const data = await res.json();
-        if (data.eventConfig) {
-          eventConfig = { ...DEFAULT_EVENT, ...data.eventConfig };
-          storageSave(STORAGE_KEYS.eventConfig, eventConfig);
-        }
-        if (data.teams) {
-          teamsConfig = data.teams;
-          storageSave(STORAGE_KEYS.teams, teamsConfig);
-        }
-      }
-    } catch (e) {
-      console.log('Config load failed or missing, using local storage');
-    }
-
-    // 2. Load from LocalStorage (fallback or override)
-    const storedEvent = storageLoad(STORAGE_KEYS.eventConfig, null);
-    if (storedEvent) eventConfig = { ...eventConfig, ...storedEvent };
-    
-    const storedTeams = storageLoad(STORAGE_KEYS.teams, null);
-    if (storedTeams) teamsConfig = storedTeams;
-    
-    if (!teamsConfig || Object.keys(teamsConfig).length === 0) {
-      teamsConfig = { ...DEFAULT_TEAMS };
-    }
-
-  };
-
-  const parseCSVRow = (row) => {
-    const cols = []; let cur = '', inQ = false;
-    for (let i = 0; i < row.length; i++) {
-      const ch = row[i];
-      if (inQ) {
-        if (ch === '"' && row[i + 1] === '"') { cur += '"'; i++; }
-        else if (ch === '"') inQ = false;
-        else cur += ch;
-      } else {
-        if (ch === '"') inQ = true;
-        else if (ch === ',') { cols.push(cur.trim()); cur = ''; }
-        else cur += ch;
-      }
-    }
-    cols.push(cur.trim());
-    return cols;
-  };
-
-  const withCacheBust = (url) => {
-    const u = String(url || '').trim();
-    if (!u) return '';
-    return u + (u.includes('?') ? '&' : '?') + 't=' + Date.now();
-  };
-
-  const importFromCSV = async () => {
-    const url = $('csv-url').value.trim();
-    if (!url) { showToast('❌ Enter CSV URL first'); return; }
-    
-    try {
-      showToast('⏳ Fetching CSV...');
-      const res = await fetch(withCacheBust(url));
-      if (!res.ok) throw new Error('Fetch failed');
-      const text = await res.text();
-      const rows = text.replace(/\r/g, '').split('\n');
-      if (rows.length < 2) throw new Error('CSV empty or missing data');
-      
-      // Parse first data row (index 1, assuming index 0 is header)
-      const dataRow = parseCSVRow(rows[1]);
-      
-      // 0:BingoTitle, 1:Description, 2:Codeword, 3:Format, 4:BoardSize, 5:TeamCount, 6:TeamNames
-      if (dataRow[0]) $('event-name').value = dataRow[0];
-      if (dataRow[1]) $('event-description').value = dataRow[1];
-      if (dataRow[2]) $('event-codeword').value = dataRow[2];
-      if (dataRow[3]) $('event-format').value = dataRow[3];
-      if (dataRow[4]) $('event-boardsize').value = dataRow[4];
-      if (dataRow[5]) $('event-teamcount').value = dataRow[5];
-      
-      // Update Event Config Object
-      eventConfig.name = dataRow[0] || eventConfig.name;
-      eventConfig.description = dataRow[1] || eventConfig.description;
-      eventConfig.codeword = dataRow[2] || eventConfig.codeword;
-      eventConfig.format = dataRow[3] || eventConfig.format;
-      eventConfig.boardSize = dataRow[4] || eventConfig.boardSize;
-      eventConfig.teamCount = dataRow[5] || eventConfig.teamCount;
-
-      // Rebuild Teams based on Count
-      const count = parseInt(eventConfig.teamCount, 10) || 8;
-      const newTeams = {};
-
-      for (let i = 1; i <= count; i++) {
-        const key = `Team${i}`;
-        let tName = `Team ${i}`;
-        if (rows[i]) {
-           const rCols = parseCSVRow(rows[i]);
-           if (rCols[6]) tName = rCols[6];
-        }
-
-        newTeams[key] = {
-          name: tName,
-          url: url,
-          points: teamsConfig[key]?.points || 0,
-          teamNumber: i,
-          passcode: teamsConfig[key]?.passcode || ''
-        };
-      }
-      teamsConfig = newTeams;
-      
-      
-      // Save everything
-      storageSave(STORAGE_KEYS.eventConfig, eventConfig);
-      storageSave(STORAGE_KEYS.teams, teamsConfig);
-      renderTeamPasscodes();
-
-      showToast('✓ Settings loaded from CSV!');
-    } catch (e) { showToast('❌ Import failed: ' + e.message); }
-  };
-
-  const downloadConfig = () => {
-    const data = {
-      eventConfig,
-      teams: teamsConfig
+    const applyTheme = (name) => {
+      const root = document.documentElement;
+      const vars = window.BINGO_THEME_VARS || [];
+      for (const k of vars) root.style.setProperty(k, '');
+      const t = THEMES[name];
+      if (t) for (const [k, v] of Object.entries(t)) root.style.setProperty(k, v);
+      storageSave('bingo-theme', name);
+      const sel = document.getElementById('theme-select');
+      if (sel) sel.value = name;
     };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'config.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast('✓ config.json downloaded!');
-  };
 
-  const renderEventForm = () => {
-    $('event-name').value = eventConfig.name || '';
-    $('event-codeword').value = eventConfig.codeword || '';
-    $('event-description').value = eventConfig.description || '';
-    $('event-format').value = eventConfig.format || '';
-    $('event-boardsize').value = eventConfig.boardSize || '';
-    $('event-teamcount').value = eventConfig.teamCount || '';
-    $('event-require-passcodes').checked = eventConfig.requirePasscodes !== false;
-    
-    // CSV URL is same for all teams
-    const csvUrl = teamsConfig.Team1?.url || '';
-    $('csv-url').value = csvUrl;
-  };
-
-  const setupThemeDropdown = () => {
-    const sel = DOM.themeSel;
-    if (!sel) return;
- 
-    // Clear all options
-    sel.innerHTML = '';
- 
-    // Populate standard themes
-    if (window.BINGO_THEME_METADATA) {
-      window.BINGO_THEME_METADATA.forEach(meta => {
-        const opt = document.createElement('option');
-        opt.value = meta.value;
-        opt.textContent = meta.label;
-        sel.appendChild(opt);
-      });
-    }
-
-    // Populate custom themes
-    try {
-      const custom = JSON.parse(localStorage.getItem(STORAGE_KEYS.customThemes) || '{}');
-      for (const [slug, data] of Object.entries(custom)) {
-        const opt = document.createElement('option');
-        opt.value = slug;
-        opt.textContent = data.name;
-        sel.appendChild(opt);
+    const setupThemeDropdown = () => {
+      const sel = document.getElementById('theme-select');
+      if (!sel) return;
+      if (window.BINGO_THEME_METADATA) {
+        window.BINGO_THEME_METADATA.forEach(meta => {
+          const opt = document.createElement('option');
+          opt.value = meta.value;
+          opt.textContent = meta.label;
+          sel.appendChild(opt);
+        });
       }
-    } catch {}
-    
-    sel.addEventListener('change', () => {
+      sel.value = storageLoad('bingo-theme', 'osrs');
+      sel.addEventListener('change', () => applyTheme(sel.value));
       applyTheme(sel.value);
-    });
+    };
 
-    updateThemeDropdownVisuals();
-  };
+    const loadData = async () => {
+      try {
+        // 1. Load config.json
+        const configRes = await fetch('config.json?t=' + Date.now());
+        if (!configRes.ok) throw new Error('Failed to load config.json');
+        const config = await configRes.json();
+        
+        // 2. Get CSV URL (assume Team1 has the master URL)
+        const csvUrl = config.teams?.Team1?.url;
+        if (!csvUrl) throw new Error('No CSV URL found in config.json (teams.Team1.url)');
+        
+        document.getElementById('csv-url').value = csvUrl;
 
-  const init = async () => {
-    loadCustomThemes();
+        // 3. Fetch CSV
+        const csvRes = await fetch(csvUrl + (csvUrl.includes('?') ? '&' : '?') + 't=' + Date.now());
+        if (!csvRes.ok) throw new Error('Failed to fetch CSV data');
+        const csvText = normalizeNL(await csvRes.text());
+        
+        // 4. Parse CSV
+        const rows = csvText.split('\n').map(r => r.trim()).filter(r => r);
+        if (rows.length < 2) throw new Error('CSV is empty or invalid');
+
+        // Row 1 (Index 1) contains Metadata
+        const metaCols = parseCSVRow(rows[1]);
+        
+        document.getElementById('bingo-title').value = metaCols[0] || '';
+        document.getElementById('bingo-desc').value = metaCols[1] || '';
+        document.getElementById('bingo-codeword').value = metaCols[2] || '';
+        document.getElementById('bingo-format').value = metaCols[3] || '';
+        document.getElementById('bingo-size').value = metaCols[4] || '';
+        document.getElementById('bingo-team-count').value = metaCols[5] || '';
+
+        // 5. Parse Teams (Column 6 in rows 1..N)
+        const teamCount = parseInt(metaCols[5], 10) || 0;
+        const teamsContainer = document.getElementById('teams-list');
+        teamsContainer.innerHTML = '';
+
+        for (let i = 1; i <= teamCount; i++) {
+          if (rows[i]) {
+            const rowCols = parseCSVRow(rows[i]);
+            const teamName = rowCols[6] || `Team ${i}`;
+            const div = document.createElement('div');
+            div.className = 'form-group';
+            div.innerHTML = `<label class="form-label">Team ${i}</label><input type="text" class="form-input" value="${teamName}" readonly>`;
+            teamsContainer.appendChild(div);
+          }
+        }
+
+      } catch (e) {
+        console.error(e);
+        alert('Error loading data: ' + e.message);
+      }
+    };
+
     setupThemeDropdown();
-    const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
-    applyTheme(savedTheme);    
-    await loadConfig();
-    renderEventForm();
-    renderTeamPasscodes();
-
-    $('import-csv-btn').addEventListener('click', importFromCSV);
-    $('download-config-btn').addEventListener('click', downloadConfig);
-    
-    $('event-require-passcodes').addEventListener('change', (e) => {
-      eventConfig.requirePasscodes = e.target.checked;
-      storageSave(STORAGE_KEYS.eventConfig, eventConfig);
-    });
-
-    // Listeners for manual edits
-    ['event-name', 'event-codeword', 'event-description', 'event-format', 'event-boardsize', 'event-teamcount'].forEach(id => {
-      const el = $(id);
-      if (el) el.addEventListener('input', (e) => {
-        const key = id.replace('event-', '');
-        const configKey = key === 'boardsize' ? 'boardSize' : (key === 'teamcount' ? 'teamCount' : key);
-        eventConfig[configKey] = e.target.value;
-        storageSave(STORAGE_KEYS.eventConfig, eventConfig);
-      });
-    });
-  };
-
-  init();
-})();
+    loadData();
+    document.getElementById('reload-btn').addEventListener('click', loadData);
   </script>
 </body>
 </html>
