@@ -119,15 +119,21 @@
         </div>
         <div class="form-group">
           <label class="form-label">Format</label>
-          <input type="text" id="bingo-format" class="form-input" />
+          <select id="bingo-format" class="form-input">
+            <option value="Blackout">Blackout</option>
+            <option value="Clan vs. Clan">Clan vs. Clan</option>
+          </select>
         </div>
         <div class="form-group">
           <label class="form-label">Board Size</label>
-          <input type="text" id="bingo-size" class="form-input" />
+          <select id="bingo-size" class="form-input">
+            <option value="5 x 5">5 x 5</option>
+            <option value="7 x 7">7 x 7</option>
+          </select>
         </div>
         <div class="form-group">
           <label class="form-label">Team Count</label>
-          <input type="text" id="bingo-team-count" class="form-input" />
+          <select id="bingo-team-count" class="form-input"></select>
         </div>
       </div>
       <div class="form-group">
@@ -195,6 +201,34 @@
       applyTheme(sel.value);
     };
 
+    const updateTeamCountUI = () => {
+      const formatSel = document.getElementById('bingo-format');
+      const teamCountSel = document.getElementById('bingo-team-count');
+      if (!formatSel || !teamCountSel) return;
+
+      const currentVal = teamCountSel.value;
+      const isCvC = formatSel.value === 'Clan vs. Clan';
+
+      teamCountSel.innerHTML = '';
+
+      if (isCvC) {
+        teamCountSel.innerHTML = '<option value="2">2</option>';
+        teamCountSel.value = '2';
+      } else {
+        for (let i = 2; i <= 8; i++) {
+          const opt = document.createElement('option');
+          opt.value = String(i);
+          opt.textContent = String(i);
+          teamCountSel.appendChild(opt);
+        }
+        if (currentVal && parseInt(currentVal) >= 2 && parseInt(currentVal) <= 8) {
+          teamCountSel.value = currentVal;
+        } else {
+          teamCountSel.value = '2';
+        }
+      }
+    };
+
     const loadData = async () => {
       try {
         // 1. Load config.json
@@ -224,9 +258,20 @@
         document.getElementById('bingo-title').value = metaCols[0] || '';
         document.getElementById('bingo-desc').value = metaCols[1] || '';
         document.getElementById('bingo-codeword').value = metaCols[2] || '';
-        document.getElementById('bingo-format').value = metaCols[3] || '';
-        document.getElementById('bingo-size').value = metaCols[4] || '';
-        document.getElementById('bingo-team-count').value = metaCols[5] || '';
+        
+        const fmt = metaCols[3] || 'Blackout';
+        const fmtEl = document.getElementById('bingo-format');
+        fmtEl.value = (fmt === 'Clan vs. Clan') ? 'Clan vs. Clan' : 'Blackout';
+
+        const sz = metaCols[4] || '5 x 5';
+        const szEl = document.getElementById('bingo-size');
+        szEl.value = (sz.includes('7')) ? '7 x 7' : '5 x 5';
+
+        updateTeamCountUI();
+
+        const cnt = metaCols[5] || '2';
+        const cntEl = document.getElementById('bingo-team-count');
+        if (cntEl.querySelector(`option[value="${cnt}"]`)) cntEl.value = cnt;
 
         // 5. Parse Teams (Column 6 in rows 1..N)
         const teamCount = parseInt(metaCols[5], 10) || 0;
@@ -299,9 +344,12 @@
     };
 
     setupThemeDropdown();
+    updateTeamCountUI();
     loadData();
+    
     document.getElementById('reload-btn').addEventListener('click', loadData);
     document.getElementById('export-btn').addEventListener('click', exportConfig);
+    document.getElementById('bingo-format').addEventListener('change', updateTeamCountUI);
   </script>
 </body>
 </html>
