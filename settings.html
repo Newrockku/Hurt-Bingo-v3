@@ -333,7 +333,7 @@
   </div>
 
   <footer class="page-footer">
-    <span>v3.340</span>
+    <span>v3.341</span>
     <span>&middot;</span>
     <span>Bingo Board Settings</span>
   </footer>
@@ -343,7 +343,7 @@
   <script src="js/themes.js"></script>
   <script>
 (() => {
-  const APP_VERSION = '3.340';
+  const APP_VERSION = '3.341';
 
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',
@@ -693,8 +693,8 @@
 
   const init = async () => {
     loadCustomThemes();
-    await loadConfig();
     setupThemeDropdown();
+    await loadConfig();
     renderEventForm();
     renderTeamPasscodes();
 

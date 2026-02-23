@@ -346,7 +346,7 @@
   <script src="js/themes.js"></script>
   <script>
   (() => {
-    const s://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=138917819&single=true&output=csv';
+    const ngle=true&output=csv';
     const SNAPSHOT_2_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=2084936163&single=true&output=csv';
 
     const HEADERS = [
@@ -619,75 +619,7 @@
       DOM.modalOverlay.classList.remove('active');
       ThemeEditor.closeEditor(false);
     };
-
-    const parseCSVRow = (row) => {
-      const cols = [];
-      let cur = '';
-      let inQ = false;
-      for (let i = 0; i < row.length; i++) {
-        const ch = row[i];
-        if (inQ) {
-          if (ch === '"' && row[i + 1] === '"') {
-            cur += '"';
-            i++;
-          } else if (ch === '"') {
-            inQ = false;
-          } else {
-            cur += ch;
-          }
-        } else if (ch === '"') {
-          inQ = true;
-        } else if (ch === ',') {
-          cols.push(cur.trim());
-          cur = '';
-        } else {
-          cur += ch;
-        }
-      }
-      cols.push(cur.trim());
-      return cols;
-    };
-
-    const withCacheBust = (url) => {
-      const u = String(url || '').trim();
-      if (!u) return '';
-      return u + (u.includes('?') ? '&' : '?') + 't=' + Date.now();
-    };
-
-    const parseCSV = (text) => {
-      const data = {};
-      const rows = text.replace(/\r/g, '').split('\n').slice(1); // Skip header
-      for (const row of rows) {
-        if (!row.trim()) continue;
-        const cols = parseCSVRow(row);
-        const playerName = cols[0].trim();
-        if (!playerName) continue;
-        
-        data[playerName] = {};
-        for (let i = 1; i < HEADERS.length; i++) {
-          const header = HEADERS[i];
-          const value = cols[i] ? cols[i].trim() : '0';
-          data[playerName][header] = (value === 'Not Found' || value === '-1') ? 0 : parseInt(value, 10) || 0;
-        }
-      }
-      return data;
-    };
-
-    const fetchAndParseCSV = async (url) => {
-      const res = await fetch(withCacheBust(url));
-      if (!res.ok) throw new Error(`Failed to fetch ${url} (${res.status})`);
-      const text = await res.text();
-      return parseCSV(text);
-    };
-
-    const calculateGains = (snap1, snap2) => {
-      const gains = [];
-      for (const player in snap2) {
-        if (snap1[player]) {
-          const playerGains = { Player: player };
-          let totalBossKc = 0;
-          for (const header of HEADERS.slice(1)) {
-            const gain = (snap2[player][header] || 0) - (snap1[player][header] || 0);
+m.fn =naayer][header] || 0);
             playerGains[header] = gain;
             if (BOSS_HEADERS.includes(header)) {
               totalBossKc += gain;
@@ -696,7 +628,6 @@
           playerGains['Total Boss KC'] = totalBossKc;
           gains.push(playerGains);
         }
-      }
       return gains;
     };
 
@@ -710,9 +641,7 @@
         const valB = b[sortState.column];
         const order = sortState.order === 'asc' ? 1 : -1;
         if (typeof valA === 'string') {
-          return valA.localeCompare(valB) * order;
-        }
-        return (valA - valB) * order;
+          return valA.localeCompare(valB) * 
       });
 
       // Calculate Max Values for highlighting
@@ -747,7 +676,7 @@
         for (const header of displayHeaders) {
           const value = player[header];
           if (header === 'Player') {
-            bodyHTML += `<td class="player-name">${escapeHTML(value)}</td>`;
+            bodyHTML += `<td class="player-name">${value}</td>`;
           } else {
             const display = value === 0 ? '' : '+' + value.toLocaleString();
             const isHighest = value > 0 && value === maxVals[header];
@@ -785,8 +714,7 @@
     const init = async () => {
       const params = new URLSearchParams(window.location.search);
       if (params.get('fromAdmin') === 'true') {
-        const btn = $('admin-back-btn');
-        if (btn) btn.style.display = 'inline-flex';
+        const btn = $('admin-back-i;
       }
 
       ThemeEditor.init();
