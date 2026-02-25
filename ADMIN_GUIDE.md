@@ -28,13 +28,9 @@ Insights into how the event is progressing:
 *   **Easiest Tiles**: The top 5 most completed tiles across all teams.
 *   **Hardest Tiles**: The top 5 least completed tiles (often those with 0 completions).
 
-### 4. Recent Updates & Discord Notifications
+### 4. Recent Updates
 A live feed showing the latest activity.
 *   **Live Feed**: Updates automatically when a team completes a tile.
-*   **Discord Integration**: You can configure a Discord Webhook to send automatic announcements.
-    *   Paste your Webhook URL in the **Event Settings & Overview** section.
-    *   Check **Enable Notifications**.
-    *   *Note: The Admin Dashboard must remain open in a browser tab for notifications to send.*
 
 ### 5. Team Boards
 A grid of mini-boards for every team.
