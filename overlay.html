@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bingo Stream Overlay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-body: transparent;
+      --bg-widget: rgba(20, 20, 20, 0.9);
+      --border-color: #6d604e;
+      --accent-color: #ffac00;
+      --text-color: #ffffff;
+      --tile-size: 32px;
+      --gap: 4px;
+    }
+
+    * { box-sizing: border-box; }
+    
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-color);
+      font-family: 'Cabin Condensed', sans-serif;
+      margin: 0; padding: 20px;
+      overflow: hidden;
+    }
+
+    #widget-container {
+      width: fit-content;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card {
+      background: var(--bg-widget);
+      border: 2px solid var(--border-color);
+      padding: 10px;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      min-width: 250px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 5px; margin-bottom: 8px;
+    }
+    .title { font-size: 1.2rem; font-weight: bold; text-transform: uppercase; color: var(--accent-color); }
+    .subtitle { font-size: 0.9rem; color: #aaa; }
+
+    /* Grid View */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(var(--cols, 7), var(--tile-size));
+      gap: var(--gap);
+    }
+    .tile {
+      width: var(--tile-size); height: var(--tile-size);
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      display: flex; justify-content: center; align-items: center;
+      font-size: 0.8rem; color: rgba(255,255,255,0.3);
+      position: relative;
+    }
+    .tile.completed {
+      background: var(--accent-color);
+      color: #000;
+      border-color: #fff;
+      font-weight: bold;
+      box-shadow: 0 0 5px var(--accent-color);
+    }
+
+    /* Leaderboard View */
+    .leaderboard-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      font-size: 1rem;
+    }
+    .leaderboard-row:last-child { border-bottom: none; }
+    .rank { width: 20px; font-weight: bold; color: var(--accent-color); }
+    .team-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px; }
+    .points { font-weight: bold; }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <div id="widget-container">
+    <!-- Header -->
+    <div class="card" id="header-card">
+      <div class="header" style="margin-bottom:0; border-bottom:none; padding-bottom:0;">
+        <span class="title" id="event-name">Bingo</span>
+        <span class="subtitle" id="team-name">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Grid View -->
+    <div class="card" id="grid-view">
+      <div class="grid-container" id="grid"></div>
+      <div style="text-align:center; margin-top:5px; font-size:0.8rem; color:#aaa;">
+        <span id="progress-text">0/49</span> Completed
+      </div>
+    </div>
+
+    <!-- Leaderboard View -->
+    <div class="card hidden" id="leaderboard-view">
+      <div class="header">
+        <span class="title">Leaderboard</span>
+      </div>
+      <div id="leaderboard-list"></div>
+    </div>
+  </div>
+
+  <script src="js/bingo-utils.js"></script>
+  <script>
+    (() => {
+      const { parseCSVRow, normalizeNL, simpleHash } = BingoUtils;
+      
+      // Config
+      const params = new URLSearchParams(window.location.search);
+      const targetTeamKey = params.get('team') || 'Team1'; // Default to Team1 if not specified
+      const cycleInterval = parseInt(params.get('cycle') || '15', 10) * 1000;
+      const tileSize = params.get('size') || '32';
+      
+      document.documentElement.style.setProperty('--tile-size', tileSize + 'px');
+
+      let eventConfig = { name: 'Bingo', boardSize: '7x7' };
+      let teamsConfig = {};
+      let gridCols = 7;
+      let gridRows = 7;
+      let currentView = 'grid'; // 'grid' or 'leaderboard'
+
+      const $ = id => document.getElementById(id);
+
+      const withCacheBust = (url) => {
+        const u = String(url || '').trim();
+        if (!u) return '';
+        return u + (u.includes('?') ? '&' : '?') + 't=' + Date.now();
+      };
+
+      const updateBoardSize = (sizeStr) => {
+        let c = 7, r = 7;
+        if (sizeStr && typeof sizeStr === 'string') {
+          const parts = sizeStr.toLowerCase().split('x');
+          if (parts.length === 2) {
+            c = parseInt(parts[0].trim()) || 7;
+            r = parseInt(parts[1].trim()) || 7;
+          }
+        }
+        gridCols = c; gridRows = r;
+        document.documentElement.style.setProperty('--cols', gridCols);
+      };
+
+      const renderGrid = (completionData) => {
+        const container = $('grid');
+        container.innerHTML = '';
+        const total = gridCols * gridRows;
+        let completedCount = 0;
+
+        for (let i = 0; i < total; i++) {
+          const isDone = completionData[i];
+          if (isDone) completedCount++;
+          
+          const div = document.createElement('div');
+          div.className = `tile ${isDone ? 'completed' : ''}`;
+          div.textContent = i + 1;
+          container.appendChild(div);
+        }
+        $('progress-text').textContent = `${completedCount}/${total}`;
+      };
+
+      const renderLeaderboard = () => {
+        const container = $('leaderboard-list');
+        container.innerHTML = '';
+        
+        const sortedTeams = Object.values(teamsConfig).sort((a, b) => b.points - a.points).slice(0, 5);
+        
+        sortedTeams.forEach((t, idx) => {
+          const row = document.createElement('div');
+          row.className = 'leaderboard-row';
+          row.innerHTML = `
+            <span class="rank">#${idx + 1}</span>
+            <span class="team-name">${t.name}</span>
+            <span class="points">${t.points}</span>
+          `;
+          container.appendChild(row);
+        });
+      };
+
+      const fetchData = async () => {
+        try {
+          // 1. Load Config
+          const configRes = await fetch(withCacheBust('config.json'));
+          if (!configRes.ok) throw new Error('Config load failed');
+          const config = await configRes.json();
+          
+          if (config.eventConfig) {
+            eventConfig = { ...eventConfig, ...config.eventConfig };
+            $('event-name').textContent = eventConfig.name;
+            updateBoardSize(eventConfig.boardSize);
+          }
+
+          // 2. Load CSV
+          // Use target team's URL or Team1 as fallback
+          const csvUrl = config.teams?.[targetTeamKey]?.url || config.teams?.Team1?.url;
+          if (!csvUrl) throw new Error('No CSV URL');
+
+          const csvRes = await fetch(withCacheBust(csvUrl));
+          if (!csvRes.ok) throw new Error('CSV load failed');
+          const csvText = normalizeNL(await csvRes.text());
+          
+          const rows = csvText.split('\n').map(r => r.trim()).filter(r => r);
+          if (rows.length < 2) return;
+
+          // Parse Metadata (Row 1)
+          const metaCols = parseCSVRow(rows[1]);
+          if (metaCols[4]) updateBoardSize(metaCols[4]);
+
+          // Parse Teams
+          teamsConfig = {};
+          const teamCount = parseInt(metaCols[5], 10) || 0;
+          
+          // Initialize teams
+          for(let i=1; i<=teamCount; i++) {
+             const key = `Team${i}`;
+             teamsConfig[key] = { 
+               name: `Team ${i}`, 
+               points: 0, 
+               teamNumber: i,
+               completion: []
+             };
+          }
+
+          // Parse Data
+          const maxTiles = gridCols * gridRows;
+          const dataRows = rows.slice(1);
+          
+          // Update Team Names
+          Object.values(teamsConfig).forEach(t => {
+            if (rows[t.teamNumber]) {
+              const c = parseCSVRow(rows[t.teamNumber]);
+              if (c[6]) t.name = c[6];
+            }
+          });
+
+          // Calculate Points & Completion
+          dataRows.forEach((row, idx) => {
+            if (idx >= maxTiles) return;
+            const cols = parseCSVRow(row);
+            const points = parseInt(cols[10], 10) || 0;
+
+            Object.values(teamsConfig).forEach(t => {
+              const curCol = 13 + ((t.teamNumber - 1) * 3);
+              const goalCol = 14 + ((t.teamNumber - 1) * 3);
+              const cur = parseInt(cols[curCol], 10) || 0;
+              const goal = parseInt(cols[goalCol], 10) || 1;
+              
+              const isComplete = cur >= goal;
+              t.completion[idx] = isComplete;
+              if (isComplete) t.points += points;
+            });
+          });
+
+          // Render
+          const targetTeam = teamsConfig[targetTeamKey] || Object.values(teamsConfig)[0];
+          if (targetTeam) {
+            $('team-name').textContent = targetTeam.name;
+            renderGrid(targetTeam.completion);
+          }
+          renderLeaderboard();
+
+        } catch (e) {
+          console.error(e);
+        }
+      };
+
+      const toggleView = () => {
+        const gridEl = $('grid-view');
+        const lbEl = $('leaderboard-view');
+        
+        if (currentView === 'grid') {
+          gridEl.classList.add('hidden');
+          lbEl.classList.remove('hidden');
+          currentView = 'leaderboard';
+        } else {
+          lbEl.classList.add('hidden');
+          gridEl.classList.remove('hidden');
+          currentView = 'grid';
+        }
+      };
+
+      // Init
+      fetchData();
+      setInterval(fetchData, 30000); // Data refresh every 30s
+      
+      if (cycleInterval > 0) {
+        setInterval(toggleView, cycleInterval);
+      }
+    })();
+  </script>
+</body>
+</html>
