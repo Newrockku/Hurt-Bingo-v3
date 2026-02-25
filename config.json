@@ -5,8 +5,8 @@
     "description": "Test Description",
     "syncInterval": 30000,
     "format": "Blackout",
-    "boardSize": "7 x 7",
-    "teamCount": "6",
+    "boardSize": "5 x 5",
+    "teamCount": "8",
     "bonuses": {
       "row": 15,
       "col": 15,
