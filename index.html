@@ -1164,45 +1164,10 @@
       if (fetchController?.signal.aborted) return;
       const h = simpleHash(raw);
 
-      if (manual) {
-        // Manual sync: trust immediately
-        appliedHash = h;
-        candidateHash = null;
-        stabilityCount = 0;
-      } else {
-        // Auto sync: Stability Check
-        if (appliedHash === null) {
-          appliedHash = h;
-        } else if (h === appliedHash) {
-          candidateHash = null;
-          stabilityCount = 0;
-          return; // No change
-        } else {
-          if (h === candidateHash) {
-            stabilityCount++;
-          } else {
-            candidateHash = h;
-            stabilityCount = 1;
-          }
-          if (stabilityCount < 3) return; // Wait for confirmation
-          
-          appliedHash = h;
-          candidateHash = null;
-          stabilityCount = 0;
-        }
-      }
-
-      flashSync();
-
       const lines = raw.split('\n');
-      
-      // Parse Metadata from first data row (index 1) BEFORE init arrays
-      // Parse Bonuses from Col 11 in Rows 2, 3, 4 (Indices 1, 2, 3)
-      let rowBonus = 0, colBonus = 0, diagBonus = 0;
-      if (lines[1]) { const c = parseCSVRow(lines[1]); rowBonus = parseInt(c[11]) || 0; }
-      if (lines[2]) { const c = parseCSVRow(lines[2]); colBonus = parseInt(c[11]) || 0; }
-      if (lines[3]) { const c = parseCSVRow(lines[3]); diagBonus = parseInt(c[11]) || 0; }
 
+      // Always parse metadata to ensure board size/config is correct,
+      // overriding any stale values from config.json (e.g. on tab switch)
       if (lines.length > 1) {
         const metaCols = parseCSVRow(lines[1].trim());
         if (metaCols.length >= 6) {
@@ -1240,6 +1205,43 @@
           localStorage.setItem(STORAGE_KEYS.eventConfig, JSON.stringify(eventConfig));
         }
       }
+
+      if (manual) {
+        // Manual sync: trust immediately
+        appliedHash = h;
+        candidateHash = null;
+        stabilityCount = 0;
+      } else {
+        // Auto sync: Stability Check
+        if (appliedHash === null) {
+          appliedHash = h;
+        } else if (h === appliedHash) {
+          candidateHash = null;
+          stabilityCount = 0;
+          return; // No change
+        } else {
+          if (h === candidateHash) {
+            stabilityCount++;
+          } else {
+            candidateHash = h;
+            stabilityCount = 1;
+          }
+          if (stabilityCount < 3) return; // Wait for confirmation
+          
+          appliedHash = h;
+          candidateHash = null;
+          stabilityCount = 0;
+        }
+      }
+
+      flashSync();
+
+      // Parse Metadata from first data row (index 1) BEFORE init arrays
+      // Parse Bonuses from Col 11 in Rows 2, 3, 4 (Indices 1, 2, 3)
+      let rowBonus = 0, colBonus = 0, diagBonus = 0;
+      if (lines[1]) { const c = parseCSVRow(lines[1]); rowBonus = parseInt(c[11]) || 0; }
+      if (lines[2]) { const c = parseCSVRow(lines[2]); colBonus = parseInt(c[11]) || 0; }
+      if (lines[3]) { const c = parseCSVRow(lines[3]); diagBonus = parseInt(c[11]) || 0; }
 
       completion = Array(maxTiles).fill(false);
       tiles = Array(maxTiles).fill(null);
