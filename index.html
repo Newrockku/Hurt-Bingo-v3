@@ -1158,9 +1158,9 @@
 
       // Fill grid with empty tiles so it doesn't stay blank
       tiles = Array(maxTiles).fill(null).map((_, i) => ({
-        id: i + 1, title: 'No Data', img: '', percent: 0,
-        barColor: getProgressColor(0), checklistHtml: '',
-        description: '', isCompleted: false, points: '0', noData: true
+        id: i + 1, title: 'No Data', img: '', percent: 0, barColor: getProgressColor(0), 
+        gridChecklistHtml: '', modalChecklistHtml: '', description: '', 
+        isCompleted: false, points: '0', noData: true, collectedCount: 0, requiredCount: 0
       }));
       renderGrid();
       updateCompletedStat();
@@ -1284,13 +1284,13 @@
       for (let i = 0; i < maxTiles; i++) {
         const lineIndex = i + 1; // CSV rows are 0-indexed, but tile data starts from line 1 (after header)
         if (lineIndex >= lines.length || !lines[lineIndex].trim()) {
-          tiles[i] = { id: i + 1, title: 'No Data', img: '', percent: 0, barColor: getProgressColor(0), checklistHtml: '', description: '', isCompleted: false, points: '0', noData: true };
+          tiles[i] = { id: i + 1, title: 'No Data', img: '', percent: 0, barColor: getProgressColor(0), gridChecklistHtml: '', modalChecklistHtml: '', description: '', isCompleted: false, points: '0', noData: true, collectedCount: 0, requiredCount: 0 };
           continue;
         }
         
         const cols = parseCSVRow(lines[lineIndex].trim());
         if (cols.length < 11) {
-          tiles[i] = { id: i + 1, title: 'No Data', img: '', percent: 0, barColor: getProgressColor(0), checklistHtml: '', description: '', isCompleted: false, points: '0', noData: true };
+          tiles[i] = { id: i + 1, title: 'No Data', img: '', percent: 0, barColor: getProgressColor(0), gridChecklistHtml: '', modalChecklistHtml: '', description: '', isCompleted: false, points: '0', noData: true, collectedCount: 0, requiredCount: 0 };
           continue;
         }
 
@@ -1299,10 +1299,10 @@
         const title = cols[8] || `Tile ${id}`;
         const description = cols[9] || '';
         const pointsVal = parseInt(cols[10], 10) || 0;
-        const requiredItems = cols[11] ? cols[11].split(',').map(s => s.trim()).filter(Boolean) : [];
+        const requiredItems = cols[11] ? cols[11].split(',').map(s => s.trim()).filter(s => s) : [];
         
         // This is the team's collected items
-        const collectedItemsRaw = cols[itemsCol] ? cols[itemsCol].split(',').map(s => s.trim()).filter(Boolean) : [];
+        const collectedItemsRaw = cols[itemsCol] ? cols[itemsCol].split(',').map(s => s.trim()).filter(s => s) : [];
         const collectedItemsSet = new Set(collectedItemsRaw);
         
         const current = Math.max(0, parseInt(cols[currentCol], 10) || 0);
