@@ -210,6 +210,13 @@
             masterCsvUrl = eventConfig.masterCsvUrl || ''; // Get master CSV URL
             // Defer board size update to avoid flickering if CSV overrides it
           }
+          
+          // Fallback if masterCsvUrl is missing
+          if (!masterCsvUrl && config.teams) {
+             if (config.teams.Team1?.url) masterCsvUrl = config.teams.Team1.url;
+             else if (config.teams['Team 1']?.url) masterCsvUrl = config.teams['Team 1'].url;
+          }
+
           if (config.teams) {
             teamsConfig = config.teams; // Load teams (keyed by name)
           }

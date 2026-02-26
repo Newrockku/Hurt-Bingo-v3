@@ -641,6 +641,13 @@
         const data = await res.json();
         if (data.eventConfig) eventConfig = { ...eventConfig, ...data.eventConfig };
         if (data.teams) TEAM_MAP = data.teams; // Load teams after eventConfig
+        
+        // Fallback for masterCsvUrl if missing in eventConfig but present in Team1
+        if (!eventConfig.masterCsvUrl && data.teams) {
+           if (data.teams.Team1?.url) eventConfig.masterCsvUrl = data.teams.Team1.url;
+           else if (data.teams['Team 1']?.url) eventConfig.masterCsvUrl = data.teams['Team 1'].url;
+        }
+        
         loadedRemote = true;
       }
     } catch {}
