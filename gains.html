@@ -459,7 +459,7 @@
       }
 
       const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
-      applyTheme(savedTheme);
+      applyTheme(savedTheme); // Apply theme on init
 
       DOM.settingsTrigger.addEventListener('click', openSettings);
       DOM.modalClose.addEventListener('click', closeSettings);

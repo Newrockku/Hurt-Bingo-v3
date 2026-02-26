@@ -134,7 +134,8 @@
       document.documentElement.style.setProperty('--tile-size', tileSize + 'px');
 
       let eventConfig = { name: 'Bingo', boardSize: '7x7' };
-      let teamsConfig = {};
+      let teamsConfig = {}; // Teams will be keyed by name
+      let masterCsvUrl = ''; // New field for master CSV URL
       let gridCols = 7;
       let gridRows = 7;
       let currentView = 'grid'; // 'grid' or 'leaderboard'
@@ -206,28 +207,36 @@
           if (config.eventConfig) {
             eventConfig = { ...eventConfig, ...config.eventConfig };
             $('event-name').textContent = eventConfig.name;
+            masterCsvUrl = eventConfig.masterCsvUrl || ''; // Get master CSV URL
             // Defer board size update to avoid flickering if CSV overrides it
+          }
+          if (config.teams) {
+            teamsConfig = config.teams; // Load teams (keyed by name)
           }
 
           // 2. Load CSV
-          // Use target team's URL or Team1 as fallback
-          const csvUrl = config.teams?.[targetTeamKey]?.url || config.teams?.Team1?.url;
-          if (!csvUrl) { updateBoardSize(eventConfig.boardSize); throw new Error('No CSV URL'); }
+          if (!masterCsvUrl) { updateBoardSize(eventConfig.boardSize); throw new Error('No master CSV URL configured.'); }
 
-          const csvRes = await fetch(withCacheBust(csvUrl));
+          const csvRes = await fetch(withCacheBust(masterCsvUrl));
           if (!csvRes.ok) { updateBoardSize(eventConfig.boardSize); throw new Error('CSV load failed'); }
           const csvText = normalizeNL(await csvRes.text());
           
           const rows = csvText.split('\n').map(r => r.trim()).filter(r => r);
           if (rows.length < 2) return;
 
-          // Parse Metadata (Row 1)
+          // Parse Metadata (Row 1) from CSV
           const metaCols = parseCSVRow(rows[1]);
-          if (metaCols[4]) {
-            updateBoardSize(metaCols[4]);
-          } else {
-            updateBoardSize(eventConfig.boardSize);
-          }
+          // Update eventConfig from CSV metadata
+          eventConfig.name = metaCols[0] || eventConfig.name;
+          eventConfig.description = metaCols[1] || eventConfig.description;
+          eventConfig.codeword = metaCols[2] || eventConfig.codeword;
+          eventConfig.format = metaCols[3] || eventConfig.format;
+          eventConfig.boardSize = metaCols[4] || eventConfig.boardSize;
+          eventConfig.teamCount = metaCols[5] || eventConfig.teamCount;
+          updateBoardSize(eventConfig.boardSize);
+
+          // Update event name in header
+          $('event-name').textContent = eventConfig.name;
 
           // Parse Teams
           teamsConfig = {};
@@ -236,10 +245,12 @@
           // Initialize teams
           for(let i=1; i<=teamCount; i++) {
              const key = `Team${i}`;
-             teamsConfig[key] = { 
+             // Find existing team data by teamNumber, or create new
+             const existingTeam = Object.values(config.teams || {}).find(t => t.teamNumber === i) || {};
+             teamsConfig[existingTeam.name || key] = { // Key by name
                name: `Team ${i}`, 
                points: 0, 
-               teamNumber: i,
+               ...existingTeam, // Preserve existing data like passcode
                completion: []
              };
           }
@@ -247,14 +258,88 @@
           // Parse Data
           const maxTiles = gridCols * gridRows;
           const dataRows = rows.slice(1);
-          
-          // Update Team Names
-          Object.values(teamsConfig).forEach(t => {
-            if (rows[t.teamNumber]) {
-              const c = parseCSVRow(rows[t.teamNumber]);
-              if (c[6]) t.name = c[6];
+
+          // Update Team Names from CSV (vertical column 6) and re-key teamsConfig
+          const updatedTeamsConfig = {};
+          for (let i = 1; i <= teamCount; i++) {
+            if (rows[i]) { // Check if line exists for team number
+              const teamRowCols = parseCSVRow(rows[i]);
+              const teamNameFromCSV = teamRowCols[6] || `Team ${i}`;
+              const existingTeamData = Object.values(teamsConfig).find(t => t.teamNumber === i) || { teamNumber: i };
+              updatedTeamsConfig[teamNameFromCSV] = { ...existingTeamData, name: teamNameFromCSV };
             }
           });
+          teamsConfig = updatedTeamsConfig; // Replace teamsConfig with updated map
+
+          // Find the target team by name (targetTeamKey)
+          const targetTeam = teamsConfig[targetTeamKey] || Object.values(teamsConfig)[0];
+          if (!targetTeam) {
+            $('team-name').textContent = 'Team Not Found';
+            renderGrid([]);
+            renderLeaderboard();
+            return;
+          }
+
+          // Calculate Points & Completion for all teams
+          Object.values(teamsConfig).forEach(t => t.points = 0); // Reset points
+          Object.values(teamsConfig).forEach(t => t.completion = new Array(maxTiles).fill(false)); // Reset completion
+
+          dataRows.forEach((row, idx) => {
+            if (idx >= maxTiles) return;
+            const cols = parseCSVRow(row);
+            const points = parseInt(cols[10], 10) || 0;
+
+            Object.values(teamsConfig).forEach(t => {
+              const curCol = 13 + ((t.teamNumber - 1) * 3);
+              const goalCol = 14 + ((t.teamNumber - 1) * 3);
+              const cur = parseInt(cols[curCol], 10) || 0;
+              const goal = parseInt(cols[goalCol], 10) || 1;
+              
+              const isComplete = cur >= goal;
+              t.completion[idx] = isComplete;
+              if (isComplete) t.points += points;
+            });
+          });
+
+          // Render target team's grid and leaderboard
+          $('team-name').textContent = targetTeam.name;
+          renderGrid(targetTeam.completion);
+          renderLeaderboard();
+
+        } catch (e) {
+          console.error(e);
+          $('team-name').textContent = 'Error';
+          renderGrid([]);
+          renderLeaderboard();
+        }
+      };
+
+      const toggleView = () => {
+        const gridEl = $('grid-view');
+        const lbEl = $('leaderboard-view');
+        
+        if (currentView === 'grid') {
+          gridEl.classList.add('hidden');
+          lbEl.classList.remove('hidden');
+          currentView = 'leaderboard';
+        } else {
+          lbEl.classList.add('hidden');
+          gridEl.classList.remove('hidden');
+          currentView = 'grid';
+        }
+      };
+
+      // Init
+      fetchData();
+      setInterval(fetchData, 30000); // Data refresh every 30s
+      
+      if (cycleInterval > 0) {
+        setInterval(toggleView, cycleInterval);
+      }
+    })();
+  </script>
+</body>
+</html>
 
           // Calculate Points & Completion
           dataRows.forEach((row, idx) => {

@@ -238,7 +238,7 @@
         loadedConfig = JSON.parse(JSON.stringify(config)); // Deep copy
         
         // 2. Get CSV URL (assume Team1 has the master URL)
-        const csvUrl = config.teams?.Team1?.url;
+        const csvUrl = config.eventConfig?.masterCsvUrl;
         if (!csvUrl) throw new Error('No CSV URL found in config.json (teams.Team1.url)');
         
         document.getElementById('csv-url').value = csvUrl;
@@ -300,6 +300,8 @@
         const newConfig = JSON.parse(JSON.stringify(loadedConfig));
 
         // Update eventConfig from the form
+        const newCsvUrl = document.getElementById('csv-url').value;
+        newConfig.eventConfig.masterCsvUrl = newCsvUrl; // Store master CSV URL here
         newConfig.eventConfig.name = document.getElementById('bingo-title').value;
         newConfig.eventConfig.description = document.getElementById('bingo-desc').value;
         newConfig.eventConfig.codeword = document.getElementById('bingo-codeword').value;
@@ -309,21 +311,19 @@
 
         // Update teams
         const teamCount = parseInt(newConfig.eventConfig.teamCount, 10) || 0;
-        const newCsvUrl = document.getElementById('csv-url').value;
         
         const newTeams = {};
 
         for (let i = 1; i <= teamCount; i++) {
-            const teamKey = `Team${i}`;
             const nameInput = document.querySelector(`.team-name-input[data-team-num="${i}"]`);
             const teamName = nameInput ? nameInput.value : `Team ${i}`;
 
-            const oldTeamData = newConfig.teams[teamKey] || {};
+            // Use teamName as the key in the new teams object
+            const oldTeamData = newConfig.teams[teamName] || {};
             
-            newTeams[teamKey] = {
+            newTeams[teamName] = {
                 ...oldTeamData,
                 name: teamName,
-                url: newCsvUrl,
                 teamNumber: i
             };
         }

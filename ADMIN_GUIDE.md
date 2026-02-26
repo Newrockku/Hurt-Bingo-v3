@@ -44,6 +44,7 @@ The Settings page (`settings.html`) is the primary tool for configuring your eve
 ### Loading Data
 *   When you open `settings.html`, it automatically fetches `config.json` from the root of the website.
 *   It then uses the CSV URL found in the config file (specifically from `teams.Team1.url`) to fetch and parse your bingo data sheet.
+*   It then uses the `masterCsvUrl` found in `eventConfig` to fetch and parse your bingo data sheet.
 *   All the fields on the page (Event Details, Team Names, etc.) are populated from this data.
 
 ### Editing & Exporting
@@ -51,6 +52,7 @@ The Settings page (`settings.html`) is the primary tool for configuring your eve
 *   You can change the Event Title, Description, Codeword, and even the source CSV URL.
 *   Use the dropdowns to set the Format, Board Size, and Team Count.
 *   You can also update the names for each team.
+*   Team names will be used as keys in the exported `config.json`'s `teams` object.
 *   Once you have made your desired changes, click the **Export Config** button. This will generate and download a new `config.json` file containing all your updated settings.
 
 ### Deployment
@@ -66,7 +68,7 @@ The Overview page (`overview.html`) is a read-only dashboard suitable for public
 The Stream Overlay (`overlay.html`) is a widget designed for OBS/Streamlabs.
 *   **Features**: Transparent background, auto-cycles between Grid and Leaderboard.
 *   **URL Parameters**:
-    *   `?team=Team1`: Select the team to display.
+    *   `?team=TeamName`: Select the team to display (e.g., `?team=My%20Awesome%20Team`).
     *   `?cycle=15`: Set the rotation interval in seconds.
     *   `?size=32`: Set the tile size in pixels.
 
@@ -80,7 +82,7 @@ The Gains page (`gains.html`) allows you to compare two snapshots of player data
 
 ### Quick Setup Checklist
 1.  Create your Google Sheet with the required layout and publish it to CSV.
-2.  Create an initial `config.json` file (you can use a basic template or export one from the settings page). Make sure `teams.Team1.url` points to your CSV. Upload it to your server.
+2.  Create an initial `config.json` file (you can use a basic template or export one from the settings page). Make sure `eventConfig.masterCsvUrl` points to your CSV. Upload it to your server.
 3.  Navigate to `settings.html`. The page will load your current configuration.
 4.  Modify the settings as needed (Event Name, Team Names, etc.).
 5.  Click **Export Config** to download the updated `config.json`.

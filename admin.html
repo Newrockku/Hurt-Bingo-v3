@@ -411,7 +411,8 @@
     syncInterval: 30000,
     format: '',
     boardSize: '',
-    teamCount: ''
+    teamCount: '8', // Default to 8 for initial load if not in config
+    masterCsvUrl: '' // New field for master CSV URL
   };
   let teamsConfig = {};
   let gridCols = 7;
@@ -513,7 +514,7 @@
     const bonusEl = $('event-bonuses-display');
 
     if (nameEl) nameEl.textContent = eventConfig.name || 'Bingo 2026';
-    if (codewordEl) codewordEl.textContent = eventConfig.codeword || '(Not set)';
+    if (codewordEl) codewordEl.textContent = eventConfig.codeword || '-';
     if (csvEl) csvEl.textContent = teamsConfig.Team1?.url
       ? teamsConfig.Team1.url
       : 'Not configured';
@@ -666,7 +667,7 @@
     if (!container) return;
     
     const teams = Object.entries(teamsConfig).sort((a,b) => a[1].teamNumber - b[1].teamNumber);
-    const frag = document.createDocumentFragment();
+    const frag = document.createDocumentFragment(); // Use team name as the URL parameter
     const maxTiles = gridCols * gridRows;
 
     teams.forEach(([key, team]) => {
@@ -712,12 +713,12 @@
 
   const fetchGameData = async () => {
     // Use Team1 URL as master
-    const url = teamsConfig.Team1?.url;
-    if (!url) {
+    const masterCsvUrl = eventConfig.masterCsvUrl;
+    if (!masterCsvUrl) {
       const boards = $('boards-grid');
       if (boards) boards.innerHTML = '<div style="color:var(--text-dim); text-align:center; padding:20px;">No CSV URL configured. Go to Settings.</div>';
       const lb = $('leaderboard-list');
-      if (lb) lb.innerHTML = '<div style="color:var(--text-dim); text-align:center; padding:10px;">No data available</div>';
+      if (lb) lb.innerHTML = '<div style="color:var(--text-dim); text-align:center; padding:10px;">No CSV URL configured.</div>';
       return;
     }
 
@@ -725,7 +726,7 @@
     fetchController = new AbortController();
 
     try {
-      const res = await fetch(withCacheBust(url), { signal: fetchController.signal });
+      const res = await fetch(withCacheBust(masterCsvUrl), { signal: fetchController.signal });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const text = normalizeNL(await res.text());
 
@@ -760,32 +761,34 @@
       
       if (rows.length > 1) {
         const metaCols = parseCSVRow(rows[1]);
-        // Parse Metadata: 0:Name, 1:Description, 2:Codeword, 3:Format, 4:Size, 5:Count, 6:Names
-        if (metaCols[0]) eventConfig.name = metaCols[0];
-        if (metaCols[1]) eventConfig.description = metaCols[1];
-        if (metaCols[2]) eventConfig.codeword = metaCols[2];
-        if (metaCols[3]) eventConfig.format = metaCols[3];
-        if (metaCols[4]) {
-          eventConfig.boardSize = metaCols[4];
-          updateBoardSize(metaCols[4]);
-        }
-        if (metaCols[5]) eventConfig.teamCount = metaCols[5];
+        // Update eventConfig from CSV metadata
+        eventConfig.name = metaCols[0] || eventConfig.name;
+        eventConfig.description = metaCols[1] || eventConfig.description;
+        eventConfig.codeword = metaCols[2] || eventConfig.codeword;
+        eventConfig.format = metaCols[3] || eventConfig.format;
+        eventConfig.boardSize = metaCols[4] || eventConfig.boardSize;
+        eventConfig.teamCount = metaCols[5] || eventConfig.teamCount;
+        updateBoardSize(eventConfig.boardSize);
 
         // Parse Bonuses from Col 11 in Rows 1, 2, 3 (Indices 1, 2, 3)
         let rowBonus = 0, colBonus = 0, diagBonus = 0;
         if (rows[1]) { const c = parseCSVRow(rows[1]); rowBonus = parseInt(c[11]) || 0; }
         if (rows[2]) { const c = parseCSVRow(rows[2]); colBonus = parseInt(c[11]) || 0; }
         if (rows[3]) { const c = parseCSVRow(rows[3]); diagBonus = parseInt(c[11]) || 0; }
-        eventConfig.bonuses = { row: rowBonus, col: colBonus, diag: diagBonus };
+        eventConfig.bonuses = { row: rowBonus, col: colBonus, diag: diagBonus }; // Store bonuses in eventConfig
 
-        // Update Teams from vertical column 6 (index 6) in rows 1..N
-        Object.values(teamsConfig).forEach(team => {
-          const tNum = team.teamNumber;
-          if (tNum && rows[tNum]) {
-             const rCols = parseCSVRow(rows[tNum]);
-             if (rCols[6]) team.name = rCols[6];
+        // Update teamsConfig with names from CSV (vertical column 6)
+        const currentTeamCount = parseInt(eventConfig.teamCount, 10);
+        const updatedTeamsConfig = {};
+        for (let i = 1; i <= currentTeamCount; i++) {
+          if (rows[i]) { // Check if line exists for team number
+            const teamRowCols = parseCSVRow(rows[i]);
+            const teamNameFromCSV = teamRowCols[6] || `Team ${i}`;
+            const existingTeamData = Object.values(teamsConfig).find(t => t.teamNumber === i) || { teamNumber: i };
+            updatedTeamsConfig[teamNameFromCSV] = { ...existingTeamData, name: teamNameFromCSV };
           }
         });
+        teamsConfig = updatedTeamsConfig; // Replace teamsConfig with updated map
 
         // Calculate Points for all teams
         Object.keys(teamsConfig).forEach(k => teamsConfig[k].points = 0); // Reset
@@ -826,7 +829,7 @@
            Object.keys(teamCompletions).forEach(teamKey => {
               const oldArr = previousTeamCompletions[teamKey];
               const newArr = teamCompletions[teamKey];
-              if (!oldArr) return;
+              if (!oldArr || !newArr) return; // Ensure both arrays exist
 
               newArr.forEach((isComplete, idx) => {
                  if (isComplete && !oldArr[idx]) {

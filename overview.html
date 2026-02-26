@@ -341,7 +341,8 @@
     syncInterval: 30000,
     format: '',
     boardSize: '',
-    teamCount: ''
+    teamCount: '8', // Default to 8 for initial load if not in config
+    masterCsvUrl: '' // New field for master CSV URL
   };
   let teamsConfig = {};
   let gridCols = 7;
@@ -441,7 +442,7 @@
     if (!container) return;
 
     const teams = Object.entries(teamsConfig).map(([key, team]) => ({
-      key,
+      key, // Key is now the team name
       name: team.name || key,
       points: team.points || 0,
       bingos: team.bingos || 0
@@ -605,12 +606,12 @@
   };
 
   const fetchGameData = async () => {
-    const url = teamsConfig.Team1?.url;
-    if (!url) {
+    const masterCsvUrl = eventConfig.masterCsvUrl;
+    if (!masterCsvUrl) {
       const boards = $('boards-grid');
       if (boards) boards.innerHTML = '<div style="color:var(--text-dim); text-align:center; padding:20px;">No CSV URL configured.</div>';
       const lb = $('leaderboard-list');
-      if (lb) lb.innerHTML = '<div style="color:var(--text-dim); text-align:center; padding:10px;">No data available</div>';
+      if (lb) lb.innerHTML = '<div style="color:var(--text-dim); text-align:center; padding:10px;">No CSV URL configured.</div>';
       return;
     }
 
@@ -618,7 +619,7 @@
     fetchController = new AbortController();
 
     try {
-      const res = await fetch(withCacheBust(url), { signal: fetchController.signal });
+      const res = await fetch(withCacheBust(masterCsvUrl), { signal: fetchController.signal });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const text = normalizeNL(await res.text());
 
@@ -649,24 +650,33 @@
       
       if (rows.length > 1) {
         const metaCols = parseCSVRow(rows[1]);
-        if (metaCols[0]) eventConfig.name = metaCols[0];
-        if (metaCols[4]) {
-          eventConfig.boardSize = metaCols[4];
-          updateBoardSize(metaCols[4]);
-        }
+        // Update eventConfig from CSV metadata
+        eventConfig.name = metaCols[0] || eventConfig.name;
+        eventConfig.description = metaCols[1] || eventConfig.description;
+        eventConfig.codeword = metaCols[2] || eventConfig.codeword;
+        eventConfig.format = metaCols[3] || eventConfig.format;
+        eventConfig.boardSize = metaCols[4] || eventConfig.boardSize;
+        eventConfig.teamCount = metaCols[5] || eventConfig.teamCount;
+        updateBoardSize(eventConfig.boardSize);
 
         let rowBonus = 0, colBonus = 0, diagBonus = 0;
         if (rows[1]) { const c = parseCSVRow(rows[1]); rowBonus = parseInt(c[11]) || 0; }
         if (rows[2]) { const c = parseCSVRow(rows[2]); colBonus = parseInt(c[11]) || 0; }
         if (rows[3]) { const c = parseCSVRow(rows[3]); diagBonus = parseInt(c[11]) || 0; }
+        eventConfig.bonuses = { row: rowBonus, col: colBonus, diag: diagBonus }; // Store bonuses in eventConfig
 
-        Object.values(teamsConfig).forEach(team => {
-          const tNum = team.teamNumber;
-          if (tNum && rows[tNum]) {
-             const rCols = parseCSVRow(rows[tNum]);
-             if (rCols[6]) team.name = rCols[6];
+        // Update teamsConfig with names from CSV (vertical column 6)
+        const currentTeamCount = parseInt(eventConfig.teamCount, 10);
+        const updatedTeamsConfig = {};
+        for (let i = 1; i <= currentTeamCount; i++) {
+          if (rows[i]) { // Check if line exists for team number
+            const teamRowCols = parseCSVRow(rows[i]);
+            const teamNameFromCSV = teamRowCols[6] || `Team ${i}`;
+            const existingTeamData = Object.values(teamsConfig).find(t => t.teamNumber === i) || { teamNumber: i };
+            updatedTeamsConfig[teamNameFromCSV] = { ...existingTeamData, name: teamNameFromCSV };
           }
-        });
+        }
+        teamsConfig = updatedTeamsConfig; // Replace teamsConfig with updated map
 
         Object.keys(teamsConfig).forEach(k => teamsConfig[k].points = 0);
 
@@ -691,7 +701,7 @@
             const goalCol = 14 + ((tNum - 1) * 3);
             const cur = parseInt(cols[curCol], 10) || 0;
             const goal = parseInt(cols[goalCol], 10) || 1;
-            if (cur >= goal) {
+            if (cur >= goal && teamCompletions[key]) { // Ensure teamCompletions[key] exists before accessing
               team.points += points;
               teamCompletions[key][rIndex] = true;
               tileStats[rIndex].count++;
@@ -703,7 +713,7 @@
            Object.keys(teamCompletions).forEach(teamKey => {
               const oldArr = previousTeamCompletions[teamKey];
               const newArr = teamCompletions[teamKey];
-              if (!oldArr) return;
+              if (!oldArr || !newArr) return; // Ensure both arrays exist
 
               newArr.forEach((isComplete, idx) => {
                  if (isComplete && !oldArr[idx]) {
