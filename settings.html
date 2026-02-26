@@ -318,8 +318,8 @@
             const nameInput = document.querySelector(`.team-name-input[data-team-num="${i}"]`);
             const teamName = nameInput ? nameInput.value : `Team ${i}`;
 
-            // Use teamName as the key in the new teams object
-            const oldTeamData = newConfig.teams[teamName] || {};
+            // Find existing data by teamNumber to preserve passcodes if name changes
+            const oldTeamData = Object.values(newConfig.teams).find(t => t.teamNumber === i) || {};
             
             newTeams[teamName] = {
                 ...oldTeamData,

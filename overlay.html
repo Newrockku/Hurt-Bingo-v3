@@ -268,7 +268,7 @@
               const existingTeamData = Object.values(teamsConfig).find(t => t.teamNumber === i) || { teamNumber: i };
               updatedTeamsConfig[teamNameFromCSV] = { ...existingTeamData, name: teamNameFromCSV };
             }
-          });
+          }
           teamsConfig = updatedTeamsConfig; // Replace teamsConfig with updated map
 
           // Find the target team by name (targetTeamKey)

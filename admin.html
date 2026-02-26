@@ -787,7 +787,7 @@
             const existingTeamData = Object.values(teamsConfig).find(t => t.teamNumber === i) || { teamNumber: i };
             updatedTeamsConfig[teamNameFromCSV] = { ...existingTeamData, name: teamNameFromCSV };
           }
-        });
+        }
         teamsConfig = updatedTeamsConfig; // Replace teamsConfig with updated map
 
         // Calculate Points for all teams
