@@ -596,14 +596,14 @@
   const THEMES = window.BINGO_THEMES;
 
   const DEFAULT_TEAMS = {
-    'Team1': { name: "Team 1", url: "", points: 0, teamNumber: 1 },
-    'Team2': { name: "Team 2", url: "", points: 0, teamNumber: 2 },
-    'Team3': { name: "Team 3", url: "", points: 0, teamNumber: 3 },
-    'Team4': { name: "Team 4", url: "", points: 0, teamNumber: 4 },
-    'Team5': { name: "Team 5", url: "", points: 0, teamNumber: 5 },
-    'Team6': { name: "Team 6", url: "", points: 0, teamNumber: 6 },
-    'Team7': { name: "Team 7", url: "", points: 0, teamNumber: 7 },
-    'Team8': { name: "Team 8", url: "", points: 0, teamNumber: 8 }
+    'Team 1': { name: "Team 1", url: "", points: 0, teamNumber: 1 },
+    'Team 2': { name: "Team 2", url: "", points: 0, teamNumber: 2 },
+    'Team 3': { name: "Team 3", url: "", points: 0, teamNumber: 3 },
+    'Team 4': { name: "Team 4", url: "", points: 0, teamNumber: 4 },
+    'Team 5': { name: "Team 5", url: "", points: 0, teamNumber: 5 },
+    'Team 6': { name: "Team 6", url: "", points: 0, teamNumber: 6 },
+    'Team 7': { name: "Team 7", url: "", points: 0, teamNumber: 7 },
+    'Team 8': { name: "Team 8", url: "", points: 0, teamNumber: 8 }
   };
 
   let TEAM_MAP = {};
@@ -666,6 +666,7 @@
     const params = new URLSearchParams(window.location.search);
     const adminMode = params.get('admin') === 'true';
     
+    const teamKeys = Object.keys(TEAM_MAP);
     const requestedTeamParam = params.get('team');
 
     // If requesting a specific team
