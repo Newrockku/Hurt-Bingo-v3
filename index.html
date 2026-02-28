@@ -952,7 +952,9 @@
       cell.appendChild(headerBox);
       cell.appendChild(imgContainer);
       cell.appendChild(progressContainer);
-      cell.appendChild(checklistBox);
+      if (!tile.isXpTile) {
+        cell.appendChild(checklistBox);
+      }
       cell.appendChild(pointBadge);
 
       cell.addEventListener('click', () => openTileModalByIndex(i, cell));
@@ -1031,6 +1033,10 @@
     DOM.modalProgressSection.style.display = t.isCompleted ? 'none' : 'block';
     DOM.modalBar.style.width = t.percent + '%';
     DOM.modalBar.style.backgroundColor = t.barColor;
+
+    DOM.modalList.style.display = t.isXpTile ? 'none' : 'block';
+    DOM.modalChecklistLabel.style.display = t.isXpTile ? 'none' : 'block';
+
     DOM.modalList.innerHTML = t.modalChecklistHtml || '';
     DOM.modalDesc.innerText = t.description || '(No description)';
 
@@ -1160,7 +1166,7 @@
       tiles = Array(maxTiles).fill(null).map((_, i) => ({
         id: i + 1, title: 'No Data', img: '', percent: 0, barColor: getProgressColor(0), 
         gridChecklistHtml: '', modalChecklistHtml: '', description: '', 
-        isCompleted: false, points: '0', noData: true, collectedCount: 0, requiredCount: 0
+        isCompleted: false, points: '0', noData: true, collectedCount: 0, requiredCount: 0, isXpTile: false
       }));
       renderGrid();
       updateCompletedStat();
@@ -1294,13 +1300,13 @@
       for (let i = 0; i < maxTiles; i++) {
         const lineIndex = i + 1; // CSV rows are 0-indexed, but tile data starts from line 1 (after header)
         if (lineIndex >= lines.length || !lines[lineIndex].trim()) {
-          tiles[i] = { id: i + 1, title: 'No Data', img: '', percent: 0, barColor: getProgressColor(0), gridChecklistHtml: '', modalChecklistHtml: '', description: '', isCompleted: false, points: '0', noData: true, collectedCount: 0, requiredCount: 0 };
+          tiles[i] = { id: i + 1, title: 'No Data', img: '', percent: 0, barColor: getProgressColor(0), gridChecklistHtml: '', modalChecklistHtml: '', description: '', isCompleted: false, points: '0', noData: true, collectedCount: 0, requiredCount: 0, isXpTile: false };
           continue;
         }
         
         const cols = parseCSVRow(lines[lineIndex].trim());
         if (cols.length < 11) {
-          tiles[i] = { id: i + 1, title: 'No Data', img: '', percent: 0, barColor: getProgressColor(0), gridChecklistHtml: '', modalChecklistHtml: '', description: '', isCompleted: false, points: '0', noData: true, collectedCount: 0, requiredCount: 0 };
+          tiles[i] = { id: i + 1, title: 'No Data', img: '', percent: 0, barColor: getProgressColor(0), gridChecklistHtml: '', modalChecklistHtml: '', description: '', isCompleted: false, points: '0', noData: true, collectedCount: 0, requiredCount: 0, isXpTile: false };
           continue;
         }
 
@@ -1317,6 +1323,7 @@
         
         const current = Math.max(0, parseInt(cols[currentCol], 10) || 0);
         const goal = Math.max(1, parseInt(cols[goalCol], 10) || 1);
+        const isXpTile = goal > 100000;
         const percent = Math.min((current / goal) * 100, 100);
         const isCompleted = percent === 100;
         if (isCompleted) calculatedPoints += pointsVal;
@@ -1335,7 +1342,7 @@
           return `<div class="check-item${isCollected ? '' : ' uncollected'}"><span class="check-mark"></span> ${escapeHTML(it)}</div>`;
         }).join('');
         
-        tiles[i] = { id, title, img, percent, barColor: getProgressColor(percent), gridChecklistHtml, modalChecklistHtml, description, isCompleted, points: pointsVal, noData: false, collectedCount: current, requiredCount: goal };
+        tiles[i] = { id, title, img, percent, barColor: getProgressColor(percent), gridChecklistHtml, modalChecklistHtml, description, isCompleted, points: pointsVal, noData: false, collectedCount: current, requiredCount: goal, isXpTile };
       }
 
       const bingoStats = calculateBingos(completion, gridCols, gridRows);
