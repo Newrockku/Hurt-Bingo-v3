@@ -722,18 +722,26 @@
       if (TEAM_MAP[requestedTeamParam]) {
         currentTeamKey = requestedTeamParam;
       } else {
-        // Try to find by teamNumber (for old links like ?team=Team1)
-        const teamNumMatch = requestedTeamParam.match(/^Team(\d+)$/);
-        if (teamNumMatch) {
-          const teamNumber = parseInt(teamNumMatch[1], 10);
-          const foundTeam = Object.values(TEAM_MAP).find(t => t.teamNumber === teamNumber);
-          if (foundTeam) {
-            currentTeamKey = foundTeam.name; // Use the actual name as the key
-          } else {
-            currentTeamKey = ''; // Team not found
-          }
+        // Try case-insensitive match
+        const lowerParam = requestedTeamParam.toLowerCase();
+        const foundKey = Object.keys(TEAM_MAP).find(k => k.toLowerCase() === lowerParam);
+
+        if (foundKey) {
+          currentTeamKey = foundKey;
         } else {
-          currentTeamKey = ''; // Invalid team requested
+          // Try to find by teamNumber (for old links like ?team=Team1)
+          const teamNumMatch = requestedTeamParam.match(/^Team(\d+)$/i);
+          if (teamNumMatch) {
+            const teamNumber = parseInt(teamNumMatch[1], 10);
+            const foundTeam = Object.values(TEAM_MAP).find(t => t.teamNumber === teamNumber);
+            if (foundTeam) {
+              currentTeamKey = foundTeam.name; // Use the actual name as the key
+            } else {
+              currentTeamKey = ''; // Team not found
+            }
+          } else {
+            currentTeamKey = ''; // Invalid team requested
+          }
         }
       }
     } else if (adminMode && teamKeys.length > 0) {
