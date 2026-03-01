@@ -333,9 +333,13 @@
             const checked = player.selected ? 'checked' : '';
             bodyHTML += `<td class="player-name"><input type="checkbox" class="row-select" data-player="${value.replace(/"/g, '&quot;')}" ${checked} style="margin-right:8px;">${value}</td>`;
           } else {
-            const display = value.toLocaleString();
-            const classes = (value === 0 ? 'zero ' : '');
-            bodyHTML += `<td class="${classes}">${display}</td>`;
+            if (player.selected) {
+              bodyHTML += `<td>${player.Player}</td>`;
+            } else {
+              const display = value.toLocaleString();
+              const classes = (value === 0 ? 'zero ' : '');
+              bodyHTML += `<td class="${classes}">${display}</td>`;
+            }
           }
         }
         bodyHTML += '</tr>';
@@ -364,9 +368,7 @@
         const player = draftData.find(p => p.Player === name);
         if (player) {
           player.selected = e.target.checked;
-          const tr = e.target.closest('tr');
-          if (player.selected) tr.classList.add('highlighted');
-          else tr.classList.remove('highlighted');
+          renderTable();
         }
       }
     };
