@@ -1,12 +1,12 @@
 {
   "eventConfig": {
-    "name": "BINGO TITLE HERE",
-    "codeword": "CODEWORD",
-    "description": "This is a bingo test description imported from the CSV!",
+    "name": "Hurt Bingo March 2026",
+    "codeword": "??????",
+    "description": "Welcome to March 2026 Bingo! This is our first time hosting bingo on a custom webpage! If you have any features you would like to see added, put then im Discord in the \"bingo-general\" and tag Ironrockku.",
     "syncInterval": 30000,
     "format": "Blackout",
     "boardSize": "5 x 5",
-    "teamCount": "8",
+    "teamCount": "5",
     "bonuses": {
       "row": 15,
       "col": 15,
@@ -51,23 +51,6 @@
       "points": 0,
       "teamNumber": 5,
       "passcode": "555555"
-    },
-    "Team 6": {
-      "name": "Team 6",
-      "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
-      "points": 0,
-      "teamNumber": 6,
-      "passcode": "666666"
-    },
-    "Team 7": {
-      "name": "Team 7",
-      "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
-      "teamNumber": 7
-    },
-    "Team 8": {
-      "name": "Team 8",
-      "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=1593254680&single=true&output=csv",
-      "teamNumber": 8
     }
   }
 }
