@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Draft - Bingo Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-body: #342e25; --bg-tile: #494034; --bg-well: #342e25;
+      --bg-completed: #1e3a1e; --bg-completed-well: #162a16;
+      --border-main: #6d604e; --border-completed: #4caf50;
+      --accent: #ffac00; --text-main: #ffac00; --text-bright: #ffee00;
+      --text-dim: #858476; --text-completed: #4caf50; --danger: #ff6d6d;
+    }
+    * { box-sizing: border-box; }
+    html { scrollbar-gutter: stable; overflow-y: scroll; }
+    ::-webkit-scrollbar { width: 12px; height: 12px; }
+    ::-webkit-scrollbar-track { background: var(--bg-well); }
+    ::-webkit-scrollbar-thumb { background: var(--bg-tile); border: 2px solid var(--bg-well); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border-main); }
+    ::-webkit-scrollbar-corner { background: var(--bg-well); }
+    body {
+      background-color: var(--bg-body); color: var(--text-main);
+      font-family: 'Cabin Condensed', sans-serif; margin: 0; padding: 20px;
+      min-height: 100vh;
+    }
+    .sr-only {
+      position: absolute !important;
+      width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); border: 0; white-space: nowrap;
+    }
+    .gains-header {
+      background: var(--bg-tile); border: 2px solid var(--border-main);
+      padding: 20px; margin: 0 auto 30px auto; max-width: 95%;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+    .gains-header h1 {
+      margin: 0; font-size: 2rem; text-transform: uppercase;
+      letter-spacing: 1px; text-shadow: 2px 2px 4px black;
+    }
+    .nav-btn {
+      background: var(--bg-well); border: 2px solid var(--border-main);
+      color: var(--text-dim); padding: 8px 16px;
+      font-family: 'Cabin Condensed'; font-size: 0.95rem;
+      cursor: pointer; border-radius: 0;
+      transition: all 0.2s ease; text-decoration: none; display: inline-block;
+    }
+    .nav-btn:hover {
+      border-color: var(--accent); color: var(--accent); background: var(--bg-tile);
+    }
+    #admin-back-btn {
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: bold;
+    }
+    #admin-back-btn:hover {
+      background: var(--accent);
+      color: var(--bg-body);
+    }
+    .gains-container { max-width: 95%; margin: 0 auto; }
+    .table-wrapper {
+      background: var(--bg-tile); border: 2px solid var(--border-main);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      overflow: auto; max-height: 65vh;
+    }
+    table {
+      width: 100%; border-collapse: collapse; font-size: 0.9rem;
+    }
+    th, td {
+      padding: 8px 12px; border: 1px solid var(--border-main);
+      text-align: center; white-space: nowrap;
+    }
+    thead {
+      background-color: var(--bg-well);
+    }
+    th {
+      font-weight: bold; color: var(--text-bright);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      cursor: pointer; user-select: none;
+      position: sticky; top: 0; z-index: 15;
+      background-color: var(--bg-well);
+    }
+    th:hover { background-color: var(--bg-body); color: var(--accent); }
+    th .sort-arrow {
+      display: inline-block; width: 0; height: 0;
+      border-left: 4px solid transparent; border-right: 4px solid transparent;
+      margin-left: 6px; vertical-align: middle; opacity: 0.5;
+    }
+    th.asc .sort-arrow { border-bottom: 5px solid var(--accent); opacity: 1; }
+    th.desc .sort-arrow { border-top: 5px solid var(--accent); opacity: 1; }
+    tbody tr:nth-child(even) { background-color: var(--bg-well); }
+    tbody tr:hover { background-color: var(--bg-body); }
+    td { color: var(--text-bright); }
+    td.player-name { font-weight: bold; color: var(--accent); }
+    td.zero { color: var(--text-dim); }
+    .page-footer {
+      margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-main);
+      font-size: 0.7rem; color: var(--border-main);
+      display: flex; justify-content: center; align-items: center; gap: 6px;
+    }
+    .loader {
+      text-align: center; padding: 40px; font-size: 1.2rem;
+      color: var(--text-dim);
+    }
+
+    /* Sticky Player Column */
+    th:first-child, td:first-child {
+      position: sticky; left: 0; z-index: 10;
+      text-align: left;
+      border-right: 2px solid var(--border-main);
+    }
+    th:first-child { z-index: 20; background-color: var(--bg-well); }
+    tbody tr td:first-child { background-color: var(--bg-body); }
+    tbody tr:nth-child(even) td:first-child { background-color: var(--bg-well); }
+    tbody tr:hover td:first-child { background-color: var(--bg-body); }
+  </style>
+</head>
+<body>
+
+  <header class="gains-header" role="banner">
+    <h1><svg style="width:1em; height:1em; fill:currentColor; vertical-align: -0.15em; margin-right: 10px;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>Draft Tracker</h1>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <a href="admin.html" id="admin-back-btn" class="nav-btn" style="display:none;">← Admin</a>
+    </div>
+  </header>
+
+  <div class="gains-container">
+    <div class="table-wrapper" id="table-wrapper">
+      <div class="loader" id="loader">Loading draft data...</div>
+      <table id="gains-table" style="display:none;">
+        <thead id="gains-table-head"></thead>
+        <tbody id="gains-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <span>v3.342</span>
+    <span>&middot;</span>
+    <span>Bingo Draft Tracker</span>
+  </footer>
+
+  <script src="js/themes.js"></script>
+  <script>
+  (() => {
+    const APP_VERSION = '3.342';
+    const SNAPSHOT_1_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFOGe_j8BL0X5Cwvy3LNmsrWG82IAXlWpump0Sw6PKWLz-1gxbisdbPuTmJ_CmjLA_q-Q6y9jTfFwq/pub?gid=138917819&single=true&output=csv';
+
+    const HEADERS = [
+      'Player','Draft Score','Total','Attack','Defence','Strength','Hitpoints','Ranged','Prayer','Magic','Cooking','Woodcutting','Fletching','Fishing','Firemaking','Crafting','Smithing','Mining','Herblore','Agility','Thieving','Slayer','Farming','Runecraft','Hunter','Construction','Sailing','Abyssal Sire','Alchemical Hydra','Amoxilatl','Araxxor','Artio','Barrows Chests','Bryophyta','Brutus','Callisto','Calvar\'ion','Cerberus','Chambers of Xeric','Chambers of Xeric: CM','Chaos Elemental','Chaos Fanatic','Commander Zilyana','Corporeal Beast','Crazy Archaeologist','Dagannoth Prime','Dagannoth Rex','Dagannoth Supreme','Deranged Archaeologist','Doom of Mokhaiotl','Duke Sucellus','General Graardor','Giant Mole','Grotesque Guardians','Hespori','Kalphite Queen','King Black Dragon','Kraken','Kree\'Arra','K\'ril Tsutsaroth','Lunar Chests','Mimic','Nex','Nightmare','Phosani\'s Nightmare','Obor','Phantom Muspah','Sarachnis','Scorpia','Scurrius','Shellbane Griffin','Skotizo','Sol Heredit','Spindel','Tempoross','The Gauntlet','The Corrupted Gauntlet','The Hueycoatl','The Leviathan','The Royal Titans','The Whisperer','Theatre of Blood','Theatre of Blood: HM','Thermonuclear Smoke Devil','Tombs of Amascut: Normal','Tombs of Amascut: Expert','TzKal-Zuk','TzTok-Jad','Vardorvis','Venenatis','Vet\'ion','Vorkath','Wintertodt','Yama','Zalcano','Zulrah'
+    ];
+
+    let draftData = [];
+    let sortState = { column: 'Draft Score', order: 'desc' };
+
+    const STORAGE_KEYS = { theme: 'bingo-theme' };
+    const $ = id => document.getElementById(id);
+    const THEME_VARS = window.BINGO_THEME_VARS;
+    const THEMES = window.BINGO_THEMES;
+
+    const storageLoad = (k, fb) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fb; } catch { return fb; } };
+    const storageSave = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+    const applyTheme = (name) => {
+      const root = document.documentElement;
+      for (const k of THEME_VARS) root.style.setProperty(k, '');
+      const t = THEMES[name];
+      if (t) for (const [k, v] of Object.entries(t)) root.style.setProperty(k, v);
+      storageSave(STORAGE_KEYS.theme, name);
+    };
+
+    const parseCSV = (text) => {
+      const data = [];
+      const rows = text.replace(/\r/g, '').split('\n').slice(1); // Skip header
+      for (const row of rows) {
+        if (!row.trim()) continue;
+        const cols = row.split(',');
+        const playerName = cols[0].trim();
+        if (!playerName) continue;
+        
+        const playerObj = { Player: playerName };
+        for (let i = 1; i < HEADERS.length; i++) {
+          const header = HEADERS[i];
+          const value = cols[i] ? cols[i].trim() : '0';
+          playerObj[header] = (value === 'Not Found' || value === '-1') ? 0 : parseInt(value, 10) || 0;
+        }
+        data.push(playerObj);
+      }
+      return data;
+    };
+
+    const fetchAndParseCSV = async (url) => {
+      const res = await fetch(url + '&t=' + Date.now());
+      if (!res.ok) throw new Error(`Failed to fetch ${url}`);
+      const text = await res.text();
+      return parseCSV(text);
+    };
+
+    const renderTable = () => {
+      const tableHead = $('gains-table-head');
+      const tableBody = $('gains-table-body');
+      
+      // Sort data
+      draftData.sort((a, b) => {
+        const valA = a[sortState.column];
+        const valB = b[sortState.column];
+        const order = sortState.order === 'asc' ? 1 : -1;
+        if (typeof valA === 'string') return valA.localeCompare(valB) * order;
+        return (valA - valB) * order;
+      });
+
+      // Render Header
+      if (!tableHead.innerHTML) {
+        let headHTML = '<tr>';
+        for (const header of HEADERS) {
+          const isSortCol = sortState.column === header;
+          const sortClass = isSortCol ? sortState.order : '';
+          headHTML += `<th data-col="${header}" class="${sortClass}">${header}<span class="sort-arrow"></span></th>`;
+        }
+        headHTML += '</tr>';
+        tableHead.innerHTML = headHTML;
+      }
+
+      // Render Body
+      let bodyHTML = '';
+      for (const player of draftData) {
+        bodyHTML += '<tr>';
+        for (const header of HEADERS) {
+          const value = player[header];
+          if (header === 'Player') {
+            bodyHTML += `<td class="player-name">${value}</td>`;
+          } else {
+            const display = value.toLocaleString();
+            const classes = (value === 0 ? 'zero ' : '');
+            bodyHTML += `<td class="${classes}">${display}</td>`;
+          }
+        }
+        bodyHTML += '</tr>';
+      }
+      tableBody.innerHTML = bodyHTML;
+      
+      // Update sort arrows
+      tableHead.querySelectorAll('th').forEach(th => {
+        const col = th.dataset.col;
+        th.classList.remove('asc', 'desc');
+        if (col === sortState.column) th.classList.add(sortState.order);
+      });
+    };
+    
+    const handleSort = (e) => {
+      const col = e.target.dataset.col;
+      if (!col) return;
+      if (sortState.column === col) sortState.order = sortState.order === 'asc' ? 'desc' : 'asc';
+      else { sortState.column = col; sortState.order = 'desc'; }
+      renderTable();
+    };
+
+    const init = async () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('fromAdmin') === 'true') {
+        const btn = $('admin-back-btn');
+        if (btn) btn.style.display = 'inline-flex';
+      }
+
+      const savedTheme = storageLoad(STORAGE_KEYS.theme, 'osrs');
+      applyTheme(savedTheme);
+
+      try {
+        draftData = await fetchAndParseCSV(SNAPSHOT_1_URL);
+        $('loader').style.display = 'none';
+        $('gains-table').style.display = '';
+        renderTable();
+        $('gains-table-head').addEventListener('click', handleSort);
+      } catch (error) {
+        console.error("Failed to load draft data:", error);
+        $('loader').innerText = `Error loading data: ${error.message}.`;
+      }
+    };
+
+    init();
+  })();
+  </script>
+</body>
+</html>
