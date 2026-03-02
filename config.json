@@ -1,7 +1,7 @@
 {
   "eventConfig": {
     "name": "Hurt Bingo March 2026",
-    "codeword": "??????",
+    "codeword": "MB2026",
     "description": "Welcome to March 2026 Bingo! This is our first time hosting bingo on a custom webpage! If you have any features you would like to see added, put then im Discord in the \"bingo-general\" and tag Ironrockku.",
     "syncInterval": 30000,
     "format": "Blackout",
