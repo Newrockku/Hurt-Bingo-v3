@@ -1265,6 +1265,10 @@
 
       const lines = raw.split('\n');
 
+      // Find the current team's number before we potentially overwrite TEAM_MAP
+      const originalTeamObject = TEAM_MAP[currentTeamKey];
+      const originalTeamNumber = originalTeamObject ? originalTeamObject.teamNumber : null;
+
       // Always parse metadata to ensure board size/config is correct,
       // overriding any stale values from config.json (e.g. on tab switch)
       if (lines.length > 1) {
@@ -1290,6 +1294,14 @@
           }
         }
         TEAM_MAP = updatedTeamMap;
+
+        // Now, find the new key (name) for our original team number
+        if (originalTeamNumber) {
+            const newTeamEntry = Object.entries(TEAM_MAP).find(([key, team]) => team.teamNumber === originalTeamNumber);
+            if (newTeamEntry) {
+                currentTeamKey = newTeamEntry[0]; // The key is the new name
+            }
+        }
       }
 
       if (manual) {
