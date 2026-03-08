@@ -1,4 +1,6 @@
 (() => {
+  const VERSION = '3.343';
+
   const storageLoad = (key, fallback) => {
     try {
       const raw = localStorage.getItem(key);
@@ -63,6 +65,7 @@
   };
 
   window.BingoUtils = {
+    VERSION,
     escapeHTML,
     normalizeNL,
     parseCSVRow,

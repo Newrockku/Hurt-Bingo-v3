@@ -151,7 +151,7 @@
   </div>
 
   <footer class="page-footer">
-    <span>v3.342</span>
+    <span id="app-version"></span>
     <span>&middot;</span>
     <span>Bingo Settings</span>
   </footer>
@@ -160,6 +160,8 @@
   <script src="js/bingo-utils.js"></script>
   <script>
     const { parseCSVRow, normalizeNL, storageLoad, storageSave } = BingoUtils;
+    if(document.getElementById('app-version')) document.getElementById('app-version').innerText = `v${BingoUtils.VERSION}`;
+
     const THEMES = window.BINGO_THEMES;
     let loadedConfig = {};
 

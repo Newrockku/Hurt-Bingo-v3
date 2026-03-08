@@ -207,7 +207,7 @@
   </div>
 
   <footer class="page-footer">
-    <span>v3.342</span>
+    <span id="app-version"></span>
     <span>&middot;</span>
     <span>Bingo Submissions Leaderboard</span>
   </footer>
@@ -216,6 +216,8 @@
   <script src="js/bingo-utils.js"></script>
   <script>
   (() => {
+    if(document.getElementById('app-version')) document.getElementById('app-version').innerText = `v${BingoUtils.VERSION}`;
+
     const HEADERS = ['Rank', 'Player', 'Score'];
     let leaderboardData = [];
     let sortState = { column: 'Rank', order: 'asc' };

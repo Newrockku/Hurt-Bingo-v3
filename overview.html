@@ -282,15 +282,17 @@
   </div>
 
   <footer class="page-footer">
-    <span>v3.342</span>
+    <span id="app-version"></span>
     <span>&middot;</span>
     <span>Bingo Board Overview</span>
   </footer>
 
   <script src="js/themes.js"></script>
+  <script src="js/bingo-utils.js"></script>
   <script>
 (() => {
-  const APP_VERSION = '3.342';
+  const APP_VERSION = BingoUtils.VERSION;
+  if(document.getElementById('app-version')) document.getElementById('app-version').innerText = `v${APP_VERSION}`;
 
   const STORAGE_KEYS = {
     eventConfig: 'bingo-event-config',

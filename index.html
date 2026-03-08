@@ -618,15 +618,18 @@
           </div>
         </div>
 
-        <div class="settings-version">Bingo Board &middot; v3.342</div>
+        <div class="settings-version" id="settings-version">Bingo Board &middot; v...</div>
       </div>
     </div>
   </div>
 
   <script src="js/themes.js"></script>
+  <script src="js/bingo-utils.js"></script>
   <script>
 (() => {
-  const APP_VERSION = '3.342';
+  const APP_VERSION = BingoUtils.VERSION;
+  if(document.getElementById('app-version')) document.getElementById('app-version').innerText = `v${APP_VERSION}`;
+  if(document.getElementById('settings-version')) document.getElementById('settings-version').innerText = `Bingo Board · v${APP_VERSION}`;
   let maxTiles = 49;
   let gridCols = 7;
   let gridRows = 7;
