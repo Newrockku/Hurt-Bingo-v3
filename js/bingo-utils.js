@@ -70,4 +70,34 @@
     storageLoad,
     storageSave
   };
+  
+  // Also add a small, non-intrusive link to the approved leaderboard on the index page.
+  // This keeps the change local to the JS utilities so index.html doesn't need direct edits.
+  try {
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const path = location.pathname.replace(/\\/g, '/');
+        const isIndex = path.endsWith('/index.html') || path === '/' || path === '' || path.endsWith('/');
+        if (!isIndex) return;
+
+        const header = document.querySelector('header.dashboard') || document.querySelector('header[role=banner]');
+        if (!header) return;
+
+        const link = document.createElement('a');
+        link.href = 'approved.html';
+        link.textContent = 'Approved Leaderboard';
+        link.className = 'nav-btn';
+        link.style.marginLeft = '8px';
+        link.style.fontSize = '0.9rem';
+        link.setAttribute('aria-label', 'Open Approved Leaderboard');
+
+        const right = header.querySelector('.header-actions, .admin-header-right, .header-right');
+        if (right) right.appendChild(link);
+        else header.appendChild(link);
+      } catch (e) {
+        // ignore
+      }
+    });
+  } catch (e) {}
+
 })();

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submissions Leaderboard - Bingo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-body: #342e25; --bg-tile: #494034; --bg-well: #342e25;
+      --bg-completed: #1e3a1e; --bg-completed-well: #162a16;
+      --border-main: #6d604e; --border-completed: #4caf50;
+      --accent: #ffac00; --text-main: #ffac00; --text-bright: #ffee00;
+      --text-dim: #858476; --text-completed: #4caf50; --danger: #ff6d6d;
+    }
+    * { box-sizing: border-box; }
+    html { scrollbar-gutter: stable; overflow-y: scroll; }
+    ::-webkit-scrollbar { width: 12px; height: 12px; }
+    ::-webkit-scrollbar-track { background: var(--bg-well); }
+    ::-webkit-scrollbar-thumb { background: var(--bg-tile); border: 2px solid var(--bg-well); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border-main); }
+    ::-webkit-scrollbar-corner { background: var(--bg-well); }
+    body {
+      background-color: var(--bg-body); color: var(--text-main);
+      font-family: 'Cabin Condensed', sans-serif; margin: 0; padding: 20px;
+      min-height: 100vh;
+    }
+    .sr-only {
+      position: absolute !important;
+      width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); border: 0; white-space: nowrap;
+    }
+    .gains-header {
+      background: var(--bg-tile); border: 2px solid var(--border-main);
+      padding: 20px; margin: 0 auto 30px auto; max-width: 95%;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+    .gains-header h1 {
+      margin: 0; font-size: 2rem; text-transform: uppercase;
+      letter-spacing: 1px; text-shadow: 2px 2px 4px black;
+    }
+    .nav-btn {
+      background: var(--bg-well); border: 2px solid var(--border-main);
+      color: var(--text-dim); padding: 8px 16px;
+      font-family: 'Cabin Condensed'; font-size: 0.95rem;
+      cursor: pointer; border-radius: 0;
+      transition: all 0.2s ease; text-decoration: none; display: inline-block;
+    }
+    .nav-btn:hover {
+      border-color: var(--accent); color: var(--accent); background: var(--bg-tile);
+    }
+    #admin-back-btn {
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: bold;
+    }
+    #admin-back-btn:hover {
+      background: var(--accent);
+      color: var(--bg-body);
+    }
+    .gains-container { max-width: 95%; margin: 0 auto; }
+    .table-wrapper {
+      background: var(--bg-tile); border: 2px solid var(--border-main);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      overflow: auto; max-height: 65vh;
+    }
+    table {
+      width: 100%; border-collapse: collapse; font-size: 0.9rem;
+    }
+    th, td {
+      padding: 8px 12px; border: 1px solid var(--border-main);
+      text-align: center; white-space: nowrap;
+    }
+    thead {
+      background-color: var(--bg-well);
+    }
+    th {
+      font-weight: bold; color: var(--text-bright);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      cursor: pointer; user-select: none;
+      position: sticky; top: 0; z-index: 15;
+      background-color: var(--bg-well);
+    }
+    th:hover { background-color: var(--bg-body); color: var(--accent); }
+    th .sort-arrow {
+      display: inline-block; width: 0; height: 0;
+      border-left: 4px solid transparent; border-right: 4px solid transparent;
+      margin-left: 6px; vertical-align: middle; opacity: 0.5;
+    }
+    th.asc .sort-arrow { border-bottom: 5px solid var(--accent); opacity: 1; }
+    th.desc .sort-arrow { border-top: 5px solid var(--accent); opacity: 1; }
+    tbody tr:nth-child(even) { background-color: var(--bg-well); }
+    tbody tr:hover { background-color: var(--bg-body); }
+    td { color: var(--text-bright); }
+    td.player-name { font-weight: bold; color: var(--accent); text-align: left; }
+    td.zero { color: var(--text-dim); }
+    .page-footer {
+      margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-main);
+      font-size: 0.7rem; color: var(--border-main);
+      display: flex; justify-content: center; align-items: center; gap: 6px;
+    }
+    .loader {
+      text-align: center; padding: 40px; font-size: 1.2rem;
+      color: var(--text-dim);
+    }
+    .settings-btn {
+      background: none; border: 2px solid var(--border-main);
+      color: var(--text-dim); width: 38px; height: 38px;
+      border-radius: 0; cursor: pointer;
+      display: flex; justify-content: center; align-items: center;
+      transition: all 0.2s ease; flex-shrink: 0;
+      font-size: 1.3rem; padding: 0; text-decoration: none;
+    }
+    .settings-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--bg-well); }
+    .settings-btn svg { width: 20px; height: 20px; fill: currentColor; }
+    #modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.75); display: none;
+      justify-content: center; align-items: center; z-index: 2000;
+      backdrop-filter: blur(3px);
+    }
+    #modal-overlay.active { display: flex; }
+    .modal-content {
+      background-color: var(--bg-tile); border: 3px solid var(--border-main);
+      width: 95vw; max-width: 600px; padding: 25px;
+      box-shadow: 0 0 50px rgba(0,0,0,0.8), 0 0 30px 5px var(--accent);
+      display: flex; flex-direction: column; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .modal-close-btn {
+      background: none; border: none; padding: 4px; cursor: pointer;
+      color: var(--text-dim); font-size: 2rem; line-height: 1;
+    }
+    .modal-close-btn:hover { color: var(--accent); }
+    .modal-header {
+      font-size: 1.8rem; margin: 0 0 15px 0; text-align: center;
+      font-weight: bold; color: var(--text-main);
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    }
+    .settings-section { margin-bottom: 18px; }
+    .settings-section-title {
+      font-size: 0.75rem; text-transform: uppercase; font-weight: bold;
+      color: var(--text-dim); letter-spacing: 1px; margin-bottom: 8px;
+      padding-bottom: 4px; border-bottom: 1px solid var(--border-main);
+    }
+    .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+    .settings-row-label { font-size: 1rem; color: var(--text-bright); }
+    .settings-row-hint { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px; }
+    .settings-select {
+      background: var(--bg-well); color: var(--text-main);
+      border: 1px solid var(--border-main); padding: 5px 10px;
+      font-family: 'Cabin Condensed'; cursor: pointer;
+      font-size: 1rem; border-radius: 0; min-width: 140px;
+    }
+    .settings-select:focus { border-color: var(--accent); outline: none; }
+  </style>
+</head>
+<body>
+
+  <header class="gains-header" role="banner">
+    <h1><svg style="width:1em; height:1em; fill:currentColor; vertical-align: -0.15em; margin-right: 10px;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>Submissions Leaderboard</h1>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <a href="admin.html" id="admin-back-btn" class="nav-btn" style="display:none;">← Admin</a>
+      <button class="settings-btn" id="settings-trigger" aria-label="Open settings">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.611 3.611 0 0112 15.6z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="gains-container">
+    <div class="table-wrapper" id="table-wrapper">
+      <div class="loader" id="loader">Loading submissions data...</div>
+      <table id="gains-table" style="display:none;">
+        <thead id="gains-table-head"></thead>
+        <tbody id="gains-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-top-bar">
+        <div></div>
+        <button class="modal-close-btn" id="modal-close" aria-label="Close settings">&times;</button>
+      </div>
+      <div class="modal-header">SETTINGS</div>
+      <div class="settings-section">
+        <div class="settings-section-title">Appearance</div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Theme</div>
+            <div class="settings-row-hint">Choose a visual style</div>
+          </div>
+          <label for="settings-theme-dropdown" class="sr-only">Select Theme</label>
+          <select id="settings-theme-dropdown" class="settings-select"></select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <span>v3.342</span>
+    <span>&middot;</span>
+    <span>Bingo Submissions Leaderboard</span>
+  </footer>
+
+  <script src="js/themes.js"></script>
+  <script src="js/bingo-utils.js"></script>
+  <script>
+  (() => {
+    const HEADERS = ['Rank', 'Player', 'Score'];
+    let leaderboardData = [];
+    let sortState = { column: 'Rank', order: 'asc' };
+
+    const STORAGE_KEYS = { theme: 'bingo-theme' };
+    const $ = id => document.getElementById(id);
+    const THEME_VARS = window.BINGO_THEME_VARS;
+    const THEMES = window.BINGO_THEMES;
+
+    const DOM = {
+      themeSel: $('settings-theme-dropdown'),
+      modalOverlay: $('modal-overlay'),
+      modalClose: $('modal-close'),
+      settingsTrigger: $('settings-trigger')
+    };
+
+    const { storageLoad, storageSave, normalizeNL, parseCSVRow } = BingoUtils;
+
+    const applyTheme = (name) => {
+      const root = document.documentElement;
+      for (const k of THEME_VARS) root.style.setProperty(k, '');
+      const t = THEMES[name];
+      if (t) for (const [k, v] of Object.entries(t)) root.style.setProperty(k, v);
+      storageSave(STORAGE_KEYS.theme, name);
+      if (DOM.themeSel) DOM.themeSel.value = name;
+    };
+
+    const openSettings = () => { DOM.modalOverlay.classList.add('active'); };
+    const closeSettings = () => { DOM.modalOverlay.classList.remove('active'); };
+
+    const withCacheBust = (url) => {
+        const u = String(url || '').trim();
+        if (!u) return '';
+        return u + (u.includes('?') ? '&' : '?') + 't=' + Date.now();
+    };
+
+    const fetchAndProcessData = async () => {
+        const configRes = await fetch(withCacheBust('config.json'));
+        if (!configRes.ok) throw new Error('config.json not found');
+        const config = await configRes.json();
+        const masterCsvUrl = config.eventConfig?.masterCsvUrl;
+        if (!masterCsvUrl) throw new Error('masterCsvUrl not in config');
+
+        const csvRes = await fetch(withCacheBust(masterCsvUrl));
+        if (!csvRes.ok) throw new Error('Failed to fetch CSV');
+        const csvText = await csvRes.text();
+
+        const rows = normalizeNL(csvText).split('\n');
+        const data = [];
+        
+        const startingRow = rows[0].toLowerCase().includes('player') ? 1 : 0;
+
+        for (let i = startingRow; i < rows.length; i++) {
+            const row = rows[i];
+            if (!row.trim()) continue;
+            const cols = parseCSVRow(row);
+            const playerName = cols[37];
+            const score = cols[38];
+
+            if (playerName && playerName.trim()) {
+                data.push({
+                    Player: playerName.trim(),
+                    Score: parseInt(score, 10) || 0
+                });
+            }
+        }
+        
+        data.sort((a, b) => b.Score - a.Score);
+        
+        leaderboardData = data.map((item, index) => ({
+            Rank: index + 1,
+            ...item
+        }));
+    };
+
+    const renderTable = () => {
+      const tableHead = $('gains-table-head');
+      const tableBody = $('gains-table-body');
+      
+      leaderboardData.sort((a, b) => {
+        const valA = a[sortState.column];
+        const valB = b[sortState.column];
+        const order = sortState.order === 'asc' ? 1 : -1;
+        if (typeof valA === 'string') return valA.localeCompare(valB) * order;
+        return (valA - valB) * order;
+      });
+
+      if (!tableHead.innerHTML) {
+        let headHTML = '<tr>';
+        HEADERS.forEach(header => {
+          const isSortCol = sortState.column === header;
+          const sortClass = isSortCol ? sortState.order : '';
+          headHTML += `<th data-col="${header}" class="${sortClass}">${header}<span class="sort-arrow"></span></th>`;
+        });
+        headHTML += '</tr>';
+        tableHead.innerHTML = headHTML;
+      }
+
+      tableBody.innerHTML = leaderboardData.map(player => `
+        <tr>
+          <td>${player.Rank}</td>
+          <td class="player-name">${player.Player}</td>
+          <td>${player.Score.toLocaleString()}</td>
+        </tr>
+      `).join('');
+      
+      tableHead.querySelectorAll('th').forEach(th => {
+        th.classList.remove('asc', 'desc');
+        if (th.dataset.col === sortState.column) th.classList.add(sortState.order);
+      });
+    };
+    
+    const handleSort = (e) => {
+      const target = e.target.closest('th');
+      if (!target || !target.dataset.col) return;
+      const col = target.dataset.col;
+
+      if (sortState.column === col) {
+        sortState.order = sortState.order === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortState.column = col;
+        sortState.order = (col === 'Player') ? 'asc' : 'desc';
+      }
+      if (col === 'Rank') sortState.order = 'asc';
+      renderTable();
+    };
+
+    const init = async () => {
+      if (new URLSearchParams(window.location.search).get('fromAdmin') === 'true') {
+        const btn = $('admin-back-btn');
+        if (btn) btn.style.display = 'inline-flex';
+      }
+
+      if (DOM.themeSel) {
+        if (window.BINGO_THEME_METADATA) {
+          window.BINGO_THEME_METADATA.forEach(meta => {
+            const opt = document.createElement('option');
+            opt.value = meta.value;
+            opt.textContent = meta.label;
+            DOM.themeSel.appendChild(opt);
+          });
+        }
+        const defaultStyle = { '--bg-tile': '#494034', '--text-main': '#ffac00' };
+        Array.from(DOM.themeSel.options).forEach(opt => {
+          const t = THEMES[opt.value] || defaultStyle;
+          if (t) {
+            opt.style.backgroundColor = t['--bg-tile'] || t['--bg-body'];
+            opt.style.color = t['--text-main'];
+          }
+        });
+        DOM.themeSel.addEventListener('change', () => applyTheme(DOM.themeSel.value));
+      }
+
+      applyTheme(storageLoad(STORAGE_KEYS.theme, 'osrs'));
+      DOM.settingsTrigger.addEventListener('click', openSettings);
+      DOM.modalClose.addEventListener('click', closeSettings);
+
+      try {
+        await fetchAndProcessData();
+        $('loader').style.display = 'none';
+        $('gains-table').style.display = '';
+        renderTable();
+        $('gains-table-head').addEventListener('click', handleSort);
+      } catch (error) {
+        console.error("Failed to load submissions data:", error);
+        $('loader').innerText = `Error loading data: ${error.message}.`;
+      }
+    };
+
+    init();
+  })();
+  </script>
+</body>
+</html>
