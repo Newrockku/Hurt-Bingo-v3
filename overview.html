@@ -201,6 +201,32 @@
     .update-highlight { color: var(--accent); font-weight: bold; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
+    .stats-table-wrapper {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--border-main);
+      background: var(--bg-well);
+    }
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .stats-table th, .stats-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-main);
+      text-align: left;
+    }
+    .stats-table tr:last-child td { border-bottom: none; }
+    .stats-table th {
+      background: var(--bg-tile); color: var(--text-bright);
+      position: sticky; top: 0; font-weight: bold; text-transform: uppercase;
+    }
+    .stats-table tr:nth-child(even) { background-color: var(--bg-body); }
+    .stats-table td:nth-child(1) { width: 60px; text-align: center; font-weight: bold; }
+    .stats-table td:nth-child(2) { white-space: normal; }
+    .stats-table td:nth-child(3) { width: 120px; text-align: right; font-weight: bold; }
+
     /* Heatmap Grid */
     .heatmap-grid {
       display: grid; grid-template-columns: repeat(var(--grid-cols, 7), 1fr);
@@ -289,15 +315,19 @@
         </div>
       </div>
       <div id="list-view" style="display: none;">
-        <div class="stats-grid">
-          <div>
-            <h3 style="font-size:1rem; color:var(--text-dim); border-bottom:1px solid var(--border-main); padding-bottom:5px; margin-top:0;">Easiest Tiles (Most Completed)</h3>
-            <div id="stats-most-completed" style="display:flex; flex-direction:column; gap:2px;"></div>
-          </div>
-          <div>
-            <h3 style="font-size:1rem; color:var(--text-dim); border-bottom:1px solid var(--border-main); padding-bottom:5px; margin-top:0;">Hardest Tiles (Least Completed)</h3>
-            <div id="stats-least-completed" style="display:flex; flex-direction:column; gap:2px;"></div>
-          </div>
+        <div id="tile-stats-table-wrapper" class="stats-table-wrapper">
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Tile</th>
+                <th>Completions</th>
+              </tr>
+            </thead>
+            <tbody id="tile-stats-tbody">
+              <tr><td colspan="3" style="text-align:center; color:var(--text-dim); padding: 20px;">Loading stats...</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -561,22 +591,29 @@
   };
 
   const renderTileStatsList = (tileStats, totalTeams) => {
-    const mostEl = $('stats-most-completed');
-    const leastEl = $('stats-least-completed');
-    if (!mostEl || !leastEl) return;
+    const tbody = $('tile-stats-tbody');
+    if (!tbody) return;
 
-    const sorted = [...tileStats].sort((a, b) => b.count - a.count);
-    const most = sorted.slice(0, 5);
-    const least = sorted.slice(-5).reverse();
+    // Sort by count desc, then by ID asc
+    const sorted = [...tileStats].sort((a, b) => {
+      if (b.count !== a.count) return b.count - a.count;
+      return a.id - b.id;
+    });
 
-    const createRow = (t) => `
-      <div class="stat-list-item">
-        <span style="color:var(--text-bright);">${t.id}. ${escapeHTML(t.title)}</span>
-        <span style="font-weight:bold; color:${t.count > 0 ? 'var(--accent)' : 'var(--text-dim)'};">${t.count}/${totalTeams}</span>
-      </div>`;
+    if (sorted.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-dim); padding: 20px;">No tile data available</td></tr>';
+      return;
+    }
 
-    mostEl.innerHTML = most.map(createRow).join('') || '<div style="color:var(--text-dim)">No data</div>';
-    leastEl.innerHTML = least.map(createRow).join('') || '<div style="color:var(--text-dim)">No data</div>';
+    const rowsHtml = sorted.map(t => `
+      <tr>
+        <td>${t.id}</td>
+        <td>${escapeHTML(t.title)}</td>
+        <td style="color: ${t.count > 0 ? 'var(--accent)' : 'var(--text-dim)'};">${t.count} / ${totalTeams}</td>
+      </tr>
+    `).join('');
+
+    tbody.innerHTML = rowsHtml;
   };
 
   const updateStatsView = () => {
