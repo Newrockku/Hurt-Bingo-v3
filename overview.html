@@ -556,6 +556,41 @@
   };
 
   const renderTileStats = (tileStats, totalTeams) => {
+    renderTileStatsHeatmap(tileStats, totalTeams);
+    renderTileStatsList(tileStats, totalTeams);
+  };
+
+  const renderTileStatsList = (tileStats, totalTeams) => {
+    const mostEl = $('stats-most-completed');
+    const leastEl = $('stats-least-completed');
+    if (!mostEl || !leastEl) return;
+
+    const sorted = [...tileStats].sort((a, b) => b.count - a.count);
+    const most = sorted.slice(0, 5);
+    const least = sorted.slice(-5).reverse();
+
+    const createRow = (t) => `
+      <div class="stat-list-item">
+        <span style="color:var(--text-bright);">${t.id}. ${escapeHTML(t.title)}</span>
+        <span style="font-weight:bold; color:${t.count > 0 ? 'var(--accent)' : 'var(--text-dim)'};">${t.count}/${totalTeams}</span>
+      </div>`;
+
+    mostEl.innerHTML = most.map(createRow).join('') || '<div style="color:var(--text-dim)">No data</div>';
+    leastEl.innerHTML = least.map(createRow).join('') || '<div style="color:var(--text-dim)">No data</div>';
+  };
+
+  const updateStatsView = () => {
+    const view = $('tile-stats-view-select').value;
+    const heatmapView = $('heatmap-view');
+    const listView = $('list-view');
+
+    if (heatmapView) heatmapView.style.display = (view === 'heatmap') ? 'block' : 'none';
+    if (listView) listView.style.display = (view === 'list') ? 'block' : 'none';
+
+    storageSave(STORAGE_KEYS.tileStatsView, view);
+  };
+
+  const renderTileStatsHeatmap = (tileStats, totalTeams) => {
     const container = $('heatmap-grid');
     if (!container) return;
 
