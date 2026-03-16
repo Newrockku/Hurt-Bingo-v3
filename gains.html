@@ -195,7 +195,6 @@
     </div>
   </div>
 
-  <!-- Settings Modal -->
   <div id="modal-overlay">
     <div class="modal-content">
       <div class="modal-top-bar">
@@ -329,10 +328,17 @@
       for (const player in snap2) {
         if (snap1[player]) {
           const playerGains = { Player: player };
+          let totalKC = 0;
           for (const header of HEADERS.slice(1)) {
             const gain = (snap2[player][header] || 0) - (snap1[player][header] || 0);
             playerGains[header] = gain;
+            
+            // Add up Boss KC (all headers after Sailing)
+            if (BOSS_HEADERS.includes(header)) {
+              totalKC += gain;
+            }
           }
+          playerGains['Total KC'] = totalKC;
           gains.push(playerGains);
         }
       }
@@ -356,7 +362,7 @@
 
       // Calculate Max Values for highlighting
       const maxVals = {};
-      const numericHeaders = ['Draft Score', 'Total', ...SKILL_HEADERS, ...BOSS_HEADERS];
+      const numericHeaders = ['Draft Score', 'Total', 'Total KC', ...SKILL_HEADERS, ...BOSS_HEADERS];
       numericHeaders.forEach(h => {
         maxVals[h] = 0;
         gainsData.forEach(row => {
@@ -365,13 +371,15 @@
         });
       });
 
-      const displayHeaders = ['Player', 'Draft Score', 'Total Level', ...SKILL_HEADERS, ...BOSS_HEADERS];
+      const displayHeaders = ['Player', 'Draft Score', 'Total Level', 'Total KC', ...SKILL_HEADERS, ...BOSS_HEADERS];
 
       // Render Header
       if (!tableHead.innerHTML) {
         let headHTML = '<tr>';
         for (const header of displayHeaders) {
-          const dataCol = header === 'Total Level' ? 'Total' : header;
+          let dataCol = header;
+          if (header === 'Total Level') dataCol = 'Total';
+          
           const isSortCol = sortState.column === dataCol;
           const sortClass = isSortCol ? sortState.order : '';
           headHTML += `<th data-col="${dataCol}" class="${sortClass}">${header}<span class="sort-arrow"></span></th>`;
@@ -385,7 +393,9 @@
       for (const player of gainsData) {
         bodyHTML += '<tr>';
         for (const header of displayHeaders) {
-          const dataCol = header === 'Total Level' ? 'Total' : header;
+          let dataCol = header;
+          if (header === 'Total Level') dataCol = 'Total';
+          
           const value = player[dataCol];
           if (header === 'Player') {
             bodyHTML += `<td class="player-name">${value}</td>`;
