@@ -101,6 +101,7 @@
         <div style="display:flex; gap:10px;">
           <input type="text" id="csv-url" class="form-input" placeholder="Loading..." />
           <button id="reload-btn" class="btn">Reload Data</button>
+          <button id="save-btn" class="btn" style="border-color: var(--danger); color: var(--danger);">Save to Server</button>
           <button id="export-btn" class="btn">Export Config</button>
         </div>
       </div>
@@ -304,39 +305,73 @@
       }
     };
 
+    const getFormDataAsConfig = () => {
+      const newConfig = JSON.parse(JSON.stringify(loadedConfig));
+
+      // Update eventConfig from the form
+      const newCsvUrl = document.getElementById('csv-url').value;
+      if (!newConfig.eventConfig) newConfig.eventConfig = {};
+      
+      newConfig.eventConfig.masterCsvUrl = newCsvUrl;
+      newConfig.eventConfig.name = document.getElementById('bingo-title').value;
+      newConfig.eventConfig.description = document.getElementById('bingo-desc').value;
+      newConfig.eventConfig.codeword = document.getElementById('bingo-codeword').value;
+      newConfig.eventConfig.format = document.getElementById('bingo-format').value;
+      newConfig.eventConfig.boardSize = document.getElementById('bingo-size').value;
+      newConfig.eventConfig.teamCount = document.getElementById('bingo-team-count').value;
+
+      // Update teams
+      const teamCount = parseInt(newConfig.eventConfig.teamCount, 10) || 0;
+      const newTeams = {};
+
+      for (let i = 1; i <= teamCount; i++) {
+          const nameInput = document.querySelector(`.team-name-input[data-team-num="${i}"]`);
+          const teamName = nameInput ? nameInput.value : `Team ${i}`;
+
+          const oldTeamData = Object.values(newConfig.teams || {}).find(t => t.teamNumber === i) || {};
+          
+          newTeams[teamName] = {
+              ...oldTeamData,
+              name: teamName,
+              teamNumber: i,
+              url: newCsvUrl // Update team URL to match the new source
+          };
+      }
+      newConfig.teams = newTeams;
+      return newConfig;
+    };
+
+    const saveToServer = async () => {
+      const btn = document.getElementById('save-btn');
+      const originalText = btn.innerText;
+      
+      if (!confirm('Are you sure you want to overwrite the server config.json? This will update the board for all users.')) return;
+
+      try {
+        btn.innerText = 'Saving...';
+        btn.disabled = true;
+
+        const newConfig = getFormDataAsConfig();
+        const response = await fetch('save_config.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newConfig)
+        });
+
+        const result = await response.json();
+        if (result.success) alert('Settings saved successfully!');
+        else throw new Error(result.message || 'Server error occurred.');
+      } catch (e) {
+        alert('Error saving config: ' + e.message);
+      } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }
+    };
+
     const exportConfig = () => {
       try {
-        const newConfig = JSON.parse(JSON.stringify(loadedConfig));
-
-        // Update eventConfig from the form
-        const newCsvUrl = document.getElementById('csv-url').value;
-        newConfig.eventConfig.masterCsvUrl = newCsvUrl; // Store master CSV URL here
-        newConfig.eventConfig.name = document.getElementById('bingo-title').value;
-        newConfig.eventConfig.description = document.getElementById('bingo-desc').value;
-        newConfig.eventConfig.codeword = document.getElementById('bingo-codeword').value;
-        newConfig.eventConfig.format = document.getElementById('bingo-format').value;
-        newConfig.eventConfig.boardSize = document.getElementById('bingo-size').value;
-        newConfig.eventConfig.teamCount = document.getElementById('bingo-team-count').value;
-
-        // Update teams
-        const teamCount = parseInt(newConfig.eventConfig.teamCount, 10) || 0;
-        
-        const newTeams = {};
-
-        for (let i = 1; i <= teamCount; i++) {
-            const nameInput = document.querySelector(`.team-name-input[data-team-num="${i}"]`);
-            const teamName = nameInput ? nameInput.value : `Team ${i}`;
-
-            // Find existing data by teamNumber to preserve passcodes if name changes
-            const oldTeamData = Object.values(newConfig.teams).find(t => t.teamNumber === i) || {};
-            
-            newTeams[teamName] = {
-                ...oldTeamData,
-                name: teamName,
-                teamNumber: i
-            };
-        }
-        newConfig.teams = newTeams;
+        const newConfig = getFormDataAsConfig();
 
         const blob = new Blob([JSON.stringify(newConfig, null, 2)], { type: 'application/json' });
         const a = document.createElement('a');
@@ -357,6 +392,7 @@
     loadData();
     
     document.getElementById('reload-btn').addEventListener('click', loadData);
+    document.getElementById('save-btn').addEventListener('click', saveToServer);
     document.getElementById('export-btn').addEventListener('click', exportConfig);
     document.getElementById('bingo-format').addEventListener('change', updateTeamCountUI);
   </script>
